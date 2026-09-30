@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-product: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Colors */
+  --color-forest-950: #061611;
+  --color-forest-900: #0b221a;
+  --color-forest-850: #0e2b21;
+  --color-forest-800: #13392d;
+  --color-forest-700: #1b4b3c;
+  --color-forest-600: #266854;
+
+  --color-gold-300: #f3dfb5;
+  --color-gold-400: #e5c98d;
+  --color-gold-500: #d4af37;
+  --color-gold-600: #b89327;
+  --color-gold-700: #937318;
+
+  --color-cream-50: #fdfbf7;
+  --color-cream-100: #f7f3e8;
+  --color-cream-200: #eee7d5;
+  --color-cream-300: #dfd4bc;
+
+  --color-earth-900: #1c1a17;
+  --color-earth-800: #2d2924;
+  --color-earth-600: #696257;
+  --color-earth-400: #9e9587;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.18);
+  --shadow-gold: 0 4px 20px rgba(212, 175, 55, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  color: var(--color-earth-900);
+  background-color: var(--color-cream-50);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+  background-color: var(--color-cream-50);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-forest-950);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-forest-700);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-500);
+}
+
+/* Typography Helpers */
+.font-serif {
+  font-family: var(--font-serif);
+}
+.font-display {
+  font-family: var(--font-display);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Base Container */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+}
+
+/* Section Header styling */
+.section-subtitle {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-gold-600);
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1.18;
+  color: var(--color-forest-900);
+  margin-bottom: 14px;
+}
+
+@media (max-width: 768px) {
+  .section-title {
+    font-size: clamp(1.5rem, 5.5vw, 2.1rem);
+  }
+  .section-subtitle {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+  }
+}
+
+.section-desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-earth-600);
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Button Styles */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-gold-400);
+  color: var(--color-forest-950);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 26px;
+  border: 1px solid var(--color-gold-500);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+.btn-gold:hover {
+  background-color: var(--color-gold-300);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.28);
+}
+
+.btn-outline-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(11, 34, 26, 0.6);
+  color: var(--color-gold-300);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 26px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  backdrop-filter: blur(8px);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+.btn-outline-gold:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--color-gold-400);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+
+.pulse-badge {
+  animation: pulseSubtle 3s infinite ease-in-out;
+}

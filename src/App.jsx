@@ -15,6 +15,7 @@ import SearchModal from './components/SearchModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import AccountPage from './components/AccountPage';
+import ShopPage from './components/ShopPage';
 import { PRODUCTS } from './data/products';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [activeProduct, setActiveProduct] = useState(null);
   const [showAccount, setShowAccount] = useState(false);
+  const [showShop, setShowShop] = useState(false);
 
   // Sync state with URL hash for deep linking and native back/forward button support
   useEffect(() => {
@@ -46,11 +48,19 @@ export default function App() {
 
       if (hash === '#account') {
         setActiveProduct(null);
+        setShowShop(false);
         setShowAccount(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      } else if (hash === '#shop' || hash === '#spices') {
+        setActiveProduct(null);
+        setShowAccount(false);
+        setShowShop(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       } else {
         setShowAccount(false);
+        setShowShop(false);
       }
 
       if (hash.startsWith('#product-')) {
@@ -62,7 +72,7 @@ export default function App() {
           return;
         }
       }
-      if (hash === '' || hash === '#' || hash === '#shop' || hash === '#spices' || hash === '#story' || hash === '#contact') {
+      if (hash === '' || hash === '#' || hash === '#story' || hash === '#contact') {
         setActiveProduct(null);
       }
     };
@@ -81,6 +91,7 @@ export default function App() {
   const handleBackToHome = () => {
     setActiveProduct(null);
     setShowAccount(false);
+    setShowShop(false);
     window.location.hash = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -153,9 +164,10 @@ export default function App() {
   };
 
   const scrollToSection = (id) => {
-    if (activeProduct || showAccount) {
+    if (activeProduct || showAccount || showShop) {
       setActiveProduct(null);
       setShowAccount(false);
+      setShowShop(false);
       window.location.hash = '';
       setTimeout(() => {
         const el = document.getElementById(id);
@@ -204,12 +216,20 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onGoHome={handleBackToHome}
-        solidBackground={!!activeProduct || showAccount}
+        solidBackground={!!activeProduct || showAccount || showShop}
       />
 
       {/* Conditional Rendering: Individual Product Page or Main Storefront */}
       {showAccount ? (
         <AccountPage onGoHome={handleBackToHome} />
+      ) : showShop ? (
+        <ShopPage
+          onAddToCart={handleAddToCart}
+          onQuickView={(p) => setQuickViewProduct(p)}
+          onViewProduct={handleViewProduct}
+          wishlist={wishlist}
+          onToggleWishlist={handleToggleWishlist}
+        />
       ) : activeProduct ? (
         <ProductDetailPage
           product={activeProduct}

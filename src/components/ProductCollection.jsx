@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import { Star, Heart, Eye, ShoppingBag, Check } from 'lucide-react';
+import { Star, Heart, Eye, ShoppingBag, Check, ArrowRight } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 
 export default function ProductCollection({ onAddToCart, onQuickView, wishlist, onToggleWishlist, onViewProduct }) {
-  const [activeCategory, setActiveCategory] = useState('all');
   const [addedAnimationId, setAddedAnimationId] = useState(null);
 
-  const categories = [
-    { id: 'all', label: 'All Collection' },
-    { id: 'spices', label: 'Whole Spices' },
-    { id: 'powders', label: 'Stone Ground' },
-    { id: 'honey', label: 'Wild Forest Honey' },
-    { id: 'oils', label: 'Traditional Oils' }
-  ];
-
-  const filteredProducts = activeCategory === 'all'
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.category === activeCategory);
+  // Take only the first 4 products for the landing page brief
+  const featuredProducts = PRODUCTS.slice(0, 4);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
@@ -33,91 +23,57 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
     }
   };
 
+  const handleExploreShop = () => {
+    window.location.hash = '#shop';
+  };
+
   return (
-    <section id="shop" style={{ padding: '100px 0', backgroundColor: '#faf8f4' }}>
-      <div className="container">
+    <section id="spices" style={{ padding: '120px 0', backgroundColor: '#faf8f4' }}>
+      <div className="container" style={{ maxWidth: '1400px' }}>
         {/* Minimalist Section Header */}
-        <div style={{ textAlign: 'center', marginBottom: '46px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '64px' }}>
           <span
             style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '0.7rem',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.75rem',
               letterSpacing: '0.28em',
               textTransform: 'uppercase',
               color: '#9e8550',
               display: 'block',
-              marginBottom: '10px',
-              fontWeight: '500'
+              marginBottom: '16px',
+              fontWeight: '700'
             }}
           >
-            SINGLE ESTATE & TRIBAL FORAGED
+            DISCOVER TRADITION
           </span>
           <h2
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: 'clamp(2.2rem, 3.8vw, 3.2rem)',
+              fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
               fontWeight: '400',
               color: '#0a221a',
               letterSpacing: '-0.01em',
-              marginBottom: '12px'
+              marginBottom: '20px'
             }}
           >
-            The Collection
+            Curated Highlights
           </h2>
           <p
             style={{
-              fontSize: '0.92rem',
+              fontSize: '1.05rem',
               color: '#70685b',
-              maxWidth: '520px',
+              maxWidth: '600px',
               margin: '0 auto',
               lineHeight: '1.6'
             }}
           >
-            Hand-sorted, sun-dried, and packaged at source to lock in volatile essential oils and unadulterated forest flavours.
+            Hand-sorted and sun-dried at source. A glimpse into our unadulterated forest flavours.
           </p>
         </div>
 
-        {/* Minimalist Understated Filter Bar */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            flexWrap: 'wrap',
-            marginBottom: '52px'
-          }}
-        >
-          {categories.map((cat) => {
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: '0.78rem',
-                  fontWeight: isActive ? '600' : '400',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  padding: '8px 18px',
-                  borderRadius: '24px',
-                  border: isActive ? '1px solid #0b251d' : '1px solid rgba(14, 43, 33, 0.12)',
-                  backgroundColor: isActive ? '#0b251d' : 'transparent',
-                  color: isActive ? '#f5e7c8' : '#575146',
-                  cursor: 'pointer',
-                  transition: 'all 0.25s ease'
-                }}
-                className="filter-pill"
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Luxury Minimalist Grid - 2 Products in a row on mobile */}
+        {/* Luxury Minimalist Grid */}
         <div className="product-collection-grid">
-          {filteredProducts.map((product) => {
+          {featuredProducts.map((product) => {
             const isWishlisted = wishlist.includes(product.id);
             const isAdded = addedAnimationId === product.id;
 
@@ -127,14 +83,15 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
                 onClick={() => handleCardClick(product)}
                 style={{
                   backgroundColor: '#ffffff',
-                  borderRadius: '4px',
+                  borderRadius: '16px',
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
-                  transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                  border: '1px solid rgba(11, 37, 29, 0.08)',
-                  position: 'relative'
+                  transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                  border: '1px solid rgba(14, 43, 33, 0.04)',
+                  position: 'relative',
+                  boxShadow: '0 12px 36px rgba(10,34,26,0.02)'
                 }}
                 className="luxury-card"
               >
@@ -157,34 +114,33 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
+                      transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}
                     className="card-media"
                   />
 
-                  {/* Subtle Origin Tag (Minimalist) */}
+                  {/* Subtle Origin Tag */}
                   <span
                     style={{
                       position: 'absolute',
-                      top: '14px',
-                      left: '14px',
-                      fontSize: '0.62rem',
+                      top: '16px',
+                      left: '16px',
+                      fontSize: '0.65rem',
                       fontFamily: 'var(--font-sans)',
                       letterSpacing: '0.14em',
                       textTransform: 'uppercase',
                       color: '#4a4439',
-                      backgroundColor: 'rgba(255, 255, 255, 0.88)',
-                      backdropFilter: 'blur(6px)',
-                      padding: '3px 8px',
-                      borderRadius: '2px',
-                      fontWeight: '600'
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      padding: '4px 10px',
+                      borderRadius: '4px',
+                      fontWeight: '700',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
                     }}
-                    className="card-weight-tag"
                   >
                     {product.weight}
                   </span>
 
-                  {/* Wishlist Button (Sleek) */}
+                  {/* Wishlist Button */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -192,178 +148,82 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
                     }}
                     style={{
                       position: 'absolute',
-                      top: '14px',
-                      right: '14px',
-                      width: '32px',
-                      height: '32px',
+                      top: '16px',
+                      right: '16px',
+                      width: '36px',
+                      height: '36px',
                       borderRadius: '50%',
-                      backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                      backdropFilter: 'blur(6px)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
                       border: 'none',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
-                      zIndex: 5
+                      zIndex: 5,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
                     }}
-                    className="card-wishlist-btn"
                     aria-label="Wishlist"
                   >
-                    <Heart
-                      size={15}
-                      color={isWishlisted ? '#b91c1c' : '#575146'}
-                      fill={isWishlisted ? '#b91c1c' : 'none'}
-                    />
+                    <Heart size={16} color={isWishlisted ? '#b91c1c' : '#575146'} fill={isWishlisted ? '#b91c1c' : 'none'} />
                   </button>
 
-                  {/* Quick View Button on Hover */}
                   <div className="hover-action-overlay">
-                    <span
-                      style={{
-                        backgroundColor: 'rgba(11, 37, 29, 0.92)',
-                        color: '#f5e7c8',
-                        fontSize: '0.72rem',
-                        fontWeight: '600',
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        padding: '8px 18px',
-                        borderRadius: '20px',
-                        backdropFilter: 'blur(8px)',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Eye size={13} />
-                      View Details
+                    <span style={{ backgroundColor: 'rgba(11, 37, 29, 0.92)', color: '#f5e7c8', fontSize: '0.8rem', fontWeight: '600', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 24px', borderRadius: '30px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                      <Eye size={16} /> View Details
                     </span>
                   </div>
                 </div>
 
-                {/* Card Content (Clean & Editorial) */}
-                <div
-                  style={{
-                    padding: '18px 20px 20px 20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flexGrow: 1
-                  }}
-                  className="card-content"
-                >
-                  {/* Origin & Rating row */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '6px'
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '0.64rem',
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        color: '#9e8550',
-                        fontWeight: '600'
-                      }}
-                      className="card-origin"
-                    >
-                      {product.originBadge}
-                    </span>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <Star size={11} fill="#dfbe84" color="#dfbe84" />
-                      <span style={{ fontSize: '0.7rem', color: '#7a7266', fontWeight: '500' }}>
-                        {product.rating}
-                      </span>
+                {/* Card Content */}
+                <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.65rem', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9e8550', fontWeight: '700' }}>{product.originBadge}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Star size={12} fill="#dfbe84" color="#dfbe84" />
+                      <span style={{ fontSize: '0.75rem', color: '#7a7266', fontWeight: '600' }}>{product.rating}</span>
                     </div>
                   </div>
 
-                  {/* Product Title (Clean Modern Sans) */}
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      lineHeight: '1.35',
-                      color: '#0e2b21',
-                      letterSpacing: '-0.01em',
-                      marginBottom: '12px',
-                      minHeight: '2.5rem'
-                    }}
-                    className="card-title"
-                  >
+                  <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: '1.1rem', fontWeight: '600', lineHeight: '1.4', color: '#0e2b21', marginBottom: '16px', minHeight: '3rem' }}>
                     {product.name}
                   </h3>
 
-                  {/* Bottom Row: Price & Minimal Add Action */}
-                  <div
-                    style={{
-                      marginTop: 'auto',
-                      paddingTop: '12px',
-                      borderTop: '1px solid rgba(14, 43, 33, 0.06)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px' }}>
-                      <span
-                        style={{
-                          fontSize: '1.15rem',
-                          fontWeight: '600',
-                          color: '#0d2820',
-                          letterSpacing: '-0.02em'
-                        }}
-                        className="card-price"
-                      >
-                        ₹{product.price}
-                      </span>
+                  <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid rgba(14, 43, 33, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                      <span style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0d2820' }}>₹{product.price}</span>
                       {product.originalPrice && product.originalPrice > product.price && (
-                        <span
-                          style={{
-                            fontSize: '0.78rem',
-                            color: '#a39b8e',
-                            textDecoration: 'line-through'
-                          }}
-                          className="card-original-price"
-                        >
-                          ₹{product.originalPrice}
-                        </span>
+                        <span style={{ fontSize: '0.85rem', color: '#a39b8e', textDecoration: 'line-through' }}>₹{product.originalPrice}</span>
                       )}
                     </div>
 
-                    {/* Sleek Minimal Add Button */}
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
                       style={{
                         backgroundColor: isAdded ? '#0b251d' : 'transparent',
                         color: isAdded ? '#74db93' : '#0b251d',
-                        border: isAdded ? '1px solid #0b251d' : '1px solid rgba(11, 37, 29, 0.35)',
-                        borderRadius: '3px',
-                        padding: '6px 12px',
-                        fontSize: '0.72rem',
+                        border: isAdded ? '2px solid #0b251d' : '2px solid rgba(11, 37, 29, 0.2)',
+                        borderRadius: '8px',
+                        padding: '8px 16px',
+                        fontSize: '0.8rem',
                         fontWeight: '600',
-                        letterSpacing: '0.06em',
+                        letterSpacing: '0.05em',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '5px',
+                        gap: '6px',
                         transition: 'all 0.25s ease'
                       }}
-                      className="add-btn"
                     >
                       {isAdded ? (
                         <>
-                          <Check size={12} color="#74db93" strokeWidth={2.5} />
+                          <Check size={14} color="#74db93" strokeWidth={2.5} />
                           <span>Added</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBag size={12} strokeWidth={1.75} />
+                          <ShoppingBag size={14} strokeWidth={2} />
                           <span>Add</span>
                         </>
                       )}
@@ -373,6 +233,36 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
               </div>
             );
           })}
+        </div>
+
+        {/* Explore All CTA Component */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '64px' }}>
+          <button
+            onClick={handleExploreShop}
+            className="shop-cta-btn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '12px',
+              backgroundColor: '#0a221a',
+              color: '#dfbe84',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '1rem',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              padding: '20px 48px',
+              borderRadius: '12px',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              boxShadow: '0 12px 32px rgba(10,34,26,0.1)'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#1a3328'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#0a221a'; e.currentTarget.style.transform = 'none' }}
+          >
+            Explore Full Shop <ArrowRight size={20} strokeWidth={2} />
+          </button>
         </div>
       </div>
 
@@ -385,67 +275,36 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
 
         @media (max-width: 1100px) {
           .product-collection-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px 18px;
+            grid-template-columns: repeat(2, 1fr);
           }
         }
 
         @media (max-width: 768px) {
           .product-collection-grid {
-            grid-template-columns: repeat(2, 1fr) !important; /* Exactly 2 products in a row */
-            gap: 14px 10px !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 16px 12px !important;
           }
-          .card-content {
-            padding: 10px 10px 12px 10px !important;
-          }
-          .card-title {
-            font-size: 0.82rem !important;
-            min-height: 2.2rem !important;
-            margin-bottom: 8px !important;
-            line-height: 1.25 !important;
-          }
-          .card-origin {
-            font-size: 0.58rem !important;
-          }
-          .card-price {
-            font-size: 0.95rem !important;
-          }
-          .card-original-price {
-            font-size: 0.7rem !important;
-          }
-          .add-btn {
-            padding: 5px 8px !important;
-            font-size: 0.66rem !important;
-            gap: 4px !important;
-          }
-          .card-weight-tag {
-            top: 8px !important;
-            left: 8px !important;
-            font-size: 0.54rem !important;
-            padding: 2px 6px !important;
-          }
-          .card-wishlist-btn {
-            top: 8px !important;
-            right: 8px !important;
-            width: 26px !important;
-            height: 26px !important;
+          .shop-cta-btn {
+             width: 100%;
+             justify-content: center;
           }
         }
 
         @media (max-width: 480px) {
           .product-collection-grid {
-            grid-template-columns: repeat(2, 1fr) !important; /* Always 2 products in a row on small phones */
+            grid-template-columns: repeat(1, 1fr) !important; /* Single column on tiny screens if desired, but 2 col keeps the luxury feel. Sticking to 2 col might overflow, let's keep it 1 or tight 2. Let's do a tight 2 */
+            grid-template-columns: repeat(2, 1fr) !important;
             gap: 12px 8px !important;
           }
         }
 
         .luxury-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 16px 36px rgba(11, 37, 29, 0.08);
-          border-color: rgba(212, 175, 55, 0.35);
+          transform: translateY(-6px);
+          box-shadow: 0 24px 48px rgba(10, 34, 26, 0.06) !important;
+          border-color: rgba(140, 115, 59, 0.3) !important;
         }
         .luxury-card:hover .card-media {
-          transform: scale(1.05);
+          transform: scale(1.08) !important;
         }
         .hover-action-overlay {
           position: absolute;
@@ -453,22 +312,14 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(11, 37, 29, 0.15);
+          background: rgba(250, 248, 244, 0.85);
+          backdrop-filter: blur(4px);
           opacity: 0;
           transition: opacity 0.3s ease;
           pointer-events: none;
         }
         .luxury-card:hover .hover-action-overlay {
           opacity: 1;
-        }
-        .add-btn:hover {
-          background-color: #0b251d !important;
-          color: #f5e7c8 !important;
-          border-color: #0b251d !important;
-        }
-        .filter-pill:hover {
-          border-color: #0b251d;
-          color: #0b251d;
         }
       `}</style>
     </section>

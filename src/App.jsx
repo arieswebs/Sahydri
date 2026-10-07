@@ -14,6 +14,7 @@ import ProductQuickView from './components/ProductQuickView';
 import SearchModal from './components/SearchModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import ProductDetailPage from './components/ProductDetailPage';
+import AccountPage from './components/AccountPage';
 import { PRODUCTS } from './data/products';
 
 export default function App() {
@@ -36,11 +37,22 @@ export default function App() {
   const [completedOrder, setCompletedOrder] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
   const [activeProduct, setActiveProduct] = useState(null);
+  const [showAccount, setShowAccount] = useState(false);
 
   // Sync state with URL hash for deep linking and native back/forward button support
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+
+      if (hash === '#account') {
+        setActiveProduct(null);
+        setShowAccount(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      } else {
+        setShowAccount(false);
+      }
+
       if (hash.startsWith('#product-')) {
         const productId = hash.replace('#product-', '');
         const matched = PRODUCTS.find((p) => p.id === productId);
@@ -68,6 +80,7 @@ export default function App() {
 
   const handleBackToHome = () => {
     setActiveProduct(null);
+    setShowAccount(false);
     window.location.hash = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -140,8 +153,9 @@ export default function App() {
   };
 
   const scrollToSection = (id) => {
-    if (activeProduct) {
+    if (activeProduct || showAccount) {
       setActiveProduct(null);
+      setShowAccount(false);
       window.location.hash = '';
       setTimeout(() => {
         const el = document.getElementById(id);
@@ -190,11 +204,13 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onGoHome={handleBackToHome}
-        solidBackground={!!activeProduct}
+        solidBackground={!!activeProduct || showAccount}
       />
 
       {/* Conditional Rendering: Individual Product Page or Main Storefront */}
-      {activeProduct ? (
+      {showAccount ? (
+        <AccountPage onGoHome={handleBackToHome} />
+      ) : activeProduct ? (
         <ProductDetailPage
           product={activeProduct}
           onBack={handleBackToHome}

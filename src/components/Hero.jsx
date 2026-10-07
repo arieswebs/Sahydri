@@ -1,451 +1,623 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Compass, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function Hero({ onExploreClick, onStoryClick }) {
   const [activeSlide, setActiveSlide] = useState(0);
-  const SLIDE_DURATION = 5000; // 5s per slide
+  const [isPaused, setIsPaused] = useState(false);
+  const SLIDE_DURATION = 8000; // 8 seconds for a calm, serene classic experience
 
-  // 4 background slides: pristine landscape, branded honey, branded cardamom, and estate canopy
   const slides = [
     {
       id: "estate",
-      badge: "CERTIFIED ORGANIC HERITAGE ESTATE",
+      eyebrow: "ESTABLISHED IN KERALA • 4,200 FT ELEVATION",
       titlePrefix: "From the ",
       titleHighlight: "Sahyadri Hills",
       titleSuffix: " to Your Kitchen",
-      specs: ["4,200 FT ELEVATION", "100% BIO-DYNAMIC", "DIRECT TRIBAL ETHICS"],
-      subtitle: "Experience authentic single-origin heritage spices and raw wild forest honey, hand-foraged by indigenous tribal honey hunters from the ancient mist-shrouded rain-forests of Kerala's Western Ghats.",
-      mobileSubtitle: "Single-origin spices & raw wild forest honey from Kerala's misted Western Ghats.",
-      ctaPrimary: "EXPLORE SPICES",
-      ctaSecondary: "DISCOVER OUR STORY",
-      image: "/images/hero.jpg"
+      subtitle: "Authentic single-origin heritage spices and raw wild forest honey, hand-foraged by indigenous tribal communities from the ancient mist-shrouded rainforests of Kerala's Western Ghats.",
+      ctaPrimary: "Explore Collection",
+      ctaSecondary: "Discover Our Story",
+      image: "/images/hero.jpg",
+      chapterName: "Mist Terroir"
     },
     {
       id: "honey",
-      badge: "100% RAW FOREST NECTAR",
+      eyebrow: "100% UNHEATED FOREST NECTAR • NMR LAB VERIFIED",
       titlePrefix: "Raw Forest Honey from ",
       titleHighlight: "Untamed Groves",
       titleSuffix: "",
-      specs: ["NMR LAB CERTIFIED", "100% RAW & UNHEATED", "WILD FORAGED NECTAR"],
-      subtitle: "100% unheated, unfiltered multi-flora nectar gathered under starlight by Kadar tribal honey hunters from 150-ft ancient rainforest trees. Packed with living enzymes, bee pollen, and wild medicinal flora.",
-      mobileSubtitle: "100% unheated, raw multi-flora nectar from wild forest canopies.",
-      ctaPrimary: "TASTE WILD HONEY",
-      ctaSecondary: "PURITY LAB NMR",
-      image: "/images/hero_honey.jpg"
+      subtitle: "Unheated, unfiltered multi-flora nectar gathered under starlight by Kadar tribal honey hunters from 150-ft ancient rainforest trees. Rich in living enzymes, bee pollen, and wild medicinal flora.",
+      ctaPrimary: "Taste Wild Honey",
+      ctaSecondary: "View Purity Lab NMR",
+      image: "/images/hero_honey.jpg",
+      chapterName: "Wild Honey"
     },
     {
       id: "cardamom",
-      badge: "SINGLE-ORIGIN SPICES",
+      eyebrow: "SINGLE-ESTATE SPICES • COLD STONE POUNDED",
       titlePrefix: "Single-Origin ",
       titleHighlight: "Heritage Spices",
       titleSuffix: " of Sahyadri",
-      specs: ["CARDAMOM 8MM+", "TELLICHERRY PEPPER", "GOLDEN TURMERIC", "MALABAR CHILLI"],
-      subtitle: "Sun-cured 8mm+ green cardamom, Tellicherry black pepper, high-curcumin golden turmeric, and sun-dried red chillies—all handpicked by native farmers from 4,200 ft high ranges.",
-      mobileSubtitle: "Sun-cured green cardamom, Tellicherry pepper, golden turmeric & red chilli.",
-      ctaPrimary: "SHOP SPICE LINEUP",
-      ctaSecondary: "VIEW PURITY LABS",
-      image: "/images/hero_cardamom.jpg"
+      subtitle: "Sun-cured 8mm+ green cardamom, Tellicherry black pepper, high-curcumin golden turmeric, and sun-dried red chillies—handpicked by native farmers from 4,200 ft mist-shrouded high ranges.",
+      ctaPrimary: "Shop Heritage Spices",
+      ctaSecondary: "View Stone Milling",
+      image: "/images/hero_cardamom.jpg",
+      chapterName: "Sun-Cured Spices"
     },
     {
       id: "tribal",
-      badge: "DIRECT INDIGENOUS STEWARDSHIP",
+      eyebrow: "INDIGENOUS STEWARDSHIP • FAIR TRADE COVENANT",
       titlePrefix: "Stewarded by ",
       titleHighlight: "3,200+ Families",
-      titleSuffix: "",
-      specs: ["FAIR TRADE COVENANT", "ZERO MIDDLEMEN", "70% DIRECT VALUE RETURN"],
+      titleSuffix: " in Wayanad",
       subtitle: "Preserving centuries of sacred forest stewardship across Wayanad and Idukki. Fair trade value returned directly to indigenous tribal communities, ensuring regenerative biodiversity.",
-      mobileSubtitle: "Ethically gathered by 3,200+ native forest custodians with zero middlemen.",
-      ctaPrimary: "EXPLORE SPICES",
-      ctaSecondary: "READ CHRONICLES",
-      image: "/images/estate.jpg"
+      ctaPrimary: "Explore the Harvest",
+      ctaSecondary: "Read Chronicles",
+      image: "/images/estate.jpg",
+      chapterName: "Tribal Guild"
     }
   ];
 
-  // Continuous auto-advancing slideshow without pause
+  // Serene, gentle auto-advance (pauses on hover)
   useEffect(() => {
+    if (isPaused) return;
     const timer = setInterval(() => {
       setActiveSlide((curr) => (curr + 1) % slides.length);
     }, SLIDE_DURATION);
 
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [isPaused, slides.length]);
+
+  const handlePrev = () => {
+    setActiveSlide((curr) => (curr - 1 + slides.length) % slides.length);
+  };
+
+  const handleNext = () => {
+    setActiveSlide((curr) => (curr + 1) % slides.length);
+  };
 
   return (
-    <section id="hero-section" className="hero-responsive-section">
-      {/* 4 Automatically Moving Background Pictures with Silky Crossfade and Subtle Zoom */}
-      {slides.map((slide, idx) => (
-        <div
-          key={slide.id}
-          className={`hero-bg-layer hero-bg-${slide.id}`}
-          style={{
-            backgroundImage: `url("${slide.image}")`,
-            opacity: activeSlide === idx ? 1 : 0,
-            transform: activeSlide === idx ? 'scale(1.015)' : 'scale(1.05)'
-          }}
-        />
-      ))}
+    <>
+      <section
+        id="hero-section"
+        className="classic-hero-section"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Cinematic Layered Backgrounds with Silky 1.6s Crossfade */}
+        {slides.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className={`classic-hero-bg ${activeSlide === idx ? 'active' : ''}`}
+            style={{
+              backgroundImage: `url("${slide.image}")`
+            }}
+          />
+        ))}
 
-      {/* Atmospheric Darkening Gradient Overlay */}
-      <div className="hero-gradient-overlay" />
+        {/* Deep Atmospheric Editorial Overlays */}
+        <div className="classic-hero-vignette" />
+        <div className="classic-hero-mist" />
 
-      {/* Ambient Mist & Golden Dawn Glow Overlay */}
-      <div className="hero-mist-overlay" />
-
-      {/* Main Editorial Content Container - Centered */}
-      <div className="container hero-content-container">
-        <div className="hero-text-wrapper">
-          {/* Animated Slide Content */}
-          <div key={activeSlide} className="hero-slide-anim">
-            {/* Tag Pill */}
-            <div className="hero-tag-pill pulse-badge">
-              <Sparkles size={12} color="#d4af37" />
-              <span>{slides[activeSlide].badge}</span>
+        {/* Content Container */}
+        <div className="container classic-hero-container">
+          <div className="classic-hero-text">
+            {/* Elegant Classical Eyebrow */}
+            <div className="classic-hero-eyebrow">
+              <span className="eyebrow-line left" />
+              <span className="eyebrow-text">{slides[activeSlide].eyebrow}</span>
+              <span className="eyebrow-line right" />
             </div>
 
-            {/* Main Headline - Bold & Filled */}
-            <h1 className="hero-title">
+            {/* Regal Classic Headline */}
+            <h1 className="classic-hero-title">
               {slides[activeSlide].titlePrefix}
-              <em className="hero-title-highlight">
+              <em className="classic-hero-title-italic">
                 {slides[activeSlide].titleHighlight}
               </em>
               {slides[activeSlide].titleSuffix}
             </h1>
 
-            {/* Estate Specs Highlight Strip (Desktop only) */}
-            <div className="hero-specs-row desktop-only">
-              {slides[activeSlide].specs.map((spec, sIdx) => (
-                <span key={sIdx} className="hero-spec-chip">
-                  <span className="spec-dot" />
-                  {spec}
-                </span>
-              ))}
-            </div>
-
-            {/* Rich Subtitle for Desktop */}
-            <p className="hero-subtitle desktop-only">
+            {/* Classic Poetic Subtitle */}
+            <p className="classic-hero-subtitle">
               {slides[activeSlide].subtitle}
             </p>
 
-            {/* Concise Subtitle for Mobile */}
-            <p className="hero-subtitle mobile-only">
-              {slides[activeSlide].mobileSubtitle}
-            </p>
-
-            {/* Action Buttons */}
-            <div className="hero-actions-row">
+            {/* Refined Luxury Call-to-Actions */}
+            <div className="classic-hero-actions">
               <button
                 onClick={onExploreClick}
-                className="btn-gold hero-cta-btn hero-cta-primary"
+                className="btn-classic-primary"
               >
                 <span>{slides[activeSlide].ctaPrimary}</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={15} />
               </button>
 
               <button
                 onClick={onStoryClick}
-                className="btn-outline-gold hero-cta-btn hero-cta-secondary desktop-only"
+                className="btn-classic-secondary"
               >
                 <span>{slides[activeSlide].ctaSecondary}</span>
               </button>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Understated Classic Chapter Selector */}
+        <div className="classic-hero-nav-bar">
+          <button
+            onClick={handlePrev}
+            className="classic-nav-arrow"
+            aria-label="Previous Chapter"
+          >
+            <ChevronLeft size={16} />
+          </button>
+
+          <div className="classic-chapter-tabs">
+            {slides.map((s, idx) => (
+              <button
+                key={s.id}
+                onClick={() => setActiveSlide(idx)}
+                className={`classic-chapter-tab ${activeSlide === idx ? 'active' : ''}`}
+              >
+                <span className="tab-idx">0{idx + 1}</span>
+                <span className="tab-name">{s.chapterName}</span>
+                <span className="tab-indicator" />
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleNext}
+            className="classic-nav-arrow"
+            aria-label="Next Chapter"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </section>
+
+      {/* Classic Trust & Heritage Pillars Ribbon */}
+      <section className="classic-heritage-ribbon">
+        <div className="container">
+          <div className="heritage-ribbon-grid">
+            <div className="ribbon-card">
+              <div className="ribbon-icon">✦</div>
+              <div className="ribbon-content">
+                <h3 className="ribbon-heading">4,200 Ft Terroir</h3>
+                <p className="ribbon-text">Single-origin estates in misted Wayanad & Idukki cloud forests.</p>
+              </div>
+            </div>
+
+            <div className="ribbon-card">
+              <div className="ribbon-icon">✦</div>
+              <div className="ribbon-content">
+                <h3 className="ribbon-heading">100% Raw Forest Honey</h3>
+                <p className="ribbon-text">NMR lab-verified, unheated multi-flora nectar from wild cliff hives.</p>
+              </div>
+            </div>
+
+            <div className="ribbon-card">
+              <div className="ribbon-icon">✦</div>
+              <div className="ribbon-content">
+                <h3 className="ribbon-heading">Cold Stone Pounded</h3>
+                <p className="ribbon-text">Slow heritage granite milling below 38°C preserving volatile oils.</p>
+              </div>
+            </div>
+
+            <div className="ribbon-card">
+              <div className="ribbon-icon">✦</div>
+              <div className="ribbon-content">
+                <h3 className="ribbon-heading">Direct Tribal Covenant</h3>
+                <p className="ribbon-text">70%+ harvest value returned to 3,200+ native forest custodians.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <style>{`
-        /* ================= HERO BASE - FILLED EDITORIAL ================= */
-        .hero-responsive-section {
+        /* ================= CLASSIC HERO SECTION ================= */
+        .classic-hero-section {
           position: relative;
-          min-height: 100vh;
-          min-height: 100dvh;
+          min-height: 92vh;
+          min-height: 92dvh;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
           color: #ffffff;
-          padding: 80px 20px 40px 20px;
+          padding: 120px 24px 70px 24px;
           overflow: hidden;
-          background-color: #05120e;
+          background-color: #061712;
         }
 
-        .hero-bg-layer {
+        .classic-hero-bg {
           position: absolute;
           inset: 0;
           background-size: cover;
-          transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 6.5s ease-out;
+          background-position: center 42%;
+          opacity: 0;
+          transform: scale(1.03);
+          transition: opacity 1.6s cubic-bezier(0.22, 1, 0.36, 1), transform 8s ease-out;
           z-index: 1;
           pointer-events: none;
         }
 
-        /* Desktop focal positions - centered */
-        .hero-bg-estate { background-position: center 40%; }
-        .hero-bg-honey { background-position: center 60%; }
-        .hero-bg-cardamom { background-position: center 55%; }
-        .hero-bg-tribal { background-position: center 40%; }
+        .classic-hero-bg.active {
+          opacity: 1;
+          transform: scale(1);
+        }
 
-        .hero-gradient-overlay {
+        .classic-hero-vignette {
           position: absolute;
           inset: 0;
           background: linear-gradient(
             to bottom,
             rgba(5, 18, 14, 0.72) 0%,
-            rgba(6, 22, 17, 0.42) 40%,
-            rgba(6, 22, 17, 0.88) 100%
+            rgba(5, 18, 14, 0.45) 35%,
+            rgba(5, 18, 14, 0.85) 100%
           );
-          pointer-events: none;
           z-index: 2;
+          pointer-events: none;
         }
 
-        .hero-mist-overlay {
+        .classic-hero-mist {
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 25% 40%, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
-          pointer-events: none;
+          background: radial-gradient(circle at 50% 45%, rgba(212, 175, 55, 0.08) 0%, transparent 65%);
           z-index: 3;
+          pointer-events: none;
         }
 
-        .hero-content-container {
+        .classic-hero-container {
           position: relative;
           z-index: 10;
           width: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: center;
           align-items: center;
-          margin: 0 auto;
-          padding: 0;
           text-align: center;
+          margin: 0 auto;
         }
 
-        .hero-text-wrapper {
-          max-width: 960px;
+        .classic-hero-text {
+          max-width: 920px;
           width: 100%;
-          margin: 0 auto;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: center;
           text-align: center;
         }
 
-        .hero-slide-anim {
-          display: flex;
-          flex-direction: column;
+        /* Classical Eyebrow with hairline accents */
+        .classic-hero-eyebrow {
+          display: inline-flex;
           align-items: center;
-          width: 100%;
-          text-align: center;
+          gap: 16px;
+          margin-bottom: 22px;
         }
 
-        .hero-tag-pill {
+        .eyebrow-line {
+          width: 36px;
+          height: 1px;
+          background: rgba(223, 190, 132, 0.6);
+        }
+
+        .eyebrow-text {
+          font-family: var(--font-sans);
+          font-size: 0.74rem;
+          font-weight: 600;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #dfbe84;
+        }
+
+        /* Regal Classic Serif Headline */
+        .classic-hero-title {
+          font-family: var(--font-serif);
+          font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+          line-height: 1.12;
+          font-weight: 400;
+          letter-spacing: -0.015em;
+          color: #ffffff;
+          margin-bottom: 20px;
+          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .classic-hero-title-italic {
+          font-style: italic;
+          color: #f0d5a3;
+          padding: 0 6px;
+        }
+
+        /* Classic Editorial Subtitle */
+        .classic-hero-subtitle {
+          font-size: clamp(0.95rem, 1.3vw, 1.12rem);
+          line-height: 1.7;
+          color: #e2ede8;
+          max-width: 700px;
+          margin: 0 auto 34px auto;
+          font-weight: 300;
+          text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Refined Classic Buttons */
+        .classic-hero-actions {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .btn-classic-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background-color: #dfbe84;
+          color: #081d16;
+          font-family: var(--font-sans);
+          font-size: 0.82rem;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          padding: 14px 32px;
+          border-radius: 2px;
+          border: 1px solid #dfbe84;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .btn-classic-primary:hover {
+          background-color: #ebd3a7;
+          border-color: #ebd3a7;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(223, 190, 132, 0.25);
+        }
+
+        .btn-classic-secondary {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background-color: rgba(7, 24, 19, 0.85);
-          border: 1px solid rgba(212, 175, 55, 0.5);
-          padding: 6px 16px;
-          border-radius: 30px;
-          font-size: 0.74rem;
-          letter-spacing: 0.16em;
+          background: rgba(8, 29, 22, 0.55);
+          color: #f7f3e8;
+          font-family: var(--font-sans);
+          font-size: 0.82rem;
+          font-weight: 500;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #f5dfb2;
-          margin: 0 auto 12px auto;
+          padding: 14px 30px;
+          border-radius: 2px;
+          border: 1px solid rgba(223, 190, 132, 0.45);
           backdrop-filter: blur(8px);
+          cursor: pointer;
+          transition: all 0.3s ease;
         }
 
-        .hero-title {
-          font-family: var(--font-serif);
-          font-size: clamp(2.4rem, 4.8vw, 4.4rem);
-          line-height: 1.1;
-          font-weight: 400;
-          margin: 0 auto 14px auto;
+        .btn-classic-secondary:hover {
+          background: rgba(223, 190, 132, 0.15);
+          border-color: #dfbe84;
           color: #ffffff;
-          letter-spacing: -0.02em;
-          text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75);
-          text-align: center;
-          width: 100%;
-          max-width: 920px;
+          transform: translateY(-2px);
         }
 
-        .hero-title-highlight {
-          font-style: italic;
-          color: #dfbe84;
-          padding: 0 4px;
-        }
-
-        .hero-specs-row {
+        /* Classic Chapter Selector Strip at Bottom of Hero */
+        .classic-hero-nav-bar {
+          position: absolute;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 15;
           display: flex;
-          gap: 10px;
-          justify-content: center;
           align-items: center;
-          flex-wrap: wrap;
-          margin: 0 auto 14px auto;
+          gap: 14px;
+          background: rgba(7, 24, 19, 0.75);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(223, 190, 132, 0.22);
+          border-radius: 40px;
+          padding: 6px 14px;
+          max-width: 90vw;
         }
 
-        .hero-spec-chip {
-          display: inline-flex;
+        .classic-nav-arrow {
+          background: transparent;
+          border: none;
+          color: #dfbe84;
+          cursor: pointer;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+        }
+
+        .classic-nav-arrow:hover {
+          background: rgba(223, 190, 132, 0.15);
+          color: #ffffff;
+        }
+
+        .classic-chapter-tabs {
+          display: flex;
           align-items: center;
           gap: 6px;
-          background: rgba(7, 24, 19, 0.75);
-          border: 1px solid rgba(212, 175, 55, 0.35);
-          padding: 4px 12px;
+        }
+
+        .classic-chapter-tab {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          background: transparent;
+          border: none;
+          padding: 6px 12px;
           border-radius: 20px;
+          cursor: pointer;
+          transition: all 0.25s ease;
+          position: relative;
+        }
+
+        .tab-idx {
           font-size: 0.68rem;
-          letter-spacing: 0.1em;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #9ea8a3;
+          transition: color 0.25s ease;
+        }
+
+        .tab-name {
+          font-size: 0.72rem;
+          font-family: var(--font-sans);
+          letter-spacing: 0.06em;
+          color: #c4d0ca;
+          font-weight: 500;
+          transition: color 0.25s ease;
+        }
+
+        .classic-chapter-tab.active {
+          background: rgba(223, 190, 132, 0.18);
+        }
+
+        .classic-chapter-tab.active .tab-idx {
           color: #dfbe84;
+        }
+
+        .classic-chapter-tab.active .tab-name {
+          color: #ffffff;
           font-weight: 600;
         }
 
-        .spec-dot {
-          width: 4px;
-          height: 4px;
-          border-radius: 50%;
-          background-color: #d4af37;
+        /* ================= CLASSIC HERITAGE RIBBON ================= */
+        .classic-heritage-ribbon {
+          background-color: #f7f3ea;
+          border-top: 1px solid #dfbe84;
+          border-bottom: 1px solid rgba(14, 43, 33, 0.08);
+          padding: 34px 0;
+          position: relative;
+          z-index: 5;
         }
 
-        .hero-subtitle {
-          font-size: clamp(0.94rem, 1.2vw, 1.12rem);
-          line-height: 1.6;
-          color: #d6e2dc;
-          max-width: 720px;
-          margin: 0 auto 18px auto;
-          text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
-          text-align: center;
+        .heritage-ribbon-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
         }
 
-        .hero-actions-row {
+        .ribbon-card {
           display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto;
+          align-items: flex-start;
+          gap: 14px;
+          padding: 0 12px;
+          position: relative;
         }
 
-        .hero-cta-btn {
-          padding: 13px 30px;
-          font-size: 0.84rem;
-          min-height: 44px;
+        .ribbon-card:not(:last-child)::after {
+          content: '';
+          position: absolute;
+          right: -12px;
+          top: 15%;
+          height: 70%;
+          width: 1px;
+          background: rgba(14, 43, 33, 0.12);
         }
 
-        .desktop-only {
-          display: flex;
-        }
-        p.desktop-only {
-          display: block;
-        }
-        .mobile-only {
-          display: none;
+        .ribbon-icon {
+          color: #b38736;
+          font-size: 0.95rem;
+          line-height: 1;
+          margin-top: 2px;
+          flex-shrink: 0;
         }
 
-        /* ================= MOBILE & TABLET MEDIA QUERIES ================= */
+        .ribbon-heading {
+          font-family: var(--font-serif);
+          font-size: 1rem;
+          font-weight: 600;
+          color: #0b221a;
+          margin-bottom: 4px;
+          letter-spacing: -0.01em;
+        }
+
+        .ribbon-text {
+          font-size: 0.8rem;
+          line-height: 1.5;
+          color: #645e52;
+          font-weight: 400;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 1024px) {
+          .heritage-ribbon-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px 16px;
+          }
+          .ribbon-card:nth-child(2)::after {
+            display: none;
+          }
+        }
+
         @media (max-width: 768px) {
-          .desktop-only {
-            display: none !important;
+          .classic-hero-section {
+            min-height: 85vh;
+            padding: 100px 16px 80px 16px;
           }
 
-          .mobile-only {
-            display: block !important;
+          .classic-hero-eyebrow {
+            gap: 10px;
+            margin-bottom: 16px;
           }
 
-          .hero-responsive-section {
-            min-height: 100dvh !important;
-            height: 100dvh !important;
-            max-height: 100dvh !important;
-            padding: 72px 16px 24px 16px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
+          .eyebrow-line {
+            width: 20px;
           }
 
-          /* Mobile positions focusing on centered product & mountain */
-          .hero-bg-estate { background-position: center 30% !important; }
-          .hero-bg-honey { background-position: center 65% !important; }
-          .hero-bg-cardamom { background-position: center 55% !important; }
-          .hero-bg-tribal { background-position: center 30% !important; }
-
-          /* Light gradient so honey jar and spice lineup shine through clearly */
-          .hero-gradient-overlay {
-            background: linear-gradient(
-              to bottom,
-              rgba(5, 18, 14, 0.82) 0%,
-              rgba(5, 18, 14, 0.38) 32%,
-              rgba(5, 18, 14, 0.05) 55%,
-              rgba(5, 18, 14, 0.75) 100%
-            ) !important;
+          .eyebrow-text {
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
           }
 
-          .hero-content-container {
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            text-align: center !important;
-            flex: 1 !important;
-            margin: auto 0 !important;
-            padding: 0 !important;
+          .classic-hero-title {
+            font-size: 2.1rem;
+            margin-bottom: 14px;
           }
 
-          .hero-text-wrapper {
-            align-items: center !important;
-            text-align: center !important;
-            width: 100% !important;
-            margin: 0 auto !important;
+          .classic-hero-subtitle {
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-bottom: 26px;
           }
 
-          .hero-slide-anim {
-            align-items: center !important;
-            text-align: center !important;
-            width: 100% !important;
+          .classic-hero-actions {
+            gap: 12px;
           }
 
-          .hero-tag-pill {
-            padding: 4px 11px !important;
-            font-size: 0.63rem !important;
-            margin: 0 auto 6px auto !important;
+          .btn-classic-primary, .btn-classic-secondary {
+            padding: 12px 24px;
+            font-size: 0.76rem;
+            width: 100%;
+            max-width: 280px;
+            justify-content: center;
           }
 
-          .hero-title {
-            font-size: clamp(1.9rem, 7.5vw, 2.45rem) !important;
-            line-height: 1.14 !important;
-            margin-bottom: 8px !important;
-            text-align: center !important;
-            text-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
-            width: 100% !important;
+          .classic-chapter-tabs .tab-name {
+            display: none;
           }
 
-          .hero-subtitle.mobile-only {
-            font-size: 0.86rem !important;
-            line-height: 1.4 !important;
-            color: #d6e2dc !important;
-            margin: 0 auto 12px auto !important;
-            max-width: 320px !important;
-            text-align: center !important;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
+          .classic-heritage-ribbon {
+            padding: 28px 0;
           }
 
-          .hero-actions-row {
-            margin: clamp(18px, 4vh, 32px) auto 0 auto !important;
-            justify-content: center !important;
+          .heritage-ribbon-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
           }
 
-          .hero-cta-primary {
-            padding: 9px 20px !important;
-            font-size: 0.76rem !important;
-            min-height: 38px !important;
-            width: auto !important;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero-responsive-section {
-            padding: 68px 14px 18px 14px !important;
-          }
-          .hero-title {
-            font-size: 1.95rem !important;
+          .ribbon-card:not(:last-child)::after {
+            display: none;
           }
         }
       `}</style>
-    </section>
+    </>
   );
 }

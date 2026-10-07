@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Menu, X, Leaf } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, Leaf, User } from 'lucide-react';
 
 export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome }) {
   const [scrolled, setScrolled] = useState(false);
@@ -121,6 +121,17 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome }
 
           {/* Right Action Icons in matching light theme */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Account Dashboard */}
+            <a
+              href="#account"
+              className="nav-icon-btn"
+              title="My Account"
+              aria-label="Account"
+              style={{ textDecoration: 'none' }}
+            >
+              <User size={18} strokeWidth={1.9} />
+            </a>
+
             {/* Search */}
             <button
               onClick={onOpenSearch}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Menu, X, Leaf } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, User, Shield } from 'lucide-react';
 
-export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome }) {
+export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, currentUser, onOpenAuth, onOpenDashboard }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -122,30 +122,40 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome }
           {/* Right Action Icons in matching light theme */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {/* Search */}
-            <button
-              onClick={onOpenSearch}
-              className="nav-icon-btn"
-              title="Search spices and honey"
-              aria-label="Search"
-            >
+            <button onClick={onOpenSearch} className="nav-icon-btn" title="Search" aria-label="Search">
               <Search size={18} strokeWidth={1.9} />
             </button>
 
             {/* Cart Icon with badge */}
-            <button
-              onClick={onOpenCart}
-              className="nav-icon-btn"
-              style={{ position: 'relative' }}
-              title="View Cart"
-              aria-label="Cart"
-            >
+            <button onClick={onOpenCart} className="nav-icon-btn" style={{ position: 'relative' }} title="View Cart" aria-label="Cart">
               <ShoppingBag size={18} strokeWidth={1.9} />
-              {cartCount > 0 && (
-                <span className="cart-badge-pill">
-                  {cartCount}
-                </span>
-              )}
+              {cartCount > 0 && <span className="cart-badge-pill">{cartCount}</span>}
             </button>
+
+            {/* Auth / User */}
+            {currentUser ? (
+              <button
+                onClick={onOpenDashboard}
+                className="nav-icon-btn"
+                title={currentUser.role === 'admin' ? 'Admin Dashboard' : 'My Account'}
+                style={{ position: 'relative' }}
+              >
+                {currentUser.role === 'admin' ? <Shield size={17} strokeWidth={2} /> : <User size={17} strokeWidth={1.9} />}
+              </button>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                style={{
+                  background: 'linear-gradient(135deg, #0a221a, #163a2a)',
+                  border: 'none', borderRadius: '20px',
+                  color: '#dfbe84', fontWeight: 700, fontSize: '0.72rem',
+                  letterSpacing: '0.08em', padding: '7px 14px',
+                  cursor: 'pointer', fontFamily: 'inherit'
+                }}
+              >
+                Sign In
+              </button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button

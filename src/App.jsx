@@ -24,7 +24,7 @@ function AppInner() {
   const {
     cart, addToCart, updateQuantity, removeFromCart, clearCart,
     wishlist, toggleWishlist,
-    currentUser,
+    currentUser, logout,
     toast, showToast
   } = useShop();
 

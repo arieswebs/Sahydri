@@ -451,77 +451,37 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
             </div>
 
             <div className="container" style={{ paddingTop: '24px', paddingBottom: '60px' }}>
-                {/* ── Results Bar ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {/* Mobile Filter Toggle */}
-                        <button
-                            onClick={() => setMobileSidebarOpen(true)}
-                            style={{ display: 'none', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#0b251d', color: '#f5e7c8', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700 }}
-                            className="shop-mobile-filter-btn"
-                        >
-                            <Filter size={14} /> Filters
-                        </button>
-                        <div style={{ fontSize: '0.85rem', color: '#7a7266' }}>
-                            {productsLoading ? 'Loading…' : (
-                                <><strong style={{ color: '#0b251d' }}>{filtered.length}</strong> result{filtered.length !== 1 ? 's' : ''} {category !== 'all' ? `in "${CATEGORIES.find(c => c.id === category)?.label}"` : ''}</>
-                            )}
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        {/* Sort */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#7a7266', fontWeight: 600, whiteSpace: 'nowrap' }}>Sort by:</span>
-                            <select
-                                value={sortBy} onChange={e => setSortBy(e.target.value)}
-                                style={{ padding: '7px 10px', background: '#fff', border: '1px solid rgba(11,37,29,0.15)', borderRadius: '6px', fontSize: '0.82rem', color: '#0b251d', fontWeight: 600, cursor: 'pointer', outline: 'none', fontFamily: 'inherit' }}
-                            >
-                                {SORT_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                            </select>
-                        </div>
-                        {/* View Toggle */}
-                        <div style={{ display: 'flex', background: '#fff', border: '1px solid rgba(11,37,29,0.12)', borderRadius: '6px', overflow: 'hidden' }}>
-                            {[
-                                { id: 'grid', Icon: Grid3X3 },
-                                { id: 'list', Icon: List }
-                            ].map(({ id, Icon }) => (
-                                <button
-                                    key={id}
-                                    onClick={() => setViewMode(id)}
-                                    style={{
-                                        padding: '7px 10px', border: 'none', cursor: 'pointer',
-                                        background: viewMode === id ? '#0b251d' : 'transparent',
-                                        color: viewMode === id ? '#f5e7c8' : '#9a9080',
-                                        transition: 'all 0.15s ease'
-                                    }}
-                                >
-                                    <Icon size={15} />
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-                    {/* ── Desktop Sidebar ── */}
-                    <div style={{ width: '230px', flexShrink: 0 }} className="shop-sidebar-wrapper">
-                        <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid rgba(11,37,29,0.08)', padding: '4px 0', position: 'sticky', top: '84px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 8px' }}>
-                                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0b251d', letterSpacing: '0.04em' }}>Filters</span>
+                <div className="shop-layout-row">
+                    {/* ── Desktop Filter Sidebar (Sticky & Fixed in Viewport) ── */}
+                    <aside className="shop-sidebar-wrapper">
+                        <div className="shop-sidebar-card">
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px 10px', borderBottom: '1px solid rgba(11,37,29,0.06)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Filter size={15} color="#0b251d" />
+                                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0b251d', letterSpacing: '0.03em' }}>Filters</span>
+                                </div>
                                 {(category !== 'all' || priceRange !== 'all') && (
-                                    <button onClick={() => { setCategory('all'); setPriceRange('all'); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.72rem', color: '#b91c1c', fontWeight: 700, textDecoration: 'underline' }}>Clear all</button>
+                                    <button
+                                        onClick={() => { setCategory('all'); setPriceRange('all'); }}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.74rem', color: '#b91c1c', fontWeight: 700, textDecoration: 'underline' }}
+                                    >
+                                        Clear all
+                                    </button>
                                 )}
                             </div>
                             <SidebarContent />
                         </div>
-                    </div>
+                    </aside>
 
                     {/* ── Mobile Sidebar Overlay ── */}
                     {mobileSidebarOpen && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex' }} onClick={() => setMobileSidebarOpen(false)}>
                             <div style={{ width: '300px', background: '#fff', height: '100%', overflowY: 'auto', boxShadow: '4px 0 24px rgba(0,0,0,0.15)', padding: '16px 0' }} onClick={e => e.stopPropagation()}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px 12px' }}>
-                                    <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0b251d' }}>Filters</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px 12px', borderBottom: '1px solid rgba(11,37,29,0.06)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Filter size={15} color="#0b251d" />
+                                        <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0b251d' }}>Filters</span>
+                                    </div>
                                     <button onClick={() => setMobileSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={18} color="#0b251d" /></button>
                                 </div>
                                 <SidebarContent />
@@ -530,8 +490,60 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                         </div>
                     )}
 
-                    {/* ── Product Grid / List ── */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* ── Product Grid / List (Scrolling Content) ── */}
+                    <main className="shop-products-main" style={{ flex: 1, minWidth: 0 }}>
+                        {/* ── Results Bar ── */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                {/* Mobile Filter Toggle */}
+                                <button
+                                    onClick={() => setMobileSidebarOpen(true)}
+                                    style={{ display: 'none', alignItems: 'center', gap: '6px', padding: '8px 14px', background: '#0b251d', color: '#f5e7c8', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700 }}
+                                    className="shop-mobile-filter-btn"
+                                >
+                                    <Filter size={14} /> Filters
+                                </button>
+                                <div style={{ fontSize: '0.85rem', color: '#7a7266' }}>
+                                    {productsLoading ? 'Loading…' : (
+                                        <><strong style={{ color: '#0b251d' }}>{filtered.length}</strong> result{filtered.length !== 1 ? 's' : ''} {category !== 'all' ? `in "${CATEGORIES.find(c => c.id === category)?.label}"` : ''}</>
+                                    )}
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                {/* Sort */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '0.8rem', color: '#7a7266', fontWeight: 600, whiteSpace: 'nowrap' }}>Sort by:</span>
+                                    <select
+                                        value={sortBy} onChange={e => setSortBy(e.target.value)}
+                                        style={{ padding: '7px 10px', background: '#fff', border: '1px solid rgba(11,37,29,0.15)', borderRadius: '6px', fontSize: '0.82rem', color: '#0b251d', fontWeight: 600, cursor: 'pointer', outline: 'none', fontFamily: 'inherit' }}
+                                    >
+                                        {SORT_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                                    </select>
+                                </div>
+                                {/* View Toggle */}
+                                <div style={{ display: 'flex', background: '#fff', border: '1px solid rgba(11,37,29,0.12)', borderRadius: '6px', overflow: 'hidden' }}>
+                                    {[
+                                        { id: 'grid', Icon: Grid3X3 },
+                                        { id: 'list', Icon: List }
+                                    ].map(({ id, Icon }) => (
+                                        <button
+                                            key={id}
+                                            onClick={() => setViewMode(id)}
+                                            style={{
+                                                padding: '7px 10px', border: 'none', cursor: 'pointer',
+                                                background: viewMode === id ? '#0b251d' : 'transparent',
+                                                color: viewMode === id ? '#f5e7c8' : '#9a9080',
+                                                transition: 'all 0.15s ease'
+                                            }}
+                                        >
+                                            <Icon size={15} />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Product Cards */}
                         {productsLoading ? (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                                 {[...Array(6)].map((_, i) => (
@@ -556,11 +568,49 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                                 {filtered.map(p => <ListCard key={p.id} product={p} />)}
                             </div>
                         )}
-                    </div>
+                    </main>
                 </div>
             </div>
 
             <style>{`
+        .shop-layout-row {
+          display: flex;
+          gap: 28px;
+          position: relative;
+        }
+        .shop-sidebar-wrapper {
+          width: 250px;
+          flex-shrink: 0;
+          position: sticky;
+          top: 86px;
+          align-self: flex-start;
+          max-height: calc(100vh - 104px);
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(223, 190, 132, 0.6) transparent;
+          z-index: 20;
+        }
+        .shop-sidebar-wrapper::-webkit-scrollbar {
+          width: 5px;
+        }
+        .shop-sidebar-wrapper::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .shop-sidebar-wrapper::-webkit-scrollbar-thumb {
+          background: rgba(223, 190, 132, 0.6);
+          border-radius: 4px;
+        }
+        .shop-sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+          background: #dfbe84;
+        }
+        .shop-sidebar-card {
+          background: #ffffff;
+          border-radius: 12px;
+          border: 1px solid rgba(11, 37, 29, 0.08);
+          box-shadow: 0 4px 20px rgba(11, 37, 29, 0.04);
+          padding: 4px 0 16px;
+        }
         .shop-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);

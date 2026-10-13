@@ -108,19 +108,23 @@ export default function OrderSuccessModal({ orderData, onClose }) {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
             <span>Order ID:</span>
-            <span style={{ color: '#ffffff', fontWeight: '700' }}>#SY-{Math.floor(100000 + Math.random() * 900000)}</span>
+            <span style={{ color: '#ffffff', fontWeight: '700' }}>#{orderData.id || orderData.orderId || ('SY-' + Date.now().toString().slice(-6))}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
             <span>Items Ordered:</span>
-            <span style={{ color: '#ffffff' }}>{orderData.items.length} product(s)</span>
+            <span style={{ color: '#ffffff' }}>{(orderData.items || []).length} product(s)</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
-            <span>Amount Paid:</span>
-            <span style={{ color: '#e5c98d', fontWeight: '700', fontSize: '1.05rem' }}>₹{orderData.grandTotal}</span>
+            <span>Payment Method:</span>
+            <span style={{ color: '#74db93', fontWeight: '600' }}>{orderData.paymentMethod || 'Razorpay'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
+            <span>Total Amount:</span>
+            <span style={{ color: '#e5c98d', fontWeight: '700', fontSize: '1.05rem' }}>₹{orderData.total ?? orderData.grandTotal}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#74db93', fontSize: '0.76rem', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <MapPin size={13} />
-            <span>Traceable Lot: Wayanad High-Altitude Organic Block #04</span>
+            <span>Traceable Lot: Wayanad High-Altitude Organic Block #04 · Status: Confirmed</span>
           </div>
         </div>
 

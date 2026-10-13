@@ -29,3 +29,18 @@ export const requireAdmin = (req, res, next) => {
     }
     next();
 };
+
+// Optional JWT access token (attaches req.user if present, but doesn't block guests)
+export const optionalAuth = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (token) {
+        try {
+            const decoded = verifyAccessToken(token);
+            req.user = decoded;
+        } catch {
+            // Token expired or invalid; ignore and treat as guest
+        }
+    }
+    next();
+};

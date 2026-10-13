@@ -42,17 +42,32 @@
   padding: 0;
 }
 
+::selection {
+  background-color: var(--color-gold-400);
+  color: var(--color-forest-950);
+}
+
+::-moz-selection {
+  background-color: var(--color-gold-400);
+  color: var(--color-forest-950);
+}
+
 html {
   scroll-behavior: smooth;
   font-family: var(--font-sans);
   color: var(--color-earth-900);
   background-color: var(--color-cream-50);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  overflow-x: clip;
 }
 
 body {
-  overflow-x: hidden;
   background-color: var(--color-cream-50);
+  text-rendering: optimizeLegibility;
 }
 
 /* Custom Scrollbar */

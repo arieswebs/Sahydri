@@ -247,8 +247,8 @@ export default function ShopTeaser({ onGoShop, onAddToCart }) {
                 transition: 'all 0.25s ease',
               }}
             >
-              <Sparkles size={14} strokeWidth={1.8} />
-              Browse by Category
+              <span>Explore Categories</span>
+              <ArrowRight size={14} strokeWidth={1.8} />
             </button>
           </div>
 

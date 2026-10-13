@@ -7,7 +7,7 @@ import productRoutes  from './routes/productRoutes.js';
 import orderRoutes    from './routes/orderRoutes.js';
 import razorpayRoutes from './routes/razorpayRoutes.js';
 import authRoutes     from './routes/authRoutes.js';
-import { requireAuth, requireAdmin } from './middleware/auth.js';
+import { initDatabase, isDatabaseConnected } from './config/db.js';
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -47,15 +47,20 @@ app.use('/api', globalLimiter);
 
 // ── Public Routes ─────────────────────────────────────────────────────────────
 app.use('/api/auth',     authRoutes);
-app.use('/api/products', productRoutes);          // GET is public; mutating routes check JWT inside
+app.use('/api/products', productRoutes);
 
-// ── Protected Routes (require valid JWT) ──────────────────────────────────────
-app.use('/api/orders',   requireAuth, orderRoutes);
-app.use('/api/razorpay', requireAuth, razorpayRoutes);
+// ── Order & Payment Routes ────────────────────────────────────────────────────
+app.use('/api/orders',   orderRoutes);
+app.use('/api/razorpay', razorpayRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (_req, res) =>
-    res.json({ status: 'ok', env: process.env.NODE_ENV, timestamp: new Date().toISOString() })
+    res.json({
+        status: 'ok',
+        database: isDatabaseConnected() ? 'connected (mysql)' : 'fallback (memory)',
+        env: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+    })
 );
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
@@ -67,6 +72,12 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ success: false, message: isDev ? err.message : 'Internal server error.' });
 });
 
-app.listen(PORT, () => {
-    console.log(`✅ Sahyadri API running → http://localhost:${PORT} [${process.env.NODE_ENV}]`);
-});
+// ── Start Server & Initialize Database ────────────────────────────────────────
+async function startServer() {
+    await initDatabase();
+    app.listen(PORT, () => {
+        console.log(`✅ Sahyadri API running → http://localhost:${PORT} [${process.env.NODE_ENV}]`);
+    });
+}
+
+startServer();

@@ -46,6 +46,23 @@ export function ShopProvider({ children }) {
     }, [refreshToken]);
 
     useEffect(() => {
+        if (!accessToken && refreshToken) {
+            fetch(`${API}/auth/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.accessToken) {
+                    saveTokens(data.accessToken, refreshToken);
+                }
+            })
+            .catch(() => {});
+        }
+    }, [accessToken, refreshToken]);
+
+    useEffect(() => {
         if (accessToken) scheduleTokenRefresh();
         return () => { if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current); };
     }, [accessToken]);
@@ -151,6 +168,143 @@ export function ShopProvider({ children }) {
         saveTokens(null, null);
     };
 
+    const updateUserProfile = async (profileData) => {
+        try {
+            const res = await authFetch(`${API}/auth/profile`, {
+                method: 'PUT',
+                body: JSON.stringify(profileData)
+            });
+            const data = await res.json();
+            if (data.success && data.user) {
+                const merged = { ...currentUser, ...data.user };
+                setCurrentUser(merged);
+                localStorage.setItem('sahyadri_user', JSON.stringify(merged));
+                return { success: true, user: merged };
+            }
+            return { success: false, message: data.message || 'Failed to update profile' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    const fetchUserOrders = async () => {
+        try {
+            const res = await authFetch(`${API}/orders/my-orders`);
+            const data = await res.json();
+            if (data.success) {
+                return { success: true, data: data.data || [] };
+            }
+            return { success: false, message: data.message, data: [] };
+        } catch (err) {
+            return { success: false, message: err.message, data: [] };
+        }
+    };
+
+    // ─── Production Product CRUD ──────────────────────────────────────────────
+    const addProduct = async (productData) => {
+        try {
+            const res = await authFetch(`${API}/products`, {
+                method: 'POST',
+                body: JSON.stringify(productData)
+            });
+            const data = await res.json();
+            if (data.success) {
+                await fetchProducts();
+                return { success: true, data: data.data };
+            }
+            return { success: false, message: data.message || 'Failed to add product' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    const updateProduct = async (id, productData) => {
+        try {
+            const res = await authFetch(`${API}/products/${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(productData)
+            });
+            const data = await res.json();
+            if (data.success) {
+                await fetchProducts();
+                return { success: true, data: data.data };
+            }
+            return { success: false, message: data.message || 'Failed to update product' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    const deleteProduct = async (id) => {
+        try {
+            const res = await authFetch(`${API}/products/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            if (data.success) {
+                await fetchProducts();
+                return { success: true, data: data.data };
+            }
+            return { success: false, message: data.message || 'Failed to delete product' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    // ─── Production Order CRUD ────────────────────────────────────────────────
+    const createOrder = async (orderData) => {
+        try {
+            const res = await authFetch(`${API}/orders`, {
+                method: 'POST',
+                body: JSON.stringify(orderData)
+            });
+            const data = await res.json();
+            if (data.success) {
+                fetchProducts();
+                return { success: true, data: data.data };
+            }
+            return { success: false, message: data.message || 'Failed to create order' };
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    const fetchAllOrders = async () => {
+        try {
+            const res = await authFetch(`${API}/orders`);
+            const data = await res.json();
+            if (data.success) return { success: true, data: data.data || [] };
+            return { success: false, message: data.message, data: [] };
+        } catch (err) {
+            return { success: false, message: err.message, data: [] };
+        }
+    };
+
+    const updateOrderStatus = async (orderId, status) => {
+        try {
+            const res = await authFetch(`${API}/orders/${orderId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
+    const deleteOrder = async (orderId) => {
+        try {
+            const res = await authFetch(`${API}/orders/${orderId}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            return { success: false, message: err.message };
+        }
+    };
+
     // ─── Toast ────────────────────────────────────────────────────────────────
     const [toast, setToast] = useState('');
     const showToast = (msg) => {
@@ -161,9 +315,11 @@ export function ShopProvider({ children }) {
     return (
         <ShopContext.Provider value={{
             products, productsLoading, productsError, fetchProducts,
+            addProduct, updateProduct, deleteProduct,
             cart, addToCart, updateQuantity, removeFromCart, clearCart, cartCount, cartTotal,
             wishlist, toggleWishlist,
-            currentUser, login, logout,
+            currentUser, login, logout, updateUserProfile, fetchUserOrders,
+            createOrder, fetchAllOrders, updateOrderStatus, deleteOrder,
             toast, showToast,
             accessToken, authFetch,
             API,

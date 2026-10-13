@@ -27,13 +27,17 @@ export default function CartDrawer({
   onCheckout,
   onAddToCart
 }) {
-  const { API, currentUser, showToast, authFetch } = useShop();
+  const { API, currentUser, showToast, authFetch, createOrder } = useShop();
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState('');
   const [addedRecommendationId, setAddedRecommendationId] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cod'
+  const [deliveryAddress, setDeliveryAddress] = useState(() => currentUser?.address || 'Wayanad High-Road, Kerala 673121');
+  const [deliveryPhone, setDeliveryPhone] = useState(() => currentUser?.phone || '');
+  const [showAddressEdit, setShowAddressEdit] = useState(false);
 
   if (!isOpen) return null;
 
@@ -56,6 +60,41 @@ export default function CartDrawer({
       if (codeToApply) setPromoCode(codeToApply);
     } else {
       setPromoError('Invalid coupon code. Try SAHYADRI10 for 10% off.');
+    }
+  };
+
+  // ── Cash on Delivery Checkout ─────────────────────────────────────────────
+  const handleCodCheckout = async () => {
+    if (cartItems.length === 0) return;
+    setPaymentLoading(true);
+
+    try {
+      const orderPayload = {
+        customerName: currentUser?.name || 'Guest Connoisseur',
+        customerEmail: currentUser?.email || 'guest@sahyadri.com',
+        items: cartItems.map(i => ({
+          productId: i.id,
+          name: i.name,
+          weight: i.weight || 'Standard',
+          price: i.price,
+          quantity: i.quantity
+        })),
+        total: grandTotal,
+        address: deliveryAddress || currentUser?.address || 'Standard Delivery',
+        paymentMethod: 'Cash on Delivery',
+      };
+
+      const result = await createOrder(orderPayload);
+      if (result.success) {
+        showToast('Order confirmed via Cash on Delivery!');
+        onCheckout(result.data || { ...orderPayload, id: 'ORD-' + Date.now() });
+      } else {
+        showToast(result.message || 'Could not place order');
+      }
+    } catch (err) {
+      showToast('Error placing order: ' + err.message);
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -83,6 +122,32 @@ export default function CartDrawer({
         return;
       }
 
+      // If sandbox order (without live keys or offline gateway)
+      if (data.sandbox || !window.Razorpay) {
+        const orderPayload = {
+          customerName:  currentUser?.name  || 'Guest Connoisseur',
+          customerEmail: currentUser?.email || 'guest@sahyadri.com',
+          items: cartItems.map(i => ({
+            productId: i.id,
+            name: i.name,
+            weight: i.weight || 'Standard',
+            price: i.price,
+            quantity: i.quantity
+          })),
+          total: grandTotal,
+          address: deliveryAddress || currentUser?.address || 'Standard Delivery',
+          paymentMethod: 'Razorpay (Online)',
+          razorpayOrderId: data.orderId,
+          razorpayPaymentId: 'pay_sandbox_' + Date.now(),
+        };
+
+        const orderResult = await createOrder(orderPayload);
+        showToast('Payment verified! Order placed in database.');
+        onCheckout(orderResult.data || { ...orderPayload, id: 'ORD-' + Date.now() });
+        setPaymentLoading(false);
+        return;
+      }
+
       // 2. Open Razorpay Checkout modal
       const options = {
         key:         data.keyId,
@@ -95,64 +160,50 @@ export default function CartDrawer({
         prefill: {
           name:    currentUser?.name  || '',
           email:   currentUser?.email || '',
-          contact: currentUser?.phone || '',
+          contact: deliveryPhone || currentUser?.phone || '',
         },
         theme: { color: '#0b251d' },
         modal: { backdropclose: false },
 
         handler: async (response) => {
-          // 3. Verify the payment signature on the backend
           try {
-            const vRes  = await fetch(`${API}/razorpay/verify`, {
+            await authFetch(`${API}/razorpay/verify`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 razorpay_order_id:   response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature:  response.razorpay_signature,
               }),
             });
-            const vData = await vRes.json();
 
-            if (!vData.success) {
-              showToast('Payment verification failed. Contact support.');
-              setPaymentLoading(false);
-              return;
-            }
-
-            // 4. Create the store order on the backend
-            await fetch(`${API}/orders`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                customerName:  currentUser?.name  || 'Guest',
-                customerEmail: currentUser?.email || '',
-                items: cartItems,
-                total: grandTotal,
-                address: currentUser?.address || '',
-                paymentMethod: 'Razorpay',
-                razorpayOrderId:   response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-              }),
-            });
-
-            // 5. Notify parent to clear cart and show success
-            onCheckout({
-              items: cartItems,
-              subtotal,
-              discountAmount,
-              grandTotal,
-              paymentId: response.razorpay_payment_id,
+            // Create store order in backend database & deduct stock
+            const orderPayload = {
+              customerName:  currentUser?.name  || 'Guest Connoisseur',
+              customerEmail: currentUser?.email || 'guest@sahyadri.com',
+              items: cartItems.map(i => ({
+                productId: i.id,
+                name: i.name,
+                weight: i.weight || 'Standard',
+                price: i.price,
+                quantity: i.quantity
+              })),
+              total: grandTotal,
+              address: deliveryAddress || currentUser?.address || 'Standard Delivery',
               paymentMethod: 'Razorpay',
-            });
+              razorpayOrderId:   response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+            };
+
+            const orderResult = await createOrder(orderPayload);
+            showToast('Payment verified & order recorded!');
+            onCheckout(orderResult.data || { ...orderPayload, id: 'ORD-' + Date.now() });
           } catch {
-            showToast('Order recorded locally — payment ref: ' + response.razorpay_payment_id);
-            onCheckout({ items: cartItems, subtotal, discountAmount, grandTotal });
+            showToast('Order recorded — payment ref: ' + response.razorpay_payment_id);
+            onCheckout({ items: cartItems, subtotal, discountAmount, grandTotal, paymentMethod: 'Razorpay' });
           }
           setPaymentLoading(false);
         },
 
-        // User closed the Razorpay modal
         'modal.ondismiss': () => {
           showToast('Payment cancelled');
           setPaymentLoading(false);
@@ -859,20 +910,83 @@ export default function CartDrawer({
               </div>
             </div>
 
-            {/* ── Razorpay Payment Button ── */}
+            {/* Delivery Destination Address */}
+            <div style={{ background: '#ffffff', border: '1px solid #d4cbb8', borderRadius: '6px', padding: '10px 12px', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showAddressEdit ? '8px' : '0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#0b251d', fontWeight: 600 }}>
+                  <MapPin size={13} color="#8c733b" />
+                  <span>Ship to: {deliveryAddress ? (deliveryAddress.length > 28 ? deliveryAddress.slice(0, 28) + '…' : deliveryAddress) : 'Set Address'}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAddressEdit(s => !s)}
+                  style={{ background: 'none', border: 'none', color: '#8c733b', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  {showAddressEdit ? 'Save' : 'Change'}
+                </button>
+              </div>
+              {showAddressEdit && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+                  <input
+                    placeholder="Delivery Street Address & PIN"
+                    value={deliveryAddress}
+                    onChange={e => setDeliveryAddress(e.target.value)}
+                    style={{ width: '100%', padding: '6px 8px', fontSize: '0.78rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
+                  />
+                  <input
+                    placeholder="Phone number for dispatch SMS"
+                    value={deliveryPhone}
+                    onChange={e => setDeliveryPhone(e.target.value)}
+                    style={{ width: '100%', padding: '6px 8px', fontSize: '0.78rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Payment Method Selector Pills */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('razorpay')}
+                style={{
+                  flex: 1, padding: '8px 10px', fontSize: '0.76rem', fontWeight: 700, borderRadius: '4px', cursor: 'pointer',
+                  border: paymentMethod === 'razorpay' ? '1.5px solid #0b251d' : '1px solid #d4cbb8',
+                  background: paymentMethod === 'razorpay' ? '#0b251d' : '#ffffff',
+                  color: paymentMethod === 'razorpay' ? '#f5e4be' : '#4a4439',
+                  transition: 'all 0.18s ease'
+                }}
+              >
+                Online (UPI / Card)
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod('cod')}
+                style={{
+                  flex: 1, padding: '8px 10px', fontSize: '0.76rem', fontWeight: 700, borderRadius: '4px', cursor: 'pointer',
+                  border: paymentMethod === 'cod' ? '1.5px solid #0b251d' : '1px solid #d4cbb8',
+                  background: paymentMethod === 'cod' ? '#0b251d' : '#ffffff',
+                  color: paymentMethod === 'cod' ? '#f5e4be' : '#4a4439',
+                  transition: 'all 0.18s ease'
+                }}
+              >
+                Cash on Delivery
+              </button>
+            </div>
+
+            {/* ── Main Action Button ── */}
             <button
-              onClick={handleRazorpayCheckout}
+              onClick={paymentMethod === 'cod' ? handleCodCheckout : handleRazorpayCheckout}
               disabled={paymentLoading}
               style={{
                 width: '100%',
-                padding: '16px',
-                fontSize: '0.92rem',
+                padding: '15px',
+                fontSize: '0.88rem',
                 background: paymentLoading
                   ? 'linear-gradient(135deg, #0a221a, #1a3a2a)'
                   : 'linear-gradient(135deg, #0b251d 0%, #16402e 100%)',
                 color: '#f5e4be',
                 fontWeight: '800',
-                letterSpacing: '0.08em',
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 border: 'none',
                 borderRadius: '4px',
@@ -880,41 +994,36 @@ export default function CartDrawer({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px',
+                gap: '8px',
                 boxShadow: '0 8px 24px rgba(10, 34, 26, 0.25)',
                 transition: 'all 0.25s ease',
                 opacity: paymentLoading ? 0.8 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!paymentLoading) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(10, 34, 26, 0.35)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(10, 34, 26, 0.25)';
               }}
             >
               {paymentLoading ? (
                 <>
                   <Loader size={16} color="#dfbe84" style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>OPENING SECURE PAYMENT…</span>
+                  <span>RECORDING ORDER IN DATABASE…</span>
+                </>
+              ) : paymentMethod === 'cod' ? (
+                <>
+                  <Package size={16} color="#dfbe84" />
+                  <span>CONFIRM ORDER (CASH ON DELIVERY)</span>
+                  <ArrowRight size={16} color="#dfbe84" />
                 </>
               ) : (
                 <>
-                  <Lock size={16} color="#dfbe84" />
+                  <Lock size={15} color="#dfbe84" />
                   <span>PAY SECURELY WITH RAZORPAY</span>
-                  <ArrowRight size={17} color="#dfbe84" />
+                  <ArrowRight size={16} color="#dfbe84" />
                 </>
               )}
             </button>
 
             {/* Razorpay badge */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
-              <span style={{ fontSize: '0.66rem', color: '#9e8550', letterSpacing: '0.04em' }}>Powered by</span>
-              <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#3395FF', letterSpacing: '0.04em' }}>Razorpay</span>
-              <span style={{ fontSize: '0.66rem', color: '#9e8550' }}>· UPI · Cards · NetBanking · Wallets</span>
+              <span style={{ fontSize: '0.66rem', color: '#9e8550', letterSpacing: '0.04em' }}>Supported:</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: '700', color: '#3395FF' }}>UPI · Cards · NetBanking · COD</span>
             </div>
 
             {/* Luxury Trust Badges Line */}

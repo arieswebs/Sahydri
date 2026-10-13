@@ -61,9 +61,25 @@ function AppInner() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
+      if (hash === '#login' || hash === '#signin') {
+        setAuthMode('login');
+        setIsAuthOpen(true);
+        return;
+      }
+      if (hash === '#signup' || hash === '#register') {
+        setAuthMode('signup');
+        setIsAuthOpen(true);
+        return;
+      }
       if (hash === '#admin' && currentUser?.role === 'admin') {
         setIsAdminOpen(true);
         return;
+      }
+      if (hash === '#account' || hash === '#dashboard' || hash === '#profile') {
+        if (currentUser) {
+          setIsDashboardOpen(true);
+          return;
+        }
       }
       setActiveProduct(null);
       setIsShopOpen(false);
@@ -160,7 +176,7 @@ function AppInner() {
         solidBackground={!!(activeProduct || isShopOpen)}
         activePage={activeProduct ? 'product' : isShopOpen ? 'shop' : 'home'}
         currentUser={currentUser}
-        onOpenAuth={() => openAuth('login')}
+        onOpenAuth={(mode) => openAuth(mode || 'login')}
         onOpenDashboard={() => currentUser?.role === 'admin' ? setIsAdminOpen(true) : setIsDashboardOpen(true)}
         onScrollToSection={scrollToSection}
       />
@@ -227,13 +243,34 @@ function AppInner() {
       />
       <AuthModal
         isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
+        onClose={() => {
+          setIsAuthOpen(false);
+          if (window.location.hash === '#login' || window.location.hash === '#signup' || window.location.hash === '#signin' || window.location.hash === '#register') {
+            window.location.hash = '';
+          }
+        }}
+        onAdminSuccess={() => {
+          setIsAuthOpen(false);
+          setIsAdminOpen(true);
+          window.location.hash = 'admin';
+        }}
+        onUserSuccess={() => {
+          setIsAuthOpen(false);
+          setIsDashboardOpen(true);
+          window.location.hash = 'account';
+        }}
         initialMode={authMode}
       />
       {isDashboardOpen && currentUser && (
         <CustomerDashboard
-          onClose={() => setIsDashboardOpen(false)}
+          onClose={() => {
+            setIsDashboardOpen(false);
+            if (window.location.hash === '#account' || window.location.hash === '#dashboard' || window.location.hash === '#profile') {
+              window.location.hash = '';
+            }
+          }}
           onViewProduct={handleViewProduct}
+          onGoShop={handleGoShop}
         />
       )}
       {isAdminOpen && currentUser?.role === 'admin' && (

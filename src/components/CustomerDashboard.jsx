@@ -1,325 +1,439 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    User, Package, MapPin, Bell, LogOut, ChevronRight,
-    Star, Truck, CheckCircle, Clock, RefreshCw, Leaf, Edit3, Save, X
+    User, Package, MapPin, LogOut,
+    Star, Truck, CheckCircle, Clock, RefreshCw, Edit3, Save, X,
+    ShoppingBag, ChevronRight, ExternalLink, Heart, Plus, Loader
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
+// ─── Status Metadata ──────────────────────────────────────────────────────────
 const STATUS_META = {
-    pending: { label: 'Pending', color: '#e5a020', bg: 'rgba(229,160,32,0.12)', Icon: Clock },
-    processing: { label: 'Processing', color: '#4fa3e0', bg: 'rgba(79,163,224,0.12)', Icon: RefreshCw },
-    shipped: { label: 'Shipped', color: '#9b7fe8', bg: 'rgba(155,127,232,0.12)', Icon: Truck },
-    delivered: { label: 'Delivered', color: '#4caf82', bg: 'rgba(76,175,130,0.12)', Icon: CheckCircle },
-    cancelled: { label: 'Cancelled', color: '#e05555', bg: 'rgba(224,85,85,0.12)', Icon: X }
+    pending:    { label: 'Pending',    color: '#b45309', bg: '#fef3c7', Icon: Clock },
+    processing: { label: 'Processing', color: '#0369a1', bg: '#e0f2fe', Icon: RefreshCw },
+    shipped:    { label: 'Shipped',    color: '#6d28d9', bg: '#ede9fe', Icon: Truck },
+    delivered:  { label: 'Delivered',  color: '#15803d', bg: '#dcfce7', Icon: CheckCircle },
+    cancelled:  { label: 'Cancelled',  color: '#b91c1c', bg: '#fee2e2', Icon: X },
 };
-
-// Mock orders for the logged-in customer
-const MOCK_ORDERS = [
-    {
-        id: 'ORD-2024-0021',
-        items: [{ name: 'Green Cardamom 8mm+', qty: 2, price: 474, weight: '100g' }],
-        total: 948,
-        status: 'delivered',
-        createdAt: '2024-10-18'
-    },
-    {
-        id: 'ORD-2024-0037',
-        items: [
-            { name: 'Premium Wild Honey', qty: 1, price: 468, weight: '500g' },
-            { name: 'Garam Masala Powder', qty: 1, price: 158, weight: '100g' }
-        ],
-        total: 626,
-        status: 'shipped',
-        createdAt: '2024-11-02'
-    },
-    {
-        id: 'ORD-2024-0044',
-        items: [{ name: 'Natural Coconut Oil', qty: 2, price: 360, weight: '1L' }],
-        total: 720,
-        status: 'processing',
-        createdAt: '2024-11-19'
-    }
-];
 
 const SECTIONS = ['Orders', 'Profile', 'Addresses', 'Wishlist'];
 
-export default function CustomerDashboard({ onClose, onViewProduct }) {
-    const { currentUser, logout, wishlist, products, showToast } = useShop();
+export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) {
+    const {
+        currentUser, logout, wishlist, products, showToast,
+        fetchUserOrders, updateUserProfile, addToCart
+    } = useShop();
+
     const [activeSection, setActiveSection] = useState('Orders');
     const [editingProfile, setEditingProfile] = useState(false);
+    const [savingProfile, setSavingProfile] = useState(false);
+
+    // Profile state synced with currentUser
     const [profile, setProfile] = useState({
-        name: currentUser?.name || '',
+        name: currentUser?.name || 'Customer',
         email: currentUser?.email || '',
-        phone: '+91 98400 12345',
-        address: '12A, MG Road, Bangalore – 560001'
+        phone: currentUser?.phone || '',
+        address: currentUser?.address || ''
     });
+
+    // Orders state loaded live from backend
+    const [orders, setOrders] = useState([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
+
+    // Sync profile state when currentUser changes
+    useEffect(() => {
+        if (currentUser) {
+            setProfile({
+                name: currentUser.name || '',
+                email: currentUser.email || '',
+                phone: currentUser.phone || '',
+                address: currentUser.address || ''
+            });
+        }
+    }, [currentUser]);
+
+    // Live order history fetch
+    useEffect(() => {
+        let isMounted = true;
+        const loadOrders = async () => {
+            setOrdersLoading(true);
+            try {
+                const res = await fetchUserOrders();
+                if (isMounted) {
+                    if (res && res.success && Array.isArray(res.data)) {
+                        setOrders(res.data);
+                    } else {
+                        setOrders([]);
+                    }
+                }
+            } catch {
+                if (isMounted) setOrders([]);
+            } finally {
+                if (isMounted) setOrdersLoading(false);
+            }
+        };
+        loadOrders();
+        return () => { isMounted = false; };
+    }, [fetchUserOrders]);
 
     const handleLogout = () => {
         logout();
-        showToast('Logged out successfully');
+        showToast('Logged out of account');
         onClose();
     };
 
+    const handleShopClick = () => {
+        onClose();
+        if (onGoShop) onGoShop();
+        else window.location.hash = 'shop';
+    };
+
+    const handleSaveProfile = async () => {
+        if (editingProfile) {
+            setSavingProfile(true);
+            const res = await updateUserProfile({
+                name: profile.name,
+                phone: profile.phone,
+                address: profile.address
+            });
+            setSavingProfile(false);
+            if (res.success) {
+                showToast('Profile details updated successfully');
+                setEditingProfile(false);
+            } else {
+                showToast(res.message || 'Error updating profile');
+            }
+        } else {
+            setEditingProfile(true);
+        }
+    };
+
     const wishlistProducts = products.filter(p => wishlist.includes(p.id));
+    const initials = (profile.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
     return (
-        <div style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(6,18,12,0.9)', backdropFilter: 'blur(16px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
-        }}>
-            <div style={{
-                background: 'linear-gradient(145deg, #0e2218, #091811)',
-                border: '1px solid rgba(212,175,55,0.2)',
-                borderRadius: '24px', width: '100%', maxWidth: '900px',
-                maxHeight: '90vh', overflow: 'hidden',
-                boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
-                display: 'flex', flexDirection: 'column'
-            }}>
-                {/* Header */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '24px 32px',
-                    borderBottom: '1px solid rgba(212,175,55,0.12)',
-                    background: 'linear-gradient(135deg, rgba(212,175,55,0.06), transparent)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{
-                            width: '52px', height: '52px', borderRadius: '50%',
-                            background: 'linear-gradient(135deg, #d4af37, #b8972f)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                            <User size={22} color="#0c1f14" />
+        <div className="account-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+            <div className="account-modal-container" onClick={e => e.stopPropagation()}>
+
+                {/* ── Top Header Bar ── */}
+                <div className="account-header">
+                    <div className="account-user-meta">
+                        <div className="account-avatar-pill">
+                            <span className="account-avatar-text">{initials}</span>
                         </div>
                         <div>
-                            <div style={{ color: '#f5e4c3', fontWeight: 700, fontSize: '1.05rem', fontFamily: 'serif' }}>
-                                {currentUser?.name}
+                            <div className="account-user-name-row">
+                                <h2 className="account-user-name">{profile.name || 'Valued Member'}</h2>
+                                <span className="account-member-chip">MEMBER</span>
                             </div>
-                            <div style={{ color: 'rgba(212,175,55,0.6)', fontSize: '0.78rem' }}>{currentUser?.email}</div>
+                            <span className="account-user-email">{profile.email}</span>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+
+                    <div className="account-header-actions">
+                        {/* Prominent "Go to Shop" Button */}
+                        <button
+                            onClick={handleShopClick}
+                            className="account-shop-cta-btn"
+                            title="Explore Shop Products"
+                        >
+                            <ShoppingBag size={14} />
+                            <span>Go to Shop</span>
+                        </button>
+
                         <button
                             onClick={handleLogout}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,55,0.2)',
-                                borderRadius: '8px', padding: '8px 14px', color: '#e07070',
-                                fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600
-                            }}
+                            className="account-logout-btn"
+                            title="Log Out"
                         >
-                            <LogOut size={14} /> Logout
+                            <LogOut size={14} />
+                            <span className="desktop-text">Sign Out</span>
                         </button>
+
                         <button
                             onClick={onClose}
-                            style={{
-                                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(212,175,55,0.2)',
-                                borderRadius: '8px', width: '36px', height: '36px',
-                                color: '#d4af37', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}
+                            className="account-close-btn"
+                            aria-label="Close dialog"
                         >
                             <X size={16} />
                         </button>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                    {/* Sidebar */}
-                    <div style={{
-                        width: '200px', flexShrink: 0,
-                        borderRight: '1px solid rgba(212,175,55,0.1)',
-                        padding: '20px 12px',
-                        display: 'flex', flexDirection: 'column', gap: '4px'
-                    }}>
-                        {SECTIONS.map(s => {
-                            const icons = { Orders: Package, Profile: User, Addresses: MapPin, Wishlist: Star };
-                            const Icon = icons[s];
-                            const active = activeSection === s;
-                            return (
-                                <button
-                                    key={s}
-                                    onClick={() => setActiveSection(s)}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '10px',
-                                        padding: '11px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                                        background: active ? 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.08))' : 'transparent',
-                                        borderLeft: active ? '2px solid #d4af37' : '2px solid transparent',
-                                        color: active ? '#d4af37' : 'rgba(245,228,195,0.5)',
-                                        fontWeight: active ? 700 : 500, fontSize: '0.85rem',
-                                        textAlign: 'left', transition: 'all 0.2s ease'
-                                    }}
-                                >
-                                    <Icon size={16} />
-                                    {s}
-                                </button>
-                            );
-                        })}
+                {/* ── Main Dashboard Body ── */}
+                <div className="account-body-split">
+
+                    {/* Sidebar Tabs */}
+                    <div className="account-sidebar">
+                        <div className="account-nav-list">
+                            {SECTIONS.map(s => {
+                                const icons = { Orders: Package, Profile: User, Addresses: MapPin, Wishlist: Heart };
+                                const Icon = icons[s];
+                                const active = activeSection === s;
+                                const count = s === 'Orders' ? orders.length : s === 'Wishlist' ? wishlistProducts.length : null;
+
+                                return (
+                                    <button
+                                        key={s}
+                                        onClick={() => setActiveSection(s)}
+                                        className={`account-tab-btn ${active ? 'account-tab-active' : ''}`}
+                                    >
+                                        <Icon size={16} className="account-tab-icon" />
+                                        <span className="account-tab-label">{s}</span>
+                                        {count !== null && (
+                                            <span className={`account-tab-badge ${active ? 'account-tab-badge-active' : ''}`}>
+                                                {count}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Direct Shop Shortcut in Sidebar */}
+                        <div className="account-sidebar-promo">
+                            <span className="account-promo-title">Fresh Harvests</span>
+                            <p className="account-promo-desc">Single-origin spices & raw forest honey delivered fresh from Kerala.</p>
+                            <button onClick={handleShopClick} className="account-promo-link">
+                                Browse Shop Catalog →
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Content */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px' }}>
+                    {/* Main Content Area */}
+                    <div className="account-main-content">
 
-                        {/* ── Orders ── */}
+                        {/* ═════ 1. ORDERS SECTION ═════ */}
                         {activeSection === 'Orders' && (
-                            <div>
-                                <h3 style={{ color: '#d4af37', fontFamily: 'serif', fontSize: '1.1rem', marginBottom: '20px', fontWeight: 700 }}>
-                                    Order History
-                                </h3>
-                                {MOCK_ORDERS.map(order => {
-                                    const meta = STATUS_META[order.status] || STATUS_META.pending;
-                                    const Icon = meta.Icon;
-                                    return (
-                                        <div key={order.id} style={{
-                                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.1)',
-                                            borderRadius: '14px', padding: '20px', marginBottom: '14px'
-                                        }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                                                <div>
-                                                    <div style={{ color: '#d4af37', fontWeight: 700, fontSize: '0.88rem', fontFamily: 'monospace' }}>{order.id}</div>
-                                                    <div style={{ color: 'rgba(245,228,195,0.4)', fontSize: '0.75rem', marginTop: '2px' }}>
-                                                        Placed on {order.createdAt}
-                                                    </div>
-                                                </div>
-                                                <span style={{
-                                                    display: 'flex', alignItems: 'center', gap: '5px',
-                                                    background: meta.bg, color: meta.color,
-                                                    border: `1px solid ${meta.color}40`,
-                                                    borderRadius: '20px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: 700
-                                                }}>
-                                                    <Icon size={11} /> {meta.label}
-                                                </span>
-                                            </div>
-                                            {order.items.map((item, i) => (
-                                                <div key={i} style={{
-                                                    display: 'flex', justifyContent: 'space-between',
-                                                    color: 'rgba(245,228,195,0.7)', fontSize: '0.83rem', paddingLeft: '8px',
-                                                    borderLeft: '2px solid rgba(212,175,55,0.2)', marginBottom: '4px', paddingBlock: '2px'
-                                                }}>
-                                                    <span>{item.name} ({item.weight}) × {item.qty}</span>
-                                                    <span>₹{(item.price * item.qty).toLocaleString()}</span>
-                                                </div>
-                                            ))}
-                                            <div style={{
-                                                display: 'flex', justifyContent: 'flex-end',
-                                                borderTop: '1px solid rgba(212,175,55,0.1)', marginTop: '12px', paddingTop: '12px',
-                                                color: '#d4af37', fontWeight: 700, fontSize: '0.92rem'
-                                            }}>
-                                                Total: ₹{order.total.toLocaleString()}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* ── Profile ── */}
-                        {activeSection === 'Profile' && (
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                    <h3 style={{ color: '#d4af37', fontFamily: 'serif', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-                                        Account Details
-                                    </h3>
-                                    <button
-                                        onClick={() => setEditingProfile(!editingProfile)}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', gap: '6px',
-                                            background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)',
-                                            borderRadius: '8px', padding: '7px 14px', color: '#d4af37',
-                                            fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600
-                                        }}
-                                    >
-                                        {editingProfile ? <><Save size={13} /> Save</> : <><Edit3 size={13} /> Edit</>}
+                            <div className="account-section-block">
+                                <div className="account-section-header">
+                                    <div>
+                                        <h3 className="account-section-title">Order History</h3>
+                                        <p className="account-section-desc">Track status, receipts, and shipments from our estates.</p>
+                                    </div>
+                                    <button onClick={handleShopClick} className="account-inline-shop-btn">
+                                        <ShoppingBag size={13} />
+                                        <span>Order More</span>
                                     </button>
                                 </div>
-                                {[
-                                    { label: 'Full Name', key: 'name' },
-                                    { label: 'Email', key: 'email' },
-                                    { label: 'Phone', key: 'phone' }
-                                ].map(field => (
-                                    <div key={field.key} style={{ marginBottom: '16px' }}>
-                                        <label style={{ display: 'block', color: 'rgba(212,175,55,0.6)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '6px', fontWeight: 600 }}>
-                                            {field.label}
-                                        </label>
-                                        {editingProfile ? (
-                                            <input
-                                                value={profile[field.key]}
-                                                onChange={e => setProfile(p => ({ ...p, [field.key]: e.target.value }))}
-                                                style={{
-                                                    width: '100%', padding: '11px 14px', boxSizing: 'border-box',
-                                                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(212,175,55,0.2)',
-                                                    borderRadius: '10px', color: '#f5e4c3', fontSize: '0.9rem', outline: 'none'
-                                                }}
-                                            />
-                                        ) : (
-                                            <div style={{ color: '#f5e4c3', fontSize: '0.9rem', padding: '4px 0' }}>{profile[field.key]}</div>
-                                        )}
+
+                                {ordersLoading ? (
+                                    <div className="account-loading-box">
+                                        <Loader size={22} className="account-spinner" />
+                                        <span>Fetching your live orders...</span>
                                     </div>
-                                ))}
+                                ) : orders.length === 0 ? (
+                                    <div className="account-empty-state">
+                                        <div className="account-empty-icon-wrap">
+                                            <Package size={30} color="#8c733b" />
+                                        </div>
+                                        <h4 className="account-empty-title">No orders placed yet</h4>
+                                        <p className="account-empty-desc">
+                                            Discover authentic bold green cardamom, high-curcumin turmeric, and raw forest honey directly from the Western Ghats.
+                                        </p>
+                                        <button onClick={handleShopClick} className="account-empty-cta">
+                                            <ShoppingBag size={14} />
+                                            <span>Explore Estate Harvests</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="account-orders-stack">
+                                        {orders.map(order => {
+                                            const meta = STATUS_META[order.status] || STATUS_META.pending;
+                                            const Icon = meta.Icon;
+                                            const dateFormatted = order.createdAt
+                                                ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric'
+                                                })
+                                                : 'Recent';
+
+                                            return (
+                                                <div key={order.id} className="account-order-card">
+                                                    <div className="account-order-top">
+                                                        <div>
+                                                            <div className="account-order-id">{order.id}</div>
+                                                            <div className="account-order-date">Placed on {dateFormatted}</div>
+                                                        </div>
+                                                        <span
+                                                            className="account-status-pill"
+                                                            style={{ background: meta.bg, color: meta.color }}
+                                                        >
+                                                            <Icon size={12} />
+                                                            <span>{meta.label}</span>
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="account-order-items">
+                                                        {(order.items || []).map((item, i) => (
+                                                            <div key={i} className="account-order-item-row">
+                                                                <span className="account-order-item-name">
+                                                                    {item.name} {item.weight && <span className="account-item-weight">({item.weight})</span>} × {item.quantity || item.qty || 1}
+                                                                </span>
+                                                                <span className="account-order-item-price">
+                                                                    ₹{((item.price || 0) * (item.quantity || item.qty || 1)).toLocaleString('en-IN')}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="account-order-bottom">
+                                                        <span className="account-order-method">
+                                                            Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
+                                                        </span>
+                                                        <div className="account-order-total-group">
+                                                            <span className="account-order-total-label">Total Paid:</span>
+                                                            <span className="account-order-total-val">₹{Number(order.total || 0).toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {/* ── Addresses ── */}
-                        {activeSection === 'Addresses' && (
-                            <div>
-                                <h3 style={{ color: '#d4af37', fontFamily: 'serif', fontSize: '1.1rem', marginBottom: '20px', fontWeight: 700 }}>
-                                    Saved Addresses
-                                </h3>
-                                <div style={{
-                                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.15)',
-                                    borderRadius: '14px', padding: '20px'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                        <span style={{
-                                            background: 'rgba(212,175,55,0.15)', color: '#d4af37', borderRadius: '20px',
-                                            padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em'
-                                        }}>DEFAULT</span>
+                        {/* ═════ 2. PROFILE SECTION ═════ */}
+                        {activeSection === 'Profile' && (
+                            <div className="account-section-block">
+                                <div className="account-section-header">
+                                    <div>
+                                        <h3 className="account-section-title">Account Details</h3>
+                                        <p className="account-section-desc">Your personal credentials and contact preferences.</p>
                                     </div>
-                                    <div style={{ color: '#f5e4c3', fontSize: '0.9rem', lineHeight: 1.7 }}>
-                                        {profile.name}<br />
-                                        {profile.address}<br />
-                                        <span style={{ color: 'rgba(245,228,195,0.5)' }}>{profile.phone}</span>
+                                    <button
+                                        onClick={handleSaveProfile}
+                                        disabled={savingProfile}
+                                        className="account-edit-btn"
+                                    >
+                                        {savingProfile ? (
+                                            <><Loader size={13} className="account-spinner" /> Saving...</>
+                                        ) : editingProfile ? (
+                                            <><Save size={13} /> Save Details</>
+                                        ) : (
+                                            <><Edit3 size={13} /> Edit Profile</>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <div className="account-fields-grid">
+                                    {[
+                                        { label: 'Full Name', key: 'name', type: 'text', placeholder: 'Enter your full name' },
+                                        { label: 'Email Address', key: 'email', type: 'email', disabled: true, note: 'Registered email address cannot be changed' },
+                                        { label: 'Phone Number', key: 'phone', type: 'tel', placeholder: '+91 98400 12345' },
+                                        { label: 'Primary Delivery Address', key: 'address', type: 'text', placeholder: 'Door no., street, city, postal code' }
+                                    ].map(f => (
+                                        <div key={f.key} className="account-field-card">
+                                            <label className="account-field-label">{f.label}</label>
+                                            {editingProfile && !f.disabled ? (
+                                                <input
+                                                    type={f.type}
+                                                    value={profile[f.key] || ''}
+                                                    placeholder={f.placeholder}
+                                                    onChange={e => setProfile(p => ({ ...p, [f.key]: e.target.value }))}
+                                                    className="account-field-input"
+                                                />
+                                            ) : (
+                                                <div className="account-field-value">
+                                                    {profile[f.key] || <span className="account-placeholder-text">Not provided</span>}
+                                                </div>
+                                            )}
+                                            {f.note && <span className="account-field-note">{f.note}</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ═════ 3. ADDRESSES SECTION ═════ */}
+                        {activeSection === 'Addresses' && (
+                            <div className="account-section-block">
+                                <div className="account-section-header">
+                                    <div>
+                                        <h3 className="account-section-title">Shipping Addresses</h3>
+                                        <p className="account-section-desc">Addresses used for dispatching estate shipments.</p>
                                     </div>
                                 </div>
-                                <button style={{
-                                    marginTop: '14px', width: '100%', padding: '12px',
-                                    background: 'transparent', border: '1px dashed rgba(212,175,55,0.3)',
-                                    borderRadius: '12px', color: 'rgba(212,175,55,0.6)', cursor: 'pointer',
-                                    fontSize: '0.85rem', fontWeight: 600
-                                }}>
-                                    + Add New Address
+
+                                <div className="account-address-card">
+                                    <div className="account-address-top">
+                                        <span className="account-default-badge">DEFAULT SHIPPING ADDRESS</span>
+                                    </div>
+                                    <div className="account-address-text">
+                                        <strong>{profile.name || 'Member'}</strong><br />
+                                        {profile.address || 'No shipping address saved yet.'}<br />
+                                        {profile.phone && <span className="account-address-phone">Phone: {profile.phone}</span>}
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => setActiveSection('Profile')}
+                                    className="account-add-address-btn"
+                                >
+                                    <Edit3 size={14} /> Update Shipping Address
                                 </button>
                             </div>
                         )}
 
-                        {/* ── Wishlist ── */}
+                        {/* ═════ 4. WISHLIST SECTION ═════ */}
                         {activeSection === 'Wishlist' && (
-                            <div>
-                                <h3 style={{ color: '#d4af37', fontFamily: 'serif', fontSize: '1.1rem', marginBottom: '20px', fontWeight: 700 }}>
-                                    My Wishlist ({wishlistProducts.length})
-                                </h3>
+                            <div className="account-section-block">
+                                <div className="account-section-header">
+                                    <div>
+                                        <h3 className="account-section-title">My Saved Wishlist ({wishlistProducts.length})</h3>
+                                        <p className="account-section-desc">Handpicked single-estate goods saved for later.</p>
+                                    </div>
+                                    <button onClick={handleShopClick} className="account-inline-shop-btn">
+                                        <ShoppingBag size={13} />
+                                        <span>Browse All</span>
+                                    </button>
+                                </div>
+
                                 {wishlistProducts.length === 0 ? (
-                                    <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(245,228,195,0.4)' }}>
-                                        <Star size={32} color="rgba(212,175,55,0.3)" style={{ marginBottom: '12px' }} />
-                                        <p>Your wishlist is empty. Start exploring our collection!</p>
+                                    <div className="account-empty-wishlist">
+                                        <Heart size={36} className="account-empty-icon" />
+                                        <h4 className="account-empty-title">Your wishlist is empty</h4>
+                                        <p className="account-empty-desc">Save your favorite cardamom, wild honey, and pepper to purchase later.</p>
+                                        <button onClick={handleShopClick} className="account-empty-cta">
+                                            Start Exploring Spices
+                                        </button>
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
+                                    <div className="account-wishlist-grid">
                                         {wishlistProducts.map(p => (
                                             <div
                                                 key={p.id}
-                                                onClick={() => { onViewProduct(p); onClose(); }}
-                                                style={{
-                                                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,175,55,0.12)',
-                                                    borderRadius: '14px', overflow: 'hidden', cursor: 'pointer',
-                                                    transition: 'transform 0.2s ease, border-color 0.2s ease'
-                                                }}
-                                                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.35)'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.12)'; }}
+                                                className="account-wishlist-item"
                                             >
-                                                <img src={p.image} alt={p.name} style={{ width: '100%', height: '130px', objectFit: 'cover' }} />
-                                                <div style={{ padding: '12px' }}>
-                                                    <div style={{ color: '#f5e4c3', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', lineHeight: 1.3 }}>{p.name}</div>
-                                                    <div style={{ color: '#d4af37', fontWeight: 700, fontSize: '0.9rem' }}>₹{p.price}</div>
+                                                <div
+                                                    className="account-wishlist-img-frame"
+                                                    onClick={() => { onViewProduct?.(p); onClose(); }}
+                                                >
+                                                    <img src={p.image} alt={p.name} className="account-wishlist-img" />
+                                                </div>
+                                                <div className="account-wishlist-meta">
+                                                    <div
+                                                        className="account-wishlist-name"
+                                                        onClick={() => { onViewProduct?.(p); onClose(); }}
+                                                    >
+                                                        {p.name}
+                                                    </div>
+                                                    <div className="account-wishlist-bottom">
+                                                        <span className="account-wishlist-price">₹{p.price}</span>
+                                                        <div className="account-wishlist-actions">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    addToCart(p);
+                                                                    showToast(`Added ${p.name} to cart`);
+                                                                }}
+                                                                className="account-wishlist-add-btn"
+                                                            >
+                                                                Add to Cart
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -330,6 +444,835 @@ export default function CustomerDashboard({ onClose, onViewProduct }) {
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                /* ── Premium White Theme Customer Dashboard ── */
+                .account-modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 2200;
+                    background: rgba(10, 24, 18, 0.65);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                    animation: accountFadeIn 0.22s ease-out;
+                }
+
+                @keyframes accountFadeIn {
+                    from { opacity: 0; }
+                    to   { opacity: 1; }
+                }
+
+                @keyframes accountScale {
+                    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+                    to   { opacity: 1; transform: translateY(0) scale(1); }
+                }
+
+                .account-modal-container {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 20px;
+                    width: 100%;
+                    max-width: 920px;
+                    max-height: 88vh;
+                    overflow: hidden;
+                    box-shadow: 0 25px 60px rgba(11, 37, 29, 0.18), 0 4px 16px rgba(11, 37, 29, 0.05);
+                    display: flex;
+                    flex-direction: column;
+                    animation: accountScale 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+                    font-family: var(--font-sans);
+                }
+
+                /* Header */
+                .account-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 20px 28px;
+                    border-bottom: 1px solid #e2e8f0;
+                    background: #fbf9f5;
+                }
+
+                .account-user-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                }
+
+                .account-avatar-pill {
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    background: #0a221a;
+                    border: 2px solid #dfbe84;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                    box-shadow: 0 2px 8px rgba(10, 34, 26, 0.15);
+                }
+
+                .account-avatar-text {
+                    font-size: 0.85rem;
+                    font-weight: 800;
+                    color: #dfbe84;
+                    letter-spacing: 0.05em;
+                }
+
+                .account-user-name-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .account-user-name {
+                    font-family: var(--font-serif);
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                    margin: 0;
+                }
+
+                .account-member-chip {
+                    background: rgba(140, 115, 59, 0.15);
+                    border: 1px solid rgba(140, 115, 59, 0.35);
+                    border-radius: 12px;
+                    padding: 1px 7px;
+                    font-size: 0.6rem;
+                    font-weight: 800;
+                    letter-spacing: 0.08em;
+                    color: #8c733b;
+                }
+
+                .account-user-email {
+                    font-size: 0.78rem;
+                    color: #64748b;
+                }
+
+                .account-header-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .account-shop-cta-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 7px;
+                    background: #0a221a;
+                    color: #f5e4be;
+                    border: 1px solid #0a221a;
+                    border-radius: 8px;
+                    padding: 8px 14px;
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    letter-spacing: 0.03em;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .account-shop-cta-btn:hover {
+                    background: #174235;
+                    border-color: #174235;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(10, 34, 26, 0.18);
+                }
+
+                .account-logout-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #ffffff;
+                    color: #b91c1c;
+                    border: 1px solid #fee2e2;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    font-size: 0.78rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.18s ease;
+                }
+
+                .account-logout-btn:hover {
+                    background: #fee2e2;
+                    border-color: #fca5a5;
+                }
+
+                .account-close-btn {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 8px;
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.18s ease;
+                }
+
+                .account-close-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
+
+                /* Body Split */
+                .account-body-split {
+                    display: flex;
+                    flex: 1;
+                    min-height: 480px;
+                    overflow: hidden;
+                }
+
+                /* Sidebar */
+                .account-sidebar {
+                    width: 220px;
+                    background: #fafaf9;
+                    border-right: 1px solid #e2e8f0;
+                    padding: 20px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    flex-shrink: 0;
+                }
+
+                .account-nav-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .account-tab-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    width: 100%;
+                    padding: 10px 12px;
+                    border-radius: 8px;
+                    border: none;
+                    background: transparent;
+                    color: #475569;
+                    font-size: 0.84rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all 0.18s ease;
+                }
+
+                .account-tab-btn:hover {
+                    background: #f1f5f9;
+                    color: #0f172a;
+                }
+
+                .account-tab-active {
+                    background: #0a221a !important;
+                    color: #ffffff !important;
+                }
+
+                .account-tab-icon {
+                    flex-shrink: 0;
+                }
+
+                .account-tab-label {
+                    flex: 1;
+                }
+
+                .account-tab-badge {
+                    background: #e2e8f0;
+                    color: #475569;
+                    font-size: 0.68rem;
+                    font-weight: 700;
+                    border-radius: 10px;
+                    padding: 1px 7px;
+                }
+
+                .account-tab-badge-active {
+                    background: rgba(223, 190, 132, 0.3);
+                    color: #f5e4be;
+                }
+
+                /* Sidebar Promo */
+                .account-sidebar-promo {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .account-promo-title {
+                    font-family: var(--font-serif);
+                    font-size: 0.86rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                }
+
+                .account-promo-desc {
+                    font-size: 0.72rem;
+                    color: #64748b;
+                    line-height: 1.45;
+                    margin: 0;
+                }
+
+                .account-promo-link {
+                    background: none;
+                    border: none;
+                    color: #8c733b;
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    padding: 0;
+                    margin-top: 4px;
+                    text-align: left;
+                    transition: color 0.18s;
+                }
+
+                .account-promo-link:hover {
+                    color: #0a221a;
+                }
+
+                /* Main Content */
+                .account-main-content {
+                    flex: 1;
+                    padding: 28px;
+                    overflow-y: auto;
+                    background: #ffffff;
+                }
+
+                .account-section-block {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .account-section-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+
+                .account-section-title {
+                    font-family: var(--font-serif);
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                    margin: 0 0 4px 0;
+                }
+
+                .account-section-desc {
+                    font-size: 0.78rem;
+                    color: #64748b;
+                    margin: 0;
+                }
+
+                .account-inline-shop-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #fbf9f5;
+                    border: 1px solid #d4cbb8;
+                    border-radius: 6px;
+                    padding: 6px 12px;
+                    font-size: 0.76rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                    cursor: pointer;
+                    transition: all 0.18s;
+                }
+
+                .account-inline-shop-btn:hover {
+                    background: #0a221a;
+                    color: #f5e4be;
+                    border-color: #0a221a;
+                }
+
+                /* Orders Stack */
+                .account-orders-stack {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                }
+
+                .account-order-card {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 18px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                    transition: box-shadow 0.2s, border-color 0.2s;
+                }
+
+                .account-order-card:hover {
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+                    border-color: #cbd5e1;
+                }
+
+                .account-order-top {
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    border-bottom: 1px solid #f1f5f9;
+                    padding-bottom: 12px;
+                }
+
+                .account-order-id {
+                    font-family: var(--font-sans);
+                    font-weight: 700;
+                    font-size: 0.88rem;
+                    color: #0a221a;
+                }
+
+                .account-order-date {
+                    font-size: 0.74rem;
+                    color: #64748b;
+                    margin-top: 2px;
+                }
+
+                .account-status-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    letter-spacing: 0.02em;
+                }
+
+                .account-order-items {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .account-order-item-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-size: 0.82rem;
+                }
+
+                .account-order-item-name {
+                    color: #334155;
+                }
+
+                .account-item-weight {
+                    color: #64748b;
+                    font-size: 0.76rem;
+                }
+
+                .account-order-item-price {
+                    font-weight: 600;
+                    color: #0a221a;
+                }
+
+                .account-order-bottom {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-top: 1px solid #f1f5f9;
+                    padding-top: 12px;
+                }
+
+                .account-order-method {
+                    font-size: 0.74rem;
+                    color: #64748b;
+                }
+
+                .account-order-total-group {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 6px;
+                }
+
+                .account-order-total-label {
+                    font-size: 0.76rem;
+                    color: #64748b;
+                }
+
+                .account-order-total-val {
+                    font-size: 1.05rem;
+                    font-weight: 800;
+                    color: #0a221a;
+                }
+
+                /* Loading & Empty States */
+                .account-loading-box {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    padding: 48px 20px;
+                    color: #64748b;
+                    font-size: 0.85rem;
+                }
+
+                .account-spinner {
+                    animation: spin 1s linear infinite;
+                    color: #8c733b;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to   { transform: rotate(360deg); }
+                }
+
+                .account-empty-state {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    padding: 48px 24px;
+                    background: #fbf9f5;
+                    border: 1px dashed #d4cbb8;
+                    border-radius: 14px;
+                }
+
+                .account-empty-icon-wrap {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 14px;
+                }
+
+                .account-empty-title {
+                    font-family: var(--font-serif);
+                    font-size: 1.05rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                    margin: 0 0 6px 0;
+                }
+
+                .account-empty-desc {
+                    font-size: 0.8rem;
+                    color: #64748b;
+                    max-width: 380px;
+                    line-height: 1.55;
+                    margin: 0 0 20px 0;
+                }
+
+                .account-empty-cta {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #0a221a;
+                    color: #f5e4be;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 18px;
+                    font-size: 0.82rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .account-empty-cta:hover {
+                    background: #174235;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 14px rgba(10, 34, 26, 0.2);
+                }
+
+                /* Profile Grid */
+                .account-fields-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                    gap: 14px;
+                }
+
+                .account-field-card {
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 14px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .account-field-label {
+                    font-size: 0.72rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .account-field-value {
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                    word-break: break-word;
+                }
+
+                .account-field-note {
+                    font-size: 0.68rem;
+                    color: #94a3b8;
+                    margin-top: 2px;
+                }
+
+                .account-placeholder-text {
+                    color: #94a3b8;
+                    font-style: italic;
+                    font-weight: 400;
+                }
+
+                .account-field-input {
+                    background: #ffffff;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 6px;
+                    padding: 8px 10px;
+                    font-size: 0.85rem;
+                    color: #0f172a;
+                    outline: none;
+                    font-family: inherit;
+                    transition: border-color 0.18s;
+                }
+
+                .account-field-input:focus {
+                    border-color: #0a221a;
+                    box-shadow: 0 0 0 2px rgba(10, 34, 26, 0.1);
+                }
+
+                .account-edit-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #0a221a;
+                    color: #f5e4be;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 7px 14px;
+                    font-size: 0.76rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.18s;
+                }
+
+                .account-edit-btn:hover {
+                    background: #174235;
+                }
+
+                /* Address Card */
+                .account-address-card {
+                    background: #f8fafc;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .account-default-badge {
+                    background: rgba(21, 128, 61, 0.12);
+                    color: #15803d;
+                    border: 1px solid rgba(21, 128, 61, 0.25);
+                    border-radius: 10px;
+                    padding: 2px 8px;
+                    font-size: 0.62rem;
+                    font-weight: 800;
+                    letter-spacing: 0.06em;
+                }
+
+                .account-address-text {
+                    font-size: 0.86rem;
+                    color: #334155;
+                    line-height: 1.6;
+                }
+
+                .account-address-phone {
+                    color: #64748b;
+                    font-size: 0.8rem;
+                    margin-top: 4px;
+                    display: block;
+                }
+
+                .account-add-address-btn {
+                    align-self: flex-start;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #ffffff;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 6px;
+                    padding: 8px 14px;
+                    font-size: 0.78rem;
+                    font-weight: 600;
+                    color: #0f172a;
+                    cursor: pointer;
+                    transition: all 0.18s;
+                }
+
+                .account-add-address-btn:hover {
+                    background: #f1f5f9;
+                    border-color: #94a3b8;
+                }
+
+                /* Wishlist Grid */
+                .account-wishlist-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                    gap: 16px;
+                }
+
+                .account-wishlist-item {
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                }
+
+                .account-wishlist-item:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+                    border-color: #cbd5e1;
+                }
+
+                .account-wishlist-img-frame {
+                    width: 100%;
+                    aspect-ratio: 1;
+                    background: #f8fafc;
+                    overflow: hidden;
+                    cursor: pointer;
+                }
+
+                .account-wishlist-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.3s;
+                }
+
+                .account-wishlist-item:hover .account-wishlist-img {
+                    transform: scale(1.04);
+                }
+
+                .account-wishlist-meta {
+                    padding: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    flex: 1;
+                }
+
+                .account-wishlist-name {
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    color: #0a221a;
+                    line-height: 1.35;
+                    cursor: pointer;
+                }
+
+                .account-wishlist-bottom {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-top: auto;
+                    padding-top: 6px;
+                }
+
+                .account-wishlist-price {
+                    font-weight: 800;
+                    font-size: 0.92rem;
+                    color: #0a221a;
+                }
+
+                .account-wishlist-add-btn {
+                    background: #0a221a;
+                    color: #f5e4be;
+                    border: none;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    font-size: 0.68rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: background 0.18s;
+                }
+
+                .account-wishlist-add-btn:hover {
+                    background: #174235;
+                }
+
+                .account-empty-wishlist {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    padding: 48px 24px;
+                    background: #fbf9f5;
+                    border: 1px dashed #d4cbb8;
+                    border-radius: 14px;
+                }
+
+                .account-empty-icon {
+                    color: #cbd5e1;
+                    margin-bottom: 12px;
+                }
+
+                /* Mobile Adaptations */
+                @media (max-width: 768px) {
+                    .account-modal-overlay {
+                        padding: 0;
+                        align-items: flex-end;
+                    }
+
+                    .account-modal-container {
+                        max-height: 94vh;
+                        border-bottom-left-radius: 0;
+                        border-bottom-right-radius: 0;
+                    }
+
+                    .account-body-split {
+                        flex-direction: column;
+                    }
+
+                    .account-sidebar {
+                        width: 100%;
+                        border-right: none;
+                        border-bottom: 1px solid #e2e8f0;
+                        padding: 12px 16px;
+                    }
+
+                    .account-nav-list {
+                        flex-direction: row;
+                        overflow-x: auto;
+                    }
+
+                    .account-tab-btn {
+                        white-space: nowrap;
+                        padding: 8px 12px;
+                    }
+
+                    .account-sidebar-promo {
+                        display: none;
+                    }
+
+                    .account-main-content {
+                        padding: 18px 16px;
+                    }
+
+                    .desktop-text {
+                        display: none;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

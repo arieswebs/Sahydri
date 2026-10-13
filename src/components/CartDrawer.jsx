@@ -12,9 +12,11 @@ import {
   Sparkles,
   Check,
   Lock,
-  Truck
+  Truck,
+  Loader
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
+import { useShop } from '../context/ShopContext';
 
 export default function CartDrawer({
   isOpen,
@@ -25,11 +27,13 @@ export default function CartDrawer({
   onCheckout,
   onAddToCart
 }) {
+  const { API, currentUser, showToast, authFetch } = useShop();
   const [promoCode, setPromoCode] = useState('');
   const [discountPercent, setDiscountPercent] = useState(0);
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState('');
   const [addedRecommendationId, setAddedRecommendationId] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -52,6 +56,119 @@ export default function CartDrawer({
       if (codeToApply) setPromoCode(codeToApply);
     } else {
       setPromoError('Invalid coupon code. Try SAHYADRI10 for 10% off.');
+    }
+  };
+
+  // ── Razorpay Checkout ─────────────────────────────────────────────────────
+  const handleRazorpayCheckout = async () => {
+    if (cartItems.length === 0) return;
+    setPaymentLoading(true);
+
+    try {
+      // 1. Create a Razorpay order on the backend
+      const res  = await authFetch(`${API}/razorpay/create-order`, {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: grandTotal * 100,
+          currency: 'INR',
+          receipt: `rcpt_${Date.now()}`,
+          notes: { customerName: currentUser?.name || 'Guest' },
+        }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        showToast('Payment gateway error: ' + (data.message || 'Try again'));
+        setPaymentLoading(false);
+        return;
+      }
+
+      // 2. Open Razorpay Checkout modal
+      const options = {
+        key:         data.keyId,
+        amount:      data.amount,
+        currency:    data.currency,
+        name:        'Sahyadri Naturals',
+        description: `Order of ${cartItems.length} item(s)`,
+        image:       '/images/sahyadri-logo.png',
+        order_id:    data.orderId,
+        prefill: {
+          name:    currentUser?.name  || '',
+          email:   currentUser?.email || '',
+          contact: currentUser?.phone || '',
+        },
+        theme: { color: '#0b251d' },
+        modal: { backdropclose: false },
+
+        handler: async (response) => {
+          // 3. Verify the payment signature on the backend
+          try {
+            const vRes  = await fetch(`${API}/razorpay/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id:   response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature:  response.razorpay_signature,
+              }),
+            });
+            const vData = await vRes.json();
+
+            if (!vData.success) {
+              showToast('Payment verification failed. Contact support.');
+              setPaymentLoading(false);
+              return;
+            }
+
+            // 4. Create the store order on the backend
+            await fetch(`${API}/orders`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customerName:  currentUser?.name  || 'Guest',
+                customerEmail: currentUser?.email || '',
+                items: cartItems,
+                total: grandTotal,
+                address: currentUser?.address || '',
+                paymentMethod: 'Razorpay',
+                razorpayOrderId:   response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+              }),
+            });
+
+            // 5. Notify parent to clear cart and show success
+            onCheckout({
+              items: cartItems,
+              subtotal,
+              discountAmount,
+              grandTotal,
+              paymentId: response.razorpay_payment_id,
+              paymentMethod: 'Razorpay',
+            });
+          } catch {
+            showToast('Order recorded locally — payment ref: ' + response.razorpay_payment_id);
+            onCheckout({ items: cartItems, subtotal, discountAmount, grandTotal });
+          }
+          setPaymentLoading(false);
+        },
+
+        // User closed the Razorpay modal
+        'modal.ondismiss': () => {
+          showToast('Payment cancelled');
+          setPaymentLoading(false);
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (resp) => {
+        showToast('Payment failed: ' + (resp.error?.description || 'Unknown error'));
+        setPaymentLoading(false);
+      });
+      rzp.open();
+    } catch (err) {
+      console.error('Razorpay init error:', err);
+      showToast('Could not reach payment gateway. Check your connection.');
+      setPaymentLoading(false);
     }
   };
 
@@ -742,43 +859,63 @@ export default function CartDrawer({
               </div>
             </div>
 
-            {/* Luxury Deep Forest Checkout CTA */}
+            {/* ── Razorpay Payment Button ── */}
             <button
-              onClick={() => onCheckout({ items: cartItems, subtotal, discountAmount, grandTotal })}
+              onClick={handleRazorpayCheckout}
+              disabled={paymentLoading}
               style={{
                 width: '100%',
                 padding: '16px',
                 fontSize: '0.92rem',
-                backgroundColor: '#0a221a',
+                background: paymentLoading
+                  ? 'linear-gradient(135deg, #0a221a, #1a3a2a)'
+                  : 'linear-gradient(135deg, #0b251d 0%, #16402e 100%)',
                 color: '#f5e4be',
                 fontWeight: '800',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: 'pointer',
+                cursor: paymentLoading ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '10px',
                 boxShadow: '0 8px 24px rgba(10, 34, 26, 0.25)',
-                transition: 'all 0.25s ease'
+                transition: 'all 0.25s ease',
+                opacity: paymentLoading ? 0.8 : 1,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#174235';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 12px 28px rgba(10, 34, 26, 0.35)';
+                if (!paymentLoading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(10, 34, 26, 0.35)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#0a221a';
                 e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 8px 24px rgba(10, 34, 26, 0.25)';
               }}
             >
-              <Lock size={16} color="#dfbe84" />
-              <span>PROCEED TO SECURE CHECKOUT</span>
-              <ArrowRight size={17} color="#dfbe84" />
+              {paymentLoading ? (
+                <>
+                  <Loader size={16} color="#dfbe84" style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>OPENING SECURE PAYMENT…</span>
+                </>
+              ) : (
+                <>
+                  <Lock size={16} color="#dfbe84" />
+                  <span>PAY SECURELY WITH RAZORPAY</span>
+                  <ArrowRight size={17} color="#dfbe84" />
+                </>
+              )}
             </button>
+
+            {/* Razorpay badge */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
+              <span style={{ fontSize: '0.66rem', color: '#9e8550', letterSpacing: '0.04em' }}>Powered by</span>
+              <span style={{ fontSize: '0.72rem', fontWeight: '800', color: '#3395FF', letterSpacing: '0.04em' }}>Razorpay</span>
+              <span style={{ fontSize: '0.66rem', color: '#9e8550' }}>· UPI · Cards · NetBanking · Wallets</span>
+            </div>
 
             {/* Luxury Trust Badges Line */}
             <div

@@ -312,7 +312,7 @@ export default function ProductDetailPage({
                     >
                       <span className="weight-opt-name">{opt.label}</span>
                       <span className="weight-opt-price">₹{Math.round(product.price * opt.multiplier)}</span>
-                      {isSelected && <span className="weight-check-dot">✓</span>}
+                      {isSelected && <Check size={12} color="#dfbe84" strokeWidth={2.5} className="weight-check-dot" />}
                     </button>
                   );
                 })}
@@ -527,7 +527,7 @@ export default function ProductDetailPage({
 
                 <div className="reviews-cards-list">
                   <div className="review-single-card">
-                    <div className="rev-stars">★★★★★</div>
+                    <div className="rev-stars">{[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#d4af37" color="#d4af37" />)}</div>
                     <p className="rev-quote">
                       "The aroma from this {product.name} is unlike anything available in commercial grocery stores.
                       The oils are alive, potent, and deeply aromatic. Will never buy commercial spices again."
@@ -536,7 +536,7 @@ export default function ProductDetailPage({
                   </div>
 
                   <div className="review-single-card">
-                    <div className="rev-stars">★★★★★</div>
+                    <div className="rev-stars">{[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#d4af37" color="#d4af37" />)}</div>
                     <p className="rev-quote">
                       "True Kerala Western Ghats quality. The color, aroma, and packaging reflect authentic heritage care.
                       Worth every single rupee."

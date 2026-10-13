@@ -3,7 +3,7 @@ import { Leaf } from 'lucide-react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ProductCollection from './components/ProductCollection';
+import ShopTeaser from './components/ShopTeaser';
 import CulturalHeritage from './components/CulturalHeritage';
 import WhySahyadri from './components/WhySahyadri';
 import CulinaryGallery from './components/CulinaryGallery';
@@ -15,6 +15,7 @@ import ProductQuickView from './components/ProductQuickView';
 import SearchModal from './components/SearchModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import ProductDetailPage from './components/ProductDetailPage';
+import ShopPage from './components/ShopPage';
 import AuthModal from './components/AuthModal';
 import CustomerDashboard from './components/CustomerDashboard';
 import AdminDashboard from './components/AdminDashboard';
@@ -32,6 +33,7 @@ function AppInner() {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [completedOrder, setCompletedOrder] = useState(null);
   const [activeProduct, setActiveProduct] = useState(null);
+  const [isShopOpen, setIsShopOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
@@ -45,8 +47,18 @@ function AppInner() {
         const productId = hash.replace('#product-', '');
         import('./data/products.js').then(m => {
           const matched = m.PRODUCTS.find((p) => p.id === productId);
-          if (matched) { setActiveProduct(matched); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+          if (matched) {
+            setActiveProduct(matched);
+            setIsShopOpen(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         });
+        return;
+      }
+      if (hash === '#shop') {
+        setIsShopOpen(true);
+        setActiveProduct(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
       if (hash === '#admin' && currentUser?.role === 'admin') {
@@ -54,6 +66,7 @@ function AppInner() {
         return;
       }
       setActiveProduct(null);
+      setIsShopOpen(false);
     };
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
@@ -62,12 +75,27 @@ function AppInner() {
 
   const handleViewProduct = (product) => {
     setActiveProduct(product);
+    setIsShopOpen(false);
     window.location.hash = `product-${product.id}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToHome = () => {
     setActiveProduct(null);
+    setIsShopOpen(false);
+    window.location.hash = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGoShop = () => {
+    setActiveProduct(null);
+    setIsShopOpen(true);
+    window.location.hash = 'shop';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackFromShop = () => {
+    setIsShopOpen(false);
     window.location.hash = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -89,8 +117,9 @@ function AppInner() {
   };
 
   const scrollToSection = (id) => {
-    if (activeProduct) {
+    if (activeProduct || isShopOpen) {
       setActiveProduct(null);
+      setIsShopOpen(false);
       window.location.hash = '';
       setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100);
     } else {
@@ -127,40 +156,41 @@ function AppInner() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onGoHome={handleBackToHome}
-        solidBackground={!!activeProduct}
+        onGoShop={handleGoShop}
+        solidBackground={!!(activeProduct || isShopOpen)}
+        activePage={activeProduct ? 'product' : isShopOpen ? 'shop' : 'home'}
         currentUser={currentUser}
         onOpenAuth={() => openAuth('login')}
         onOpenDashboard={() => currentUser?.role === 'admin' ? setIsAdminOpen(true) : setIsDashboardOpen(true)}
+        onScrollToSection={scrollToSection}
       />
 
-      {/* Conditional Rendering: Product Detail or Main Storefront */}
+      {/* Conditional Rendering: Product Detail | Shop Page | Main Storefront */}
       {activeProduct ? (
         <ProductDetailPage
           product={activeProduct}
-          onBack={handleBackToHome}
+          onBack={isShopOpen ? (() => { setActiveProduct(null); setIsShopOpen(true); window.location.hash = 'shop'; }) : handleBackToHome}
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
           wishlist={wishlist}
           onToggleWishlist={toggleWishlist}
           onSelectProduct={handleViewProduct}
         />
+      ) : isShopOpen ? (
+        <ShopPage
+          onViewProduct={handleViewProduct}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+        />
       ) : (
         <>
           <Hero
-            onExploreClick={() => scrollToSection('shop')}
+            onExploreClick={handleGoShop}
             onStoryClick={() => scrollToSection('story')}
             onAddToCart={handleAddToCart}
             onQuickView={(p) => handleViewProduct(p)}
           />
-          <div id="spices">
-            <ProductCollection
-              onAddToCart={handleAddToCart}
-              onQuickView={(p) => setQuickViewProduct(p)}
-              onViewProduct={handleViewProduct}
-              wishlist={wishlist}
-              onToggleWishlist={toggleWishlist}
-            />
-          </div>
+          <ShopTeaser onGoShop={handleGoShop} onAddToCart={handleAddToCart} />
           <CulturalHeritage />
           <WhySahyadri />
           <CulinaryGallery />

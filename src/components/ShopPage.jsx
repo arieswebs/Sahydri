@@ -8,11 +8,11 @@ import {
 import { useShop } from '../context/ShopContext';
 
 const CATEGORIES = [
-    { id: 'all', label: 'All Products', emoji: '🌿' },
-    { id: 'spices', label: 'Whole Spices', emoji: '🫑' },
-    { id: 'powders', label: 'Stone Ground', emoji: '🌶️' },
-    { id: 'honey', label: 'Wild Forest Honey', emoji: '🍯' },
-    { id: 'oils', label: 'Traditional Oils', emoji: '🥥' },
+    { id: 'all', label: 'All Products' },
+    { id: 'spices', label: 'Whole Spices' },
+    { id: 'powders', label: 'Stone Ground' },
+    { id: 'honey', label: 'Wild Forest Honey' },
+    { id: 'oils', label: 'Traditional Oils' },
 ];
 
 const SORT_OPTIONS = [
@@ -80,7 +80,7 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
     const handleWishlist = (e, id) => {
         e.stopPropagation();
         toggleWishlist(id);
-        showToast(wishlist.includes(id) ? 'Removed from wishlist' : 'Saved to wishlist ♥');
+        showToast(wishlist.includes(id) ? 'Removed from wishlist' : 'Saved to wishlist');
     };
 
     // ── Sub-components ────────────────────────────────────────────────────────────
@@ -444,7 +444,7 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                                 transition: 'all 0.2s ease', whiteSpace: 'nowrap'
                             }}
                         >
-                            <span>{cat.emoji}</span> {cat.label}
+                            {cat.label}
                         </button>
                     ))}
                 </div>

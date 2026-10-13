@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Sparkles, Mail } from 'lucide-react';
+import { Send, CheckCircle2, ShieldCheck, Mail } from 'lucide-react';
 
 export default function ConnoisseursClub() {
   const [email, setEmail] = useState('');
@@ -15,11 +15,7 @@ export default function ConnoisseursClub() {
     <section className="connoisseurs-section">
       <div className="container">
         <div className="connoisseurs-card">
-          {/* Subtle gold corner motifs */}
-          <div className="corner-star star-tl">✦</div>
-          <div className="corner-star star-tr">✦</div>
-          <div className="corner-star star-bl">✦</div>
-          <div className="corner-star star-br">✦</div>
+
 
           <span className="connoisseurs-eyebrow">
             — EXCLUSIVE HARVEST INVITATION —
@@ -60,7 +56,8 @@ export default function ConnoisseursClub() {
           )}
 
           <div className="connoisseurs-reassurance">
-            <span>✦ Zero spam. Direct estate updates only. Unsubscribe with one click.</span>
+            <ShieldCheck size={13} color="#8c8273" style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }} />
+            <span>Zero spam. Direct estate updates only. Unsubscribe with one click.</span>
           </div>
         </div>
       </div>
@@ -86,16 +83,7 @@ export default function ConnoisseursClub() {
           box-sizing: border-box;
         }
 
-        .corner-star {
-          position: absolute;
-          color: #d4af37;
-          font-size: 1rem;
-          pointer-events: none;
-        }
-        .star-tl { top: 10px; left: 12px; }
-        .star-tr { top: 10px; right: 12px; }
-        .star-bl { bottom: 10px; left: 12px; }
-        .star-br { bottom: 10px; right: 12px; }
+
 
         .connoisseurs-eyebrow {
           font-family: var(--font-display);

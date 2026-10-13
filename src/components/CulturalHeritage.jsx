@@ -6,11 +6,7 @@ export default function CulturalHeritage() {
     <section id="heritage" className="heritage-section">
       <div className="container">
         <div className="heritage-card">
-          {/* Subtle gold corner motifs */}
-          <div className="corner-motif motif-tl">✦</div>
-          <div className="corner-motif motif-tr">✦</div>
-          <div className="corner-motif motif-bl">✦</div>
-          <div className="corner-motif motif-br">✦</div>
+
 
           <div className="heritage-grid">
             {/* Left: Kathakali Portrait */}
@@ -78,16 +74,7 @@ export default function CulturalHeritage() {
           box-sizing: border-box;
         }
 
-        .corner-motif {
-          position: absolute;
-          color: #d4af37;
-          font-size: 1rem;
-          pointer-events: none;
-        }
-        .motif-tl { top: 8px; left: 10px; }
-        .motif-tr { top: 8px; right: 10px; }
-        .motif-bl { bottom: 8px; left: 10px; }
-        .motif-br { bottom: 8px; right: 10px; }
+
 
         .heritage-grid {
           display: grid;

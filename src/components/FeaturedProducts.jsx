@@ -195,7 +195,7 @@ export default function FeaturedProducts({ onViewProduct, onAddToCart, onToggleW
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '20px', flexWrap: 'wrap' }}>
                         {['12+ Products', 'Free Shipping ₹999+', 'Lab Certified', 'Easy Returns'].map(txt => (
                             <span key={txt} style={{ fontSize: '0.72rem', color: '#9a9080', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <span style={{ color: '#7a9a6e' }}>✓</span> {txt}
+                                <Check size={12} color="#7a9a6e" strokeWidth={2.5} /> {txt}
                             </span>
                         ))}
                     </div>

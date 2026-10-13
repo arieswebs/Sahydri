@@ -1,18 +1,19 @@
 import express from 'express';
 import {
-    getAllProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct
+    getAllProducts, getProductById,
+    createProduct, updateProduct, deleteProduct
 } from '../controllers/productController.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', getAllProducts);
+// Public reads
+router.get('/',    getAllProducts);
 router.get('/:id', getProductById);
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+
+// Admin-only writes
+router.post('/',      requireAuth, requireAdmin, createProduct);
+router.put('/:id',    requireAuth, requireAdmin, updateProduct);
+router.delete('/:id', requireAuth, requireAdmin, deleteProduct);
 
 export default router;

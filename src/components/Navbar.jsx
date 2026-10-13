@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, User, Shield } from 'lucide-react';
 
-export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, currentUser, onOpenAuth, onOpenDashboard }) {
+export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, onGoShop, activePage, onScrollToSection, currentUser, onOpenAuth, onOpenDashboard }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -112,11 +112,11 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, 
 
           {/* Simple Clean Navigation Links (Desktop) */}
           <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
-            <a href="#shop" className="simple-nav-link">Shop</a>
-            <a href="#spices" className="simple-nav-link">Single Estate</a>
-            <a href="#honey" className="simple-nav-link">Wild Honey</a>
-            <a href="#story" className="simple-nav-link">Our Story</a>
-            <a href="#contact" className="simple-nav-link">Contact</a>
+            <button onClick={onGoShop} className={`simple-nav-link${activePage === 'shop' ? ' nav-link-active' : ''}`}>Shop</button>
+            <button onClick={() => onScrollToSection && onScrollToSection('spices')} className="simple-nav-link">Single Estate</button>
+            <button onClick={() => onScrollToSection && onScrollToSection('honey')} className="simple-nav-link">Wild Honey</button>
+            <button onClick={() => onScrollToSection && onScrollToSection('story')} className="simple-nav-link">Our Story</button>
+            <button onClick={() => onScrollToSection && onScrollToSection('contact')} className="simple-nav-link">Contact</button>
           </nav>
 
           {/* Right Action Icons in matching light theme */}
@@ -173,41 +173,36 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="mobile-dropdown-menu">
-          <a
-            href="#shop"
-            className="mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
+          <button
+            className={`mobile-link${activePage === 'shop' ? ' mobile-link-active' : ''}`}
+            onClick={() => { setMobileMenuOpen(false); onGoShop && onGoShop(); }}
           >
             Shop the Collection
-          </a>
-          <a
-            href="#spices"
+          </button>
+          <button
             className="mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => { setMobileMenuOpen(false); onScrollToSection && onScrollToSection('spices'); }}
           >
             Single Estate Spices
-          </a>
-          <a
-            href="#honey"
+          </button>
+          <button
             className="mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => { setMobileMenuOpen(false); onScrollToSection && onScrollToSection('honey'); }}
           >
             Wild Forest Honey
-          </a>
-          <a
-            href="#story"
+          </button>
+          <button
             className="mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => { setMobileMenuOpen(false); onScrollToSection && onScrollToSection('story'); }}
           >
             Our Story & Origin
-          </a>
-          <a
-            href="#contact"
+          </button>
+          <button
             className="mobile-link"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => { setMobileMenuOpen(false); onScrollToSection && onScrollToSection('contact'); }}
           >
             Contact
-          </a>
+          </button>
         </div>
       )}
 
@@ -217,6 +212,9 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, 
           font-size: 0.78rem;
           color: #384b42;
           text-decoration: none;
+          background: none;
+          border: none;
+          cursor: pointer;
           font-weight: 600;
           letter-spacing: 0.07em;
           text-transform: uppercase;
@@ -239,8 +237,12 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, 
           border-radius: 2px;
           transition: width 0.25s ease;
         }
-        .simple-nav-link:hover::after {
+        .simple-nav-link:hover::after,
+        .nav-link-active::after {
           width: 100%;
+        }
+        .nav-link-active {
+          color: #0a221a;
         }
 
         .nav-icon-btn {
@@ -301,12 +303,21 @@ export default function Navbar({ cartCount, onOpenCart, onOpenSearch, onGoHome, 
           font-size: 0.88rem;
           color: #1a3328;
           text-decoration: none;
-          padding: 8px 0;
+          background: none;
+          border: none;
           border-bottom: 1px solid rgba(14, 43, 33, 0.06);
+          padding: 8px 0;
           font-weight: 600;
+          font-family: inherit;
+          cursor: pointer;
+          text-align: left;
+          width: 100%;
           transition: color 0.2s ease;
         }
         .mobile-link:hover {
+          color: #8c733b;
+        }
+        .mobile-link-active {
           color: #8c733b;
         }
 

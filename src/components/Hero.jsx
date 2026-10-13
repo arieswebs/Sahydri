@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Compass } from 'lucide-react';
+import { ArrowRight, Compass, ShieldCheck, Leaf, Sparkles } from 'lucide-react';
 
 export default function Hero({ onExploreClick, onStoryClick }) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -51,21 +51,6 @@ export default function Hero({ onExploreClick, onStoryClick }) {
       ctaSecondary: "Our Story",
       image: "/images/hero_cardamom.jpg",
       coordinates: "09°50' N · 77°09' E"
-    },
-    {
-      id: "tribal",
-      label: "Our Farmers",
-      badge: "DIRECT TRIBAL CUSTODIANSHIP",
-      titlePrefix: "Stewarded by ",
-      titleHighlight: "3,200+ Families",
-      titleSuffix: "",
-      specs: ["FAIR TRADE COVENANT", "ZERO INTERMEDIARIES", "70% DIRECT VALUE RETURN"],
-      subtitle: "Preserving sacred rainforest stewardship across Wayanad and Idukki. Fair trade value returned directly to native forest custodians, sustaining ancestral biodiversity.",
-      mobileSubtitle: "Ethically gathered by 3,200+ native forest custodians with zero middlemen.",
-      ctaPrimary: "Shop All",
-      ctaSecondary: "Our Story",
-      image: "/images/estate.jpg",
-      coordinates: "11°38' N · 76°02' E"
     }
   ];
 
@@ -115,13 +100,6 @@ export default function Hero({ onExploreClick, onStoryClick }) {
       <div className="container hero-layout-container">
         <div className="hero-editorial-card">
 
-          {/* Hallmark Provenance Pill */}
-          <div className="hero-hallmark-pill">
-            <span className="hero-hallmark-dot" />
-            <span className="hero-hallmark-text">{slides[activeSlide].badge}</span>
-            <span className="hero-hallmark-coord">{slides[activeSlide].coordinates}</span>
-          </div>
-
           {/* Editorial Headline */}
           <h1 className="hero-editorial-heading">
             {slides[activeSlide].titlePrefix}
@@ -165,23 +143,48 @@ export default function Hero({ onExploreClick, onStoryClick }) {
               <span>{slides[activeSlide].ctaSecondary}</span>
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* ── Bottom Provenance Ribbon (Editorial 2027 standard) ── */}
-      <div className="hero-provenance-ribbon">
-        <div className="container hero-ribbon-content">
-          <div className="hero-ribbon-item">
-            <Compass size={13} className="hero-ribbon-icon" />
-            <span>4,200 FT ELEVATION · WAYANAD & IDUKKI BIOSPHERE</span>
-          </div>
-          <div className="hero-ribbon-sep desktop-only">·</div>
-          <div className="hero-ribbon-item desktop-only">
-            <span>100% NMR PURITY CERTIFIED WILD FOREST COMB</span>
-          </div>
-          <div className="hero-ribbon-sep desktop-only">·</div>
-          <div className="hero-ribbon-item">
-            <span>DIRECT FAIR-VALUE TRIBAL COVENANT</span>
+          {/* ── Refined Editorial Provenance Feature Panel ── */}
+          <div className="hero-provenance-panel" role="region" aria-label="Terroir and harvest hallmarks">
+            <div className="hero-provenance-item">
+              <div className="hero-prov-icon-box" aria-hidden="true">
+                <Compass size={14} color="#dfbe84" strokeWidth={1.9} />
+              </div>
+              <div className="hero-prov-text-block">
+                <span className="hero-prov-kicker">4,200 FT ELEVATION</span>
+                <span className="hero-prov-desc">Wayanad &amp; Idukki Biosphere</span>
+              </div>
+            </div>
+
+            <div className="hero-provenance-item">
+              <div className="hero-prov-icon-box" aria-hidden="true">
+                <ShieldCheck size={14} color="#dfbe84" strokeWidth={1.9} />
+              </div>
+              <div className="hero-prov-text-block">
+                <span className="hero-prov-kicker">100% NMR PURITY CERTIFIED</span>
+                <span className="hero-prov-desc">Wild Forest Comb Honey</span>
+              </div>
+            </div>
+
+            <div className="hero-provenance-item">
+              <div className="hero-prov-icon-box" aria-hidden="true">
+                <Leaf size={14} color="#dfbe84" strokeWidth={1.9} />
+              </div>
+              <div className="hero-prov-text-block">
+                <span className="hero-prov-kicker">DIRECT FAIR-VALUE</span>
+                <span className="hero-prov-desc">Harvest &amp; Tribal Covenant</span>
+              </div>
+            </div>
+
+            <div className="hero-provenance-item">
+              <div className="hero-prov-icon-box" aria-hidden="true">
+                <Sparkles size={14} color="#dfbe84" strokeWidth={1.9} />
+              </div>
+              <div className="hero-prov-text-block">
+                <span className="hero-prov-kicker">100% RAW &amp; UNHEATED</span>
+                <span className="hero-prov-desc">Living Enzymes &amp; Wild Pollen</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -257,44 +260,6 @@ export default function Hero({ onExploreClick, onStoryClick }) {
           align-items: center;
           text-align: center;
           margin-bottom: 34px;
-        }
-
-        /* Hallmark Badge */
-        .hero-hallmark-pill {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          background: rgba(6, 20, 15, 0.85);
-          border: 1px solid rgba(223, 190, 132, 0.4);
-          padding: 5px 16px;
-          border-radius: 30px;
-          margin-bottom: 20px;
-          backdrop-filter: blur(12px);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-        }
-
-        .hero-hallmark-dot {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background-color: #dfbe84;
-        }
-
-        .hero-hallmark-text {
-          font-family: var(--font-sans);
-          font-size: 0.7rem;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: #f7eedf;
-          font-weight: 700;
-        }
-
-        .hero-hallmark-coord {
-          font-size: 0.62rem;
-          letter-spacing: 0.1em;
-          color: rgba(223, 190, 132, 0.65);
-          border-left: 1px solid rgba(223, 190, 132, 0.3);
-          padding-left: 10px;
         }
 
         /* Editorial Title */
@@ -530,43 +495,112 @@ export default function Hero({ onExploreClick, onStoryClick }) {
           color: #dfbe84;
         }
 
-        /* ── Bottom Provenance Ribbon ── */
-        .hero-provenance-ribbon {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 10;
-          background: rgba(5, 18, 14, 0.88);
-          border-top: 1px solid rgba(223, 190, 132, 0.16);
-          backdrop-filter: blur(8px);
-          padding: 10px 0;
+        /* ── Refined Editorial Provenance Feature Panel ── */
+        .hero-provenance-panel {
+          margin-top: clamp(26px, 3.8vh, 44px);
+          margin-bottom: 8px;
+          width: 100%;
+          max-width: 980px;
+          box-sizing: border-box;
+          background: linear-gradient(
+            165deg,
+            rgba(9, 28, 21, 0.82) 0%,
+            rgba(5, 18, 13, 0.90) 100%
+          );
+          border: 1px solid rgba(223, 190, 132, 0.22);
+          border-radius: 8px;
+          padding: 13px 22px;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          box-shadow:
+            inset 0 1px 0 rgba(223, 190, 132, 0.14),
+            0 12px 36px rgba(0, 0, 0, 0.38);
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          align-items: center;
+          gap: 16px;
         }
 
-        .hero-ribbon-content {
+        .hero-provenance-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          text-align: left;
+          min-width: 0;
+          position: relative;
+        }
+
+        /* Desktop Column Dividers */
+        .hero-provenance-item:not(:last-child)::after {
+          content: '';
+          position: absolute;
+          right: -8px;
+          top: 15%;
+          height: 70%;
+          width: 1px;
+          background: rgba(223, 190, 132, 0.16);
+        }
+
+        .hero-prov-icon-box {
+          width: 28px;
+          height: 28px;
+          border-radius: 5px;
+          background: rgba(223, 190, 132, 0.08);
+          border: 1px solid rgba(223, 190, 132, 0.24);
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 18px;
-          font-size: 0.66rem;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          color: rgba(223, 190, 132, 0.75);
-          font-weight: 600;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
         }
 
-        .hero-ribbon-item {
+        .hero-provenance-item:hover .hero-prov-icon-box {
+          background: rgba(223, 190, 132, 0.16);
+          border-color: rgba(223, 190, 132, 0.45);
+        }
+
+        .hero-prov-text-block {
           display: flex;
-          align-items: center;
-          gap: 7px;
+          flex-direction: column;
+          line-height: 1.25;
+          min-width: 0;
         }
 
-        .hero-ribbon-icon {
+        .hero-prov-kicker {
+          font-family: var(--font-sans);
+          font-size: 0.62rem;
+          font-weight: 700;
+          letter-spacing: 0.09em;
           color: #dfbe84;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 2px;
         }
 
-        .hero-ribbon-sep {
-          color: rgba(223, 190, 132, 0.3);
+        .hero-prov-desc {
+          font-family: var(--font-sans);
+          font-size: 0.76rem;
+          font-weight: 500;
+          color: rgba(247, 238, 223, 0.92);
+          line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* ── Tablet Viewport (768px – 1024px) ── */
+        @media (max-width: 1024px) and (min-width: 769px) {
+          .hero-provenance-panel {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px 24px;
+            max-width: 660px;
+            padding: 14px 20px;
+          }
+          .hero-provenance-item:not(:last-child)::after {
+            display: none;
+          }
         }
 
         /* ── Desktop vs Mobile utility classes ── */
@@ -580,42 +614,127 @@ export default function Hero({ onExploreClick, onStoryClick }) {
           .mobile-only { display: block !important; }
 
           .hero-editorial-section {
-            padding: 85px 16px 54px 16px;
+            padding: 85px 16px 48px 16px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .hero-provenance-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            width: 100%;
+            max-width: 360px;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            background: linear-gradient(
+              170deg,
+              rgba(8, 26, 19, 0.88) 0%,
+              rgba(5, 18, 14, 0.94) 100%
+            );
+            border: 1px solid rgba(223, 190, 132, 0.22);
+            box-shadow:
+              inset 0 1px 0 rgba(223, 190, 132, 0.12),
+              0 8px 24px rgba(0, 0, 0, 0.42);
           }
 
-          .hero-controls-bar {
-            padding: 6px 14px;
+          .hero-provenance-item {
+            padding: 9px 0;
+            width: 100%;
             gap: 12px;
+            border-bottom: 1px solid rgba(223, 190, 132, 0.1);
           }
 
-          .hero-tab-title {
+          .hero-provenance-item:not(:last-child)::after {
             display: none;
           }
 
-          .hero-tab-bar {
-            width: 32px;
+          .hero-provenance-item:first-child {
+            padding-top: 2px;
           }
 
-          .hero-hallmark-coord {
-            display: none;
+          .hero-provenance-item:last-child {
+            padding-bottom: 2px;
+            border-bottom: none;
+          }
+
+          .hero-prov-icon-box {
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+          }
+
+          .hero-prov-kicker {
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+          }
+
+          .hero-prov-desc {
+            font-size: 0.76rem;
+            white-space: normal; /* Readable wrapping on narrow mobile */
+            line-height: 1.25;
           }
         }
 
         @media (max-width: 480px) {
           .hero-editorial-heading {
-            font-size: 2.1rem;
+            font-size: clamp(1.65rem, 7.5vw, 2.1rem);
+            margin-bottom: 12px;
           }
           .hero-editorial-desc {
-            font-size: 0.86rem;
+            font-size: 0.84rem;
             line-height: 1.45;
+            margin-bottom: 18px;
+          }
+          .hero-actions-group {
+            gap: 10px;
           }
           .hero-btn-primary {
-            padding: 11px 22px;
-            font-size: 0.78rem;
+            padding: 10px 20px;
+            font-size: 0.76rem;
           }
-          .hero-ribbon-content {
+          .hero-btn-secondary {
+            padding: 10px 18px;
+            font-size: 0.76rem;
+          }
+        }
+
+        /* ── Specific Optimizations for iPhone SE (<= 375px) ── */
+        @media (max-width: 375px) {
+          .hero-provenance-panel {
+            max-width: 335px;
+            padding: 9px 12px;
+            margin-top: 18px;
+          }
+          .hero-provenance-item {
+            padding: 7px 0;
+            gap: 10px;
+          }
+          .hero-prov-icon-box {
+            width: 24px;
+            height: 24px;
+          }
+          .hero-prov-kicker {
+            font-size: 0.60rem;
+          }
+          .hero-prov-desc {
+            font-size: 0.72rem;
+          }
+        }
+
+        /* ── Ultra-compact (<= 330px) ── */
+        @media (max-width: 330px) {
+          .hero-provenance-panel {
+            max-width: 290px;
+            padding: 8px 10px;
+          }
+          .hero-prov-kicker {
             font-size: 0.58rem;
-            letter-spacing: 0.08em;
+          }
+          .hero-prov-desc {
+            font-size: 0.68rem;
           }
         }
       `}</style>

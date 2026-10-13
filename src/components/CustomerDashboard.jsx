@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     User, Package, MapPin, LogOut,
     Star, Truck, CheckCircle, Clock, RefreshCw, Edit3, Save, X,
-    ShoppingBag, ChevronRight, ExternalLink, Heart, Plus, Loader
+    ShoppingBag, ChevronRight, ExternalLink, Heart, Plus, Loader,
+    LayoutDashboard, Settings, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
@@ -15,17 +16,33 @@ const STATUS_META = {
     cancelled:  { label: 'Cancelled',  color: '#b91c1c', bg: '#fee2e2', Icon: X },
 };
 
-const SECTIONS = ['Orders', 'Profile', 'Addresses', 'Wishlist'];
+const SECTIONS = ['Overview', 'Orders', 'Addresses', 'Profile', 'Wishlist'];
 
-export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) {
+export default function CustomerDashboard({
+    onClose,
+    onViewProduct,
+    onGoShop,
+    isPageMode = false,
+    initialSection = 'Overview',
+    onTabChange
+}) {
     const {
         currentUser, logout, wishlist, products, showToast,
         fetchUserOrders, updateUserProfile, addToCart
     } = useShop();
 
-    const [activeSection, setActiveSection] = useState('Orders');
+    const [activeSection, setActiveSection] = useState(initialSection || 'Overview');
     const [editingProfile, setEditingProfile] = useState(false);
     const [savingProfile, setSavingProfile] = useState(false);
+
+    useEffect(() => {
+        if (initialSection) setActiveSection(initialSection);
+    }, [initialSection]);
+
+    const handleSelectSection = (s) => {
+        setActiveSection(s);
+        onTabChange?.(s);
+    };
 
     // Profile state synced with currentUser
     const [profile, setProfile] = useState({
@@ -110,45 +127,45 @@ export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) 
     const wishlistProducts = products.filter(p => wishlist.includes(p.id));
     const initials = (profile.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
-    return (
-        <div className="account-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-            <div className="account-modal-container" onClick={e => e.stopPropagation()}>
+    const dashboardCard = (
+        <div className={`account-modal-container ${isPageMode ? 'account-page-mode-card' : ''}`} onClick={e => e.stopPropagation()}>
 
-                {/* ── Top Header Bar ── */}
-                <div className="account-header">
-                    <div className="account-user-meta">
-                        <div className="account-avatar-pill">
-                            <span className="account-avatar-text">{initials}</span>
-                        </div>
-                        <div>
-                            <div className="account-user-name-row">
-                                <h2 className="account-user-name">{profile.name || 'Valued Member'}</h2>
-                                <span className="account-member-chip">MEMBER</span>
-                            </div>
-                            <span className="account-user-email">{profile.email}</span>
-                        </div>
+            {/* ── Top Header Bar ── */}
+            <div className="account-header">
+                <div className="account-user-meta">
+                    <div className="account-avatar-pill">
+                        <span className="account-avatar-text">{initials}</span>
                     </div>
+                    <div>
+                        <div className="account-user-name-row">
+                            <h2 className="account-user-name">{profile.name || 'Valued Member'}</h2>
+                            <span className="account-member-chip">MEMBER</span>
+                        </div>
+                        <span className="account-user-email">{profile.email}</span>
+                    </div>
+                </div>
 
-                    <div className="account-header-actions">
-                        {/* Prominent "Go to Shop" Button */}
-                        <button
-                            onClick={handleShopClick}
-                            className="account-shop-cta-btn"
-                            title="Explore Shop Products"
-                        >
-                            <ShoppingBag size={14} />
-                            <span>Go to Shop</span>
-                        </button>
+                <div className="account-header-actions">
+                    {/* Prominent "Go to Shop" Button */}
+                    <button
+                        onClick={handleShopClick}
+                        className="account-shop-cta-btn"
+                        title="Explore Shop Products"
+                    >
+                        <ShoppingBag size={14} />
+                        <span>Go to Shop</span>
+                    </button>
 
-                        <button
-                            onClick={handleLogout}
-                            className="account-logout-btn"
-                            title="Log Out"
-                        >
-                            <LogOut size={14} />
-                            <span className="desktop-text">Sign Out</span>
-                        </button>
+                    <button
+                        onClick={handleLogout}
+                        className="account-logout-btn"
+                        title="Log Out"
+                    >
+                        <LogOut size={14} />
+                        <span className="desktop-text">Sign Out</span>
+                    </button>
 
+                    {!isPageMode && (
                         <button
                             onClick={onClose}
                             className="account-close-btn"
@@ -156,54 +173,209 @@ export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) 
                         >
                             <X size={16} />
                         </button>
+                    )}
+                </div>
+            </div>
+
+            {/* ── Main Dashboard Body ── */}
+            <div className="account-body-split">
+
+                {/* Sidebar Tabs */}
+                <div className="account-sidebar">
+                    <div className="account-nav-list">
+                        {SECTIONS.map(s => {
+                            const icons = {
+                                Overview: LayoutDashboard,
+                                Orders: Package,
+                                Addresses: MapPin,
+                                Profile: Settings,
+                                Wishlist: Heart
+                            };
+                            const labels = {
+                                Overview: 'Overview',
+                                Orders: 'My Orders',
+                                Addresses: 'Saved Addresses',
+                                Profile: 'Account Settings',
+                                Wishlist: 'Wishlist'
+                            };
+                            const Icon = icons[s] || Package;
+                            const active = activeSection === s;
+                            const count = s === 'Orders' ? orders.length : s === 'Wishlist' ? wishlistProducts.length : null;
+
+                            return (
+                                <button
+                                    key={s}
+                                    onClick={() => handleSelectSection(s)}
+                                    className={`account-tab-btn ${active ? 'account-tab-active' : ''}`}
+                                >
+                                    <Icon size={16} className="account-tab-icon" />
+                                    <span className="account-tab-label">{labels[s] || s}</span>
+                                    {count !== null && (
+                                        <span className={`account-tab-badge ${active ? 'account-tab-badge-active' : ''}`}>
+                                            {count}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Direct Shop Shortcut in Sidebar */}
+                    <div className="account-sidebar-promo">
+                        <span className="account-promo-title">Fresh Harvests</span>
+                        <p className="account-promo-desc">Single-origin spices & raw forest honey delivered fresh from Kerala.</p>
+                        <button onClick={handleShopClick} className="account-promo-link">
+                            Browse Shop Catalog →
+                        </button>
                     </div>
                 </div>
 
-                {/* ── Main Dashboard Body ── */}
-                <div className="account-body-split">
+                {/* Main Content Area */}
+                <div className="account-main-content">
 
-                    {/* Sidebar Tabs */}
-                    <div className="account-sidebar">
-                        <div className="account-nav-list">
-                            {SECTIONS.map(s => {
-                                const icons = { Orders: Package, Profile: User, Addresses: MapPin, Wishlist: Heart };
-                                const Icon = icons[s];
-                                const active = activeSection === s;
-                                const count = s === 'Orders' ? orders.length : s === 'Wishlist' ? wishlistProducts.length : null;
+                    {/* ═════ 0. OVERVIEW SECTION ═════ */}
+                    {activeSection === 'Overview' && (
+                        <div className="account-section-block">
+                            <div className="account-overview-welcome">
+                                <div>
+                                    <h3 className="account-overview-greeting">Welcome, {profile.name || 'Member'}</h3>
+                                    <p className="account-overview-sub">
+                                        Your customer dashboard for active dispatches, delivery addresses, and estate spice orders.
+                                    </p>
+                                </div>
+                                <button onClick={handleShopClick} className="account-inline-shop-btn">
+                                    <ShoppingBag size={13} />
+                                    <span>Browse Shop</span>
+                                </button>
+                            </div>
 
-                                return (
-                                    <button
-                                        key={s}
-                                        onClick={() => setActiveSection(s)}
-                                        className={`account-tab-btn ${active ? 'account-tab-active' : ''}`}
-                                    >
-                                        <Icon size={16} className="account-tab-icon" />
-                                        <span className="account-tab-label">{s}</span>
-                                        {count !== null && (
-                                            <span className={`account-tab-badge ${active ? 'account-tab-badge-active' : ''}`}>
-                                                {count}
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                            {/* Clean Snapshot Cards */}
+                            <div className="account-overview-grid">
+                                <div className="account-overview-card" onClick={() => handleSelectSection('Orders')}>
+                                    <div className="account-overview-card-top">
+                                        <span className="account-overview-card-label">Orders Placed</span>
+                                        <Package size={16} color="#8c733b" />
+                                    </div>
+                                    <div className="account-overview-card-val">{ordersLoading ? '…' : orders.length}</div>
+                                    <div className="account-overview-card-link">View Order History →</div>
+                                </div>
+
+                                <div className="account-overview-card" onClick={() => handleSelectSection('Addresses')}>
+                                    <div className="account-overview-card-top">
+                                        <span className="account-overview-card-label">Delivery Address</span>
+                                        <MapPin size={16} color="#8c733b" />
+                                    </div>
+                                    <div className="account-overview-card-snippet">
+                                        {profile.address ? (profile.address.length > 34 ? profile.address.slice(0, 34) + '…' : profile.address) : 'No address saved'}
+                                    </div>
+                                    <div className="account-overview-card-link">Manage Addresses →</div>
+                                </div>
+
+                                <div className="account-overview-card" onClick={() => handleSelectSection('Profile')}>
+                                    <div className="account-overview-card-top">
+                                        <span className="account-overview-card-label">Account Settings</span>
+                                        <Settings size={16} color="#8c733b" />
+                                    </div>
+                                    <div className="account-overview-card-snippet">
+                                        {profile.email}
+                                    </div>
+                                    <div className="account-overview-card-link">Update Settings →</div>
+                                </div>
+                            </div>
+
+                            {/* Recent Orders Preview */}
+                            <div className="account-overview-recent-block">
+                                <div className="account-section-header" style={{ marginTop: '22px' }}>
+                                    <div>
+                                        <h4 className="account-section-title" style={{ fontSize: '1.02rem' }}>Recent Orders</h4>
+                                        <p className="account-section-desc">Latest activity for your account.</p>
+                                    </div>
+                                    {orders.length > 0 && (
+                                        <button onClick={() => handleSelectSection('Orders')} className="account-link-btn-text">
+                                            See All ({orders.length}) →
+                                        </button>
+                                    )}
+                                </div>
+
+                                {ordersLoading ? (
+                                    <div className="account-loading-box">
+                                        <Loader size={20} className="account-spinner" />
+                                        <span>Fetching recent dispatches…</span>
+                                    </div>
+                                ) : orders.length === 0 ? (
+                                    <div className="account-empty-state" style={{ padding: '28px 20px' }}>
+                                        <Package size={28} color="#8c733b" />
+                                        <h4 className="account-empty-title">No orders placed yet</h4>
+                                        <p className="account-empty-desc">
+                                            Discover our single-origin harvests and raw forest honey directly from Wayanad.
+                                        </p>
+                                        <button onClick={handleShopClick} className="account-empty-cta">
+                                            <ShoppingBag size={14} />
+                                            <span>Shop Our Collection</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="account-orders-stack">
+                                        {orders.slice(0, 2).map(order => {
+                                            const meta = STATUS_META[order.status] || STATUS_META.pending;
+                                            const Icon = meta.Icon;
+                                            const dateFormatted = order.createdAt
+                                                ? new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric'
+                                                })
+                                                : 'Recent';
+
+                                            return (
+                                                <div key={order.id} className="account-order-card">
+                                                    <div className="account-order-top">
+                                                        <div>
+                                                            <div className="account-order-id">{order.id}</div>
+                                                            <div className="account-order-date">Placed on {dateFormatted}</div>
+                                                        </div>
+                                                        <span
+                                                            className="account-status-pill"
+                                                            style={{ background: meta.bg, color: meta.color }}
+                                                        >
+                                                            <Icon size={12} />
+                                                            <span>{meta.label}</span>
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="account-order-items">
+                                                        {(order.items || []).map((item, i) => (
+                                                            <div key={i} className="account-order-item-row">
+                                                                <span className="account-order-item-name">
+                                                                    {item.name} {item.weight && <span className="account-item-weight">({item.weight})</span>} × {item.quantity || item.qty || 1}
+                                                                </span>
+                                                                <span className="account-order-item-price">
+                                                                    ₹{((item.price || 0) * (item.quantity || item.qty || 1)).toLocaleString('en-IN')}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="account-order-bottom">
+                                                        <span className="account-order-method">
+                                                            Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
+                                                        </span>
+                                                        <div className="account-order-total-group">
+                                                            <span className="account-order-total-label">Total:</span>
+                                                            <span className="account-order-total-val">₹{Number(order.total || 0).toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
+                    )}
 
-                        {/* Direct Shop Shortcut in Sidebar */}
-                        <div className="account-sidebar-promo">
-                            <span className="account-promo-title">Fresh Harvests</span>
-                            <p className="account-promo-desc">Single-origin spices & raw forest honey delivered fresh from Kerala.</p>
-                            <button onClick={handleShopClick} className="account-promo-link">
-                                Browse Shop Catalog →
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Main Content Area */}
-                    <div className="account-main-content">
-
-                        {/* ═════ 1. ORDERS SECTION ═════ */}
-                        {activeSection === 'Orders' && (
+                    {/* ═════ 1. ORDERS SECTION ═════ */}
+                    {activeSection === 'Orders' && (
                             <div className="account-section-block">
                                 <div className="account-section-header">
                                     <div>
@@ -444,8 +616,135 @@ export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) 
                     </div>
                 </div>
             </div>
+        );
+
+    return (
+        <>
+            {isPageMode ? (
+                <div className="account-page-mode-wrapper">
+                    {dashboardCard}
+                </div>
+            ) : (
+                <div className="account-modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+                    {dashboardCard}
+                </div>
+            )}
 
             <style>{`
+                /* ── Page Mode & Overview Additions ── */
+                .account-page-mode-wrapper {
+                    width: 100%;
+                    animation: accountFadeIn 0.22s ease-out;
+                }
+
+                .account-page-mode-card {
+                    max-height: none !important;
+                    box-shadow: 0 10px 30px rgba(11, 37, 29, 0.06), 0 1px 3px rgba(11, 37, 29, 0.04) !important;
+                }
+
+                .account-overview-welcome {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    padding-bottom: 20px;
+                    border-bottom: 1px solid #e2e8f0;
+                    margin-bottom: 20px;
+                }
+
+                .account-overview-greeting {
+                    font-family: var(--font-serif);
+                    font-size: 1.35rem;
+                    color: #0a221a;
+                    margin: 0 0 4px 0;
+                }
+
+                .account-overview-sub {
+                    font-size: 0.82rem;
+                    color: #64748b;
+                    margin: 0;
+                }
+
+                .account-overview-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+                    gap: 14px;
+                    margin-bottom: 24px;
+                }
+
+                .account-overview-card {
+                    background: #fbf9f5;
+                    border: 1px solid #e7dfd1;
+                    border-radius: 12px;
+                    padding: 16px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .account-overview-card:hover {
+                    border-color: #8c733b;
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 16px rgba(11, 37, 29, 0.06);
+                    background: #ffffff;
+                }
+
+                .account-overview-card-top {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 10px;
+                }
+
+                .account-overview-card-label {
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    color: #64748b;
+                    letter-spacing: 0.04em;
+                    text-transform: uppercase;
+                }
+
+                .account-overview-card-val {
+                    font-size: 1.6rem;
+                    font-weight: 800;
+                    color: #0a221a;
+                    font-family: var(--font-serif);
+                    margin-bottom: 6px;
+                }
+
+                .account-overview-card-snippet {
+                    font-size: 0.84rem;
+                    color: #0a221a;
+                    font-weight: 600;
+                    line-height: 1.4;
+                    margin-bottom: 6px;
+                    word-break: break-all;
+                }
+
+                .account-overview-card-link {
+                    margin-top: auto;
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    color: #8c733b;
+                    padding-top: 8px;
+                }
+
+                .account-link-btn-text {
+                    background: none;
+                    border: none;
+                    color: #8c733b;
+                    font-weight: 700;
+                    font-size: 0.78rem;
+                    cursor: pointer;
+                    padding: 0;
+                }
+
+                .account-link-btn-text:hover {
+                    text-decoration: underline;
+                }
+
                 /* ── Premium White Theme Customer Dashboard ── */
                 .account-modal-overlay {
                     position: fixed;
@@ -1271,8 +1570,62 @@ export default function CustomerDashboard({ onClose, onViewProduct, onGoShop }) 
                     .desktop-text {
                         display: none;
                     }
+
+                    .account-header {
+                        padding: 14px 16px;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                    }
+
+                    .account-avatar-pill {
+                        width: 38px;
+                        height: 38px;
+                    }
+
+                    .account-user-name {
+                        font-size: 1.05rem;
+                    }
+
+                    .account-shop-cta-btn {
+                        padding: 6px 10px;
+                        font-size: 0.75rem;
+                    }
+
+                    .account-logout-btn {
+                        padding: 6px 10px;
+                    }
+
+                    .account-overview-grid {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .account-wishlist-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 10px;
+                    }
+
+                    .account-order-top {
+                        flex-wrap: wrap;
+                        gap: 8px;
+                    }
+
+                    .account-order-bottom {
+                        flex-wrap: wrap;
+                        gap: 8px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .account-wishlist-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 8px;
+                    }
+                    .account-header-actions {
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
                 }
             `}</style>
-        </div>
+        </>
     );
 }

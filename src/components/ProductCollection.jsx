@@ -437,6 +437,17 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
             grid-template-columns: repeat(2, 1fr) !important; /* Always 2 products in a row on small phones */
             gap: 12px 8px !important;
           }
+          .filter-pill {
+            padding: 6px 12px !important;
+            font-size: 0.70rem !important;
+            letter-spacing: 0.05em !important;
+          }
+        }
+        @media (max-width: 360px) {
+          .filter-pill {
+            padding: 5px 9px !important;
+            font-size: 0.66rem !important;
+          }
         }
 
         .luxury-card:hover {

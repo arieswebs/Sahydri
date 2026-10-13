@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Trash2,
@@ -13,7 +13,8 @@ import {
   Check,
   Lock,
   Truck,
-  Loader
+  Loader,
+  Package
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { useShop } from '../context/ShopContext';
@@ -25,7 +26,8 @@ export default function CartDrawer({
   onUpdateQuantity,
   onRemoveItem,
   onCheckout,
-  onAddToCart
+  onAddToCart,
+  onRequireLogin
 }) {
   const { API, currentUser, showToast, authFetch, createOrder } = useShop();
   const [promoCode, setPromoCode] = useState('');
@@ -38,6 +40,11 @@ export default function CartDrawer({
   const [deliveryAddress, setDeliveryAddress] = useState(() => currentUser?.address || 'Wayanad High-Road, Kerala 673121');
   const [deliveryPhone, setDeliveryPhone] = useState(() => currentUser?.phone || '');
   const [showAddressEdit, setShowAddressEdit] = useState(false);
+
+  useEffect(() => {
+    if (currentUser?.address) setDeliveryAddress(currentUser.address);
+    if (currentUser?.phone) setDeliveryPhone(currentUser.phone);
+  }, [currentUser]);
 
   if (!isOpen) return null;
 
@@ -335,8 +342,8 @@ export default function CartDrawer({
           <button
             onClick={onClose}
             style={{
-              width: '34px',
-              height: '34px',
+              width: '38px',
+              height: '38px',
               borderRadius: '50%',
               background: '#ffffff',
               border: '1px solid rgba(14, 43, 33, 0.12)',
@@ -588,8 +595,8 @@ export default function CartDrawer({
                               background: 'none',
                               border: 'none',
                               color: '#0a221a',
-                              width: '26px',
-                              height: '26px',
+                              width: '32px',
+                              height: '32px',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
@@ -600,15 +607,15 @@ export default function CartDrawer({
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             aria-label="Decrease quantity"
                           >
-                            <Minus size={12} strokeWidth={2} />
+                            <Minus size={13} strokeWidth={2} />
                           </button>
                           <span
                             style={{
-                              fontSize: '0.84rem',
+                              fontSize: '0.85rem',
                               padding: '0 8px',
                               fontWeight: '700',
                               color: '#0a221a',
-                              minWidth: '22px',
+                              minWidth: '24px',
                               textAlign: 'center'
                             }}
                           >
@@ -620,8 +627,8 @@ export default function CartDrawer({
                               background: 'none',
                               border: 'none',
                               color: '#0a221a',
-                              width: '26px',
-                              height: '26px',
+                              width: '32px',
+                              height: '32px',
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
@@ -632,7 +639,7 @@ export default function CartDrawer({
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             aria-label="Increase quantity"
                           >
-                            <Plus size={12} strokeWidth={2} />
+                            <Plus size={13} strokeWidth={2} />
                           </button>
                         </div>
 
@@ -973,9 +980,58 @@ export default function CartDrawer({
               </button>
             </div>
 
+            {/* Guest notice */}
+            {!currentUser && (
+              <div style={{
+                background: '#faf8f4',
+                border: '1px solid #e2dad0',
+                borderRadius: '6px',
+                padding: '9px 12px',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px'
+              }}>
+                <span style={{ fontSize: '0.74rem', color: '#685e50' }}>
+                  Sign in to use saved addresses and track orders.
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    if (onRequireLogin) onRequireLogin('/checkout');
+                    else window.location.href = '/login?redirect=/checkout';
+                  }}
+                  style={{
+                    background: '#0a221a',
+                    color: '#dfbe84',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '5px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  Log In
+                </button>
+              </div>
+            )}
+
             {/* ── Main Action Button ── */}
             <button
-              onClick={paymentMethod === 'cod' ? handleCodCheckout : handleRazorpayCheckout}
+              onClick={() => {
+                if (!currentUser) {
+                  onClose();
+                  if (onRequireLogin) onRequireLogin('/checkout');
+                  else window.location.href = '/login?redirect=/checkout';
+                  return;
+                }
+                if (paymentMethod === 'cod') handleCodCheckout();
+                else handleRazorpayCheckout();
+              }}
               disabled={paymentLoading}
               style={{
                 width: '100%',
@@ -1004,6 +1060,12 @@ export default function CartDrawer({
                 <>
                   <Loader size={16} color="#dfbe84" style={{ animation: 'spin 1s linear infinite' }} />
                   <span>RECORDING ORDER IN DATABASE…</span>
+                </>
+              ) : !currentUser ? (
+                <>
+                  <Lock size={15} color="#dfbe84" />
+                  <span>SIGN IN TO CHECKOUT</span>
+                  <ArrowRight size={16} color="#dfbe84" />
                 </>
               ) : paymentMethod === 'cod' ? (
                 <>

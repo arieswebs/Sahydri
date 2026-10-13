@@ -372,11 +372,6 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
                             <div className="white-auth-field">
                                 <div className="white-auth-label-row">
                                     <label className="white-auth-label" htmlFor="white-password">Password</label>
-                                    {mode === 'login' && (
-                                        <span className="white-auth-helper-note">
-                                            Admin verifies with code
-                                        </span>
-                                    )}
                                 </div>
                                 <div className="white-auth-input-wrap">
                                     <Lock size={16} className="white-auth-icon" />

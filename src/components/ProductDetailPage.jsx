@@ -222,32 +222,6 @@ export default function ProductDetailPage({
               ))}
             </div>
 
-            {/* Quick Guarantees Box */}
-            <div className="gallery-guarantees-card">
-              <div className="guarantee-row">
-                <Truck size={17} color="#dfbe84" />
-                <div>
-                  <div className="g-title">Direct Dispatch</div>
-                  <div className="g-sub">Hand-packed at Wayanad Agro-Reserve • Dispatched within 24h</div>
-                </div>
-              </div>
-
-              <div className="guarantee-row">
-                <Award size={17} color="#dfbe84" />
-                <div>
-                  <div className="g-title">NABL NMR Certified Purity</div>
-                  <div className="g-sub">0.0% Chemical Pesticides across 220+ European lab screens</div>
-                </div>
-              </div>
-
-              <div className="guarantee-row">
-                <Leaf size={17} color="#dfbe84" />
-                <div>
-                  <div className="g-title">Fair Trade Certified</div>
-                  <div className="g-sub">Direct partnerships supporting native farming communities in Kerala</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right: Product Details & Purchase Form */}
@@ -361,6 +335,39 @@ export default function ProductDetailPage({
               <button onClick={handleBuyNow} className="pdp-buy-now-btn">
                 <span>Buy Now</span>
               </button>
+            </div>
+
+            {/* Quick Guarantees Box (Direct Dispatch, NMR Purity, Fair Trade) placed right after Buy Now */}
+            <div className="pdp-guarantees-card">
+              <div className="guarantee-row">
+                <div className="guarantee-icon-wrap">
+                  <Truck size={16} color="#dfbe84" />
+                </div>
+                <div>
+                  <div className="g-title">Direct Dispatch</div>
+                  <div className="g-sub">Hand-packed at Wayanad Agro-Reserve • Dispatched within 24h</div>
+                </div>
+              </div>
+
+              <div className="guarantee-row">
+                <div className="guarantee-icon-wrap">
+                  <Award size={16} color="#dfbe84" />
+                </div>
+                <div>
+                  <div className="g-title">NABL NMR Certified Purity</div>
+                  <div className="g-sub">0.0% Chemical Pesticides across 220+ European lab screens</div>
+                </div>
+              </div>
+
+              <div className="guarantee-row">
+                <div className="guarantee-icon-wrap">
+                  <Leaf size={16} color="#dfbe84" />
+                </div>
+                <div>
+                  <div className="g-title">Fair Trade Certified</div>
+                  <div className="g-sub">Direct partnerships supporting native farming communities in Kerala</div>
+                </div>
+              </div>
             </div>
 
             {/* 4 Core Terroir Specs Strip */}
@@ -807,15 +814,16 @@ export default function ProductDetailPage({
           object-fit: cover;
         }
 
-        .gallery-guarantees-card {
-          background-color: #ffffff;
-          border: 1px solid #e5dccb;
-          border-radius: 6px;
-          padding: 18px 20px;
-          margin-top: 24px;
+        .pdp-guarantees-card {
+          background-color: #fbf9f5;
+          border: 1px solid #ebd9b8;
+          border-radius: 8px;
+          padding: 16px 18px;
+          margin-bottom: 24px;
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 12px;
+          box-shadow: 0 4px 14px rgba(11, 37, 29, 0.04);
         }
 
         .guarantee-row {
@@ -824,16 +832,30 @@ export default function ProductDetailPage({
           align-items: flex-start;
         }
 
+        .guarantee-icon-wrap {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 1px solid rgba(223, 190, 132, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          box-shadow: 0 2px 6px rgba(11, 37, 29, 0.04);
+        }
+
         .g-title {
-          font-size: 0.8rem;
+          font-size: 0.82rem;
           font-weight: 700;
           color: #0c261e;
         }
 
         .g-sub {
-          font-size: 0.72rem;
+          font-size: 0.74rem;
           color: #6a6255;
           margin-top: 2px;
+          line-height: 1.4;
         }
 
         /* Right: Details */
@@ -1625,8 +1647,12 @@ export default function ProductDetailPage({
           .breadcrumb-inner {
             justify-content: space-between;
           }
+          .weights-buttons-row {
+            grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+            gap: 5px;
+          }
           .pdp-actions-container {
-            grid-template-columns: 100px 1fr;
+            grid-template-columns: 96px 1fr;
           }
           .quantity-controller {
             width: 100%;
@@ -1640,6 +1666,26 @@ export default function ProductDetailPage({
           .pdp-add-cart-btn {
             font-size: 0.76rem;
             padding: 0 8px;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .weights-buttons-row {
+            grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+          }
+          .pdp-actions-container {
+            grid-template-columns: 88px 1fr;
+          }
+          .qty-btn {
+            width: 28px;
+          }
+          .qty-value {
+            width: 22px;
+            font-size: 0.78rem;
+          }
+          .pdp-add-cart-btn {
+            font-size: 0.72rem;
+            padding: 0 6px;
           }
         }
       `}</style>

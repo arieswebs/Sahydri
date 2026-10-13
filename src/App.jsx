@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Leaf } from 'lucide-react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import Navbar from './components/Navbar';
@@ -16,11 +17,46 @@ import SearchModal from './components/SearchModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import ShopPage from './components/ShopPage';
-import AuthModal from './components/AuthModal';
-import CustomerDashboard from './components/CustomerDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import AccountPage from './pages/AccountPage';
+import { PRODUCTS } from './data/products';
 
-function AppInner() {
+/* ── Product Detail Route Wrapper ─────────────────────────────────────────── */
+function ProductDetailRoute({
+  onAddToCart,
+  onBuyNow,
+  wishlist,
+  onToggleWishlist,
+  onSelectProduct
+}) {
+  const { id } = useParams();
+  const { products } = useShop();
+  const navigate = useNavigate();
+
+  const matched = (products || []).find(p => p.id === id) || PRODUCTS.find(p => p.id === id);
+
+  if (!matched) {
+    return <Navigate to="/shop" replace />;
+  }
+
+  return (
+    <ProductDetailPage
+      product={matched}
+      onBack={() => navigate('/shop')}
+      onAddToCart={onAddToCart}
+      onBuyNow={onBuyNow}
+      wishlist={wishlist}
+      onToggleWishlist={onToggleWishlist}
+      onSelectProduct={onSelectProduct}
+    />
+  );
+}
+
+/* ── Main App Content ──────────────────────────────────────────────────────── */
+function AppContent() {
   const {
     cart, addToCart, updateQuantity, removeFromCart, clearCart,
     wishlist, toggleWishlist,
@@ -28,93 +64,53 @@ function AppInner() {
     toast, showToast
   } = useShop();
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [completedOrder, setCompletedOrder] = useState(null);
-  const [activeProduct, setActiveProduct] = useState(null);
-  const [isShopOpen, setIsShopOpen] = useState(false);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
-  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-  // Sync state with URL hash for deep linking
+  // If user navigates to /checkout, open the cart drawer ready to finalize
   useEffect(() => {
-    const handleHashChange = () => {
+    if (location.pathname === '/checkout') {
+      setIsCartOpen(true);
+    }
+  }, [location.pathname]);
+
+  // Handle URL hash backwards compatibility (e.g. #shop, #login, #account, #admin)
+  useEffect(() => {
+    const handleHash = () => {
       const hash = window.location.hash;
+      if (!hash) return;
+
       if (hash.startsWith('#product-')) {
-        const productId = hash.replace('#product-', '');
-        import('./data/products.js').then(m => {
-          const matched = m.PRODUCTS.find((p) => p.id === productId);
-          if (matched) {
-            setActiveProduct(matched);
-            setIsShopOpen(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        });
-        return;
+        const prodId = hash.replace('#product-', '');
+        navigate(`/product/${prodId}`, { replace: true });
+        window.location.hash = '';
+      } else if (hash === '#shop') {
+        navigate('/shop', { replace: true });
+        window.location.hash = '';
+      } else if (hash === '#login' || hash === '#signin') {
+        navigate('/login', { replace: true });
+        window.location.hash = '';
+      } else if (hash === '#signup' || hash === '#register') {
+        navigate('/register', { replace: true });
+        window.location.hash = '';
+      } else if (hash === '#account' || hash === '#dashboard' || hash === '#profile') {
+        navigate('/account', { replace: true });
+        window.location.hash = '';
+      } else if (hash === '#admin') {
+        navigate('/admin', { replace: true });
+        window.location.hash = '';
       }
-      if (hash === '#shop') {
-        setIsShopOpen(true);
-        setActiveProduct(null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-      if (hash === '#login' || hash === '#signin') {
-        setAuthMode('login');
-        setIsAuthOpen(true);
-        return;
-      }
-      if (hash === '#signup' || hash === '#register') {
-        setAuthMode('signup');
-        setIsAuthOpen(true);
-        return;
-      }
-      if (hash === '#admin' && currentUser?.role === 'admin') {
-        setIsAdminOpen(true);
-        return;
-      }
-      if (hash === '#account' || hash === '#dashboard' || hash === '#profile') {
-        if (currentUser) {
-          setIsDashboardOpen(true);
-          return;
-        }
-      }
-      setActiveProduct(null);
-      setIsShopOpen(false);
     };
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [currentUser]);
 
-  const handleViewProduct = (product) => {
-    setActiveProduct(product);
-    setIsShopOpen(false);
-    window.location.hash = `product-${product.id}`;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToHome = () => {
-    setActiveProduct(null);
-    setIsShopOpen(false);
-    window.location.hash = '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleGoShop = () => {
-    setActiveProduct(null);
-    setIsShopOpen(true);
-    window.location.hash = 'shop';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackFromShop = () => {
-    setIsShopOpen(false);
-    window.location.hash = '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [navigate]);
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -132,22 +128,47 @@ function AppInner() {
     setIsCartOpen(false);
   };
 
+  const handleViewProduct = (product) => {
+    navigate(`/product/${product.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const scrollToSection = (id) => {
-    if (activeProduct || isShopOpen) {
-      setActiveProduct(null);
-      setIsShopOpen(false);
-      window.location.hash = '';
-      setTimeout(() => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100);
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
     } else {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const openAuth = (mode = 'login') => {
-    setAuthMode(mode);
-    setIsAuthOpen(true);
+  const handleAccountSection = (section) => {
+    const tabMap = {
+      overview: 'overview',
+      orders: 'orders',
+      addresses: 'addresses',
+      settings: 'settings',
+      wishlist: 'wishlist'
+    };
+    const tab = tabMap[section] || 'overview';
+    navigate(`/account?tab=${tab}`);
   };
+
+  // Determine active page identifier for navbar styling
+  const getActivePageName = () => {
+    if (location.pathname === '/') return 'home';
+    if (location.pathname === '/shop') return 'shop';
+    if (location.pathname.startsWith('/product/')) return 'product';
+    if (location.pathname === '/account') return 'account';
+    return '';
+  };
+
+  const isSolidNavbar = location.pathname !== '/';
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="app-wrapper">
@@ -157,7 +178,7 @@ function AppInner() {
           position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
           backgroundColor: '#0c261e', border: '1px solid #d4af37', color: '#f5e4c3',
           padding: '10px 22px', borderRadius: '30px', fontSize: '0.85rem', fontWeight: '600',
-          zIndex: 999, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+          zIndex: 9999, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeIn 0.3s ease'
         }}>
           <Leaf size={14} color="#dfbe84" strokeWidth={1.8} />
@@ -165,58 +186,7 @@ function AppInner() {
         </div>
       )}
 
-      {/* Sticky Brand Navbar */}
-      <Navbar
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        wishlistCount={wishlist.length}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenSearch={() => setIsSearchOpen(true)}
-        onGoHome={handleBackToHome}
-        onGoShop={handleGoShop}
-        solidBackground={!!(activeProduct || isShopOpen)}
-        activePage={activeProduct ? 'product' : isShopOpen ? 'shop' : 'home'}
-        currentUser={currentUser}
-        onOpenAuth={(mode) => openAuth(mode || 'login')}
-        onOpenDashboard={() => currentUser?.role === 'admin' ? setIsAdminOpen(true) : setIsDashboardOpen(true)}
-        onScrollToSection={scrollToSection}
-      />
-
-      {/* Conditional Rendering: Product Detail | Shop Page | Main Storefront */}
-      {activeProduct ? (
-        <ProductDetailPage
-          product={activeProduct}
-          onBack={isShopOpen ? (() => { setActiveProduct(null); setIsShopOpen(true); window.location.hash = 'shop'; }) : handleBackToHome}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-          wishlist={wishlist}
-          onToggleWishlist={toggleWishlist}
-          onSelectProduct={handleViewProduct}
-        />
-      ) : isShopOpen ? (
-        <ShopPage
-          onViewProduct={handleViewProduct}
-          onAddToCart={handleAddToCart}
-          onBuyNow={handleBuyNow}
-        />
-      ) : (
-        <>
-          <Hero
-            onExploreClick={handleGoShop}
-            onStoryClick={() => scrollToSection('story')}
-            onAddToCart={handleAddToCart}
-            onQuickView={(p) => handleViewProduct(p)}
-          />
-          <ShopTeaser onGoShop={handleGoShop} onAddToCart={handleAddToCart} />
-          <CulturalHeritage />
-          <WhySahyadri />
-          <CulinaryGallery />
-          <Testimonials />
-          <ConnoisseursClub onJoinClick={() => openAuth('signup')} />
-          <Footer />
-        </>
-      )}
-
-      {/* ── Modals & Drawers ── */}
+      {/* Global Modals & Drawers */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -225,57 +195,196 @@ function AppInner() {
         onRemoveItem={removeFromCart}
         onCheckout={handleCheckout}
         onAddToCart={handleAddToCart}
+        onRequireLogin={(redirectDest) => {
+          setIsCartOpen(false);
+          navigate(`/login?redirect=${encodeURIComponent(redirectDest || '/checkout')}`);
+        }}
       />
+
       <ProductQuickView
         product={quickViewProduct}
         onClose={() => setQuickViewProduct(null)}
         onAddToCart={handleAddToCart}
         onViewProduct={handleViewProduct}
       />
+
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onSelectProduct={handleViewProduct}
       />
+
       <OrderSuccessModal
         orderData={completedOrder}
         onClose={() => setCompletedOrder(null)}
       />
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => {
-          setIsAuthOpen(false);
-          if (window.location.hash === '#login' || window.location.hash === '#signup' || window.location.hash === '#signin' || window.location.hash === '#register') {
-            window.location.hash = '';
+
+      {/* ── Routes ── */}
+      <Routes>
+        {/* 1. Main Storefront Homepage */}
+        <Route
+          path="/"
+          element={
+            <>
+              <Navbar
+                cartCount={cartItemCount}
+                wishlistCount={wishlist.length}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onGoHome={() => navigate('/')}
+                onGoShop={() => navigate('/shop')}
+                solidBackground={false}
+                activePage="home"
+                currentUser={currentUser}
+                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
+                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
+                onOpenAccountSection={handleAccountSection}
+                onScrollToSection={scrollToSection}
+              />
+              <Hero
+                onExploreClick={() => navigate('/shop')}
+                onStoryClick={() => scrollToSection('story')}
+                onAddToCart={handleAddToCart}
+                onQuickView={(p) => handleViewProduct(p)}
+              />
+              <ShopTeaser
+                onGoShop={() => navigate('/shop')}
+                onAddToCart={handleAddToCart}
+              />
+              <CulturalHeritage />
+              <WhySahyadri />
+              <CulinaryGallery />
+              <Testimonials />
+              <ConnoisseursClub onJoinClick={() => navigate('/register')} />
+              <Footer />
+            </>
           }
-        }}
-        onAdminSuccess={() => {
-          setIsAuthOpen(false);
-          setIsAdminOpen(true);
-          window.location.hash = 'admin';
-        }}
-        onUserSuccess={() => {
-          setIsAuthOpen(false);
-          setIsDashboardOpen(true);
-          window.location.hash = 'account';
-        }}
-        initialMode={authMode}
-      />
-      {isDashboardOpen && currentUser && (
-        <CustomerDashboard
-          onClose={() => {
-            setIsDashboardOpen(false);
-            if (window.location.hash === '#account' || window.location.hash === '#dashboard' || window.location.hash === '#profile') {
-              window.location.hash = '';
-            }
-          }}
-          onViewProduct={handleViewProduct}
-          onGoShop={handleGoShop}
         />
-      )}
-      {isAdminOpen && currentUser?.role === 'admin' && (
-        <AdminDashboard onClose={() => { setIsAdminOpen(false); window.location.hash = ''; }} />
-      )}
+
+        {/* 2. Catalogue Shop Page */}
+        <Route
+          path="/shop"
+          element={
+            <>
+              <Navbar
+                cartCount={cartItemCount}
+                wishlistCount={wishlist.length}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onGoHome={() => navigate('/')}
+                onGoShop={() => navigate('/shop')}
+                solidBackground={true}
+                activePage="shop"
+                currentUser={currentUser}
+                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
+                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
+                onOpenAccountSection={handleAccountSection}
+                onScrollToSection={scrollToSection}
+              />
+              <ShopPage
+                onViewProduct={handleViewProduct}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+              />
+              <Footer />
+            </>
+          }
+        />
+
+        {/* 3. Product Detail Page */}
+        <Route
+          path="/product/:id"
+          element={
+            <>
+              <Navbar
+                cartCount={cartItemCount}
+                wishlistCount={wishlist.length}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onGoHome={() => navigate('/')}
+                onGoShop={() => navigate('/shop')}
+                solidBackground={true}
+                activePage="product"
+                currentUser={currentUser}
+                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
+                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
+                onOpenAccountSection={handleAccountSection}
+                onScrollToSection={scrollToSection}
+              />
+              <ProductDetailRoute
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+                wishlist={wishlist}
+                onToggleWishlist={toggleWishlist}
+                onSelectProduct={handleViewProduct}
+                onBack={() => navigate('/shop')}
+              />
+            </>
+          }
+        />
+
+        {/* 4. Dedicated Authentication Pages */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* 5. Dedicated Customer Account Area */}
+        <Route
+          path="/account"
+          element={
+            <AccountPage
+              onOpenCart={() => setIsCartOpen(true)}
+              onOpenSearch={() => setIsSearchOpen(true)}
+              onViewProduct={handleViewProduct}
+            />
+          }
+        />
+
+        {/* 6. Checkout Route (Opens Cart Drawer) */}
+        <Route
+          path="/checkout"
+          element={
+            <>
+              <Navbar
+                cartCount={cartItemCount}
+                wishlistCount={wishlist.length}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onGoHome={() => navigate('/')}
+                onGoShop={() => navigate('/shop')}
+                solidBackground={true}
+                activePage="shop"
+                currentUser={currentUser}
+                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
+                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
+                onOpenAccountSection={handleAccountSection}
+                onScrollToSection={scrollToSection}
+              />
+              <ShopPage
+                onViewProduct={handleViewProduct}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+              />
+              <Footer />
+            </>
+          }
+        />
+
+        {/* 7. Dedicated Admin Dashboard (Protected Route) */}
+        <Route
+          path="/admin"
+          element={
+            currentUser?.role === 'admin' ? (
+              <AdminDashboard onClose={() => navigate('/')} />
+            ) : (
+              <Navigate to="/login?redirect=/admin" replace />
+            )
+          }
+        />
+
+        {/* 8. Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }
@@ -283,7 +392,9 @@ function AppInner() {
 export default function App() {
   return (
     <ShopProvider>
-      <AppInner />
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </ShopProvider>
   );
 }

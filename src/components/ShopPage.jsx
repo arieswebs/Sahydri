@@ -499,15 +499,17 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                         {productsLoading ? (
                             <div className="shop-grid">
                                 {[...Array(6)].map((_, i) => (
-                                    <div key={i} style={{ background: '#fff', borderRadius: '8px', height: '280px', animation: 'shimmer 1.5s infinite' }} />
+                                    <div key={i} className="skeleton" style={{ height: '320px', borderRadius: 'var(--radius-md)' }} />
                                 ))}
                             </div>
                         ) : filtered.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '80px 20px', color: '#7a7266' }}>
-                                <Package size={48} color="#d3cdc4" style={{ marginBottom: '16px' }} />
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#4a4439', marginBottom: '8px' }}>No products found</h3>
-                                <p style={{ fontSize: '0.88rem', marginBottom: '16px' }}>Try adjusting your filters or search term.</p>
-                                <button onClick={() => { setCategory('all'); setPriceRange('all'); setSearch(''); }} style={{ padding: '10px 24px', background: '#0b251d', color: '#f5e7c8', border: 'none', borderRadius: '6px', fontWeight: 700, cursor: 'pointer' }}>
+                            <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--color-earth-600)' }}>
+                                <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(14,43,33,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                                    <Package size={30} color="var(--color-forest-800)" />
+                                </div>
+                                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-forest-900)', fontFamily: 'var(--font-serif)', marginBottom: '8px' }}>No Harvest Matches</h3>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--color-earth-600)', marginBottom: '20px', maxWidth: '380px', margin: '0 auto 20px' }}>We couldn't find any spices or honey matching your criteria. Try adjusting your search term or clearing filters.</p>
+                                <button onClick={() => { setCategory('all'); setPriceRange('all'); setSearch(''); }} className="btn-forest">
                                     Clear Filters
                                 </button>
                             </div>
@@ -1279,35 +1281,31 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
         }
         @media (max-width: 360px) {
           .shop-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 8px 6px !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 8px;
           }
           .shop-categories-inner {
-            gap: 5px;
+            gap: 6px;
           }
           .shop-cat-pill {
-            padding: 5px 9px;
-            font-size: 0.70rem;
-            border-radius: 14px;
+            padding: 6px 10px;
+            font-size: 0.72rem;
+            border-radius: var(--radius-full);
           }
           .shop-product-info {
-            padding: 6px 6px 8px;
+            padding: 8px 8px 10px;
           }
           .shop-product-name {
-            font-size: 0.74rem;
+            font-size: 0.8rem;
           }
           .shop-product-price {
-            font-size: 0.82rem;
+            font-size: 0.9rem;
           }
           .shop-product-add-btn {
-            padding: 4px 6px;
-            font-size: 0.62rem;
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            min-height: 32px;
           }
-        }
-        @keyframes shimmer {
-          0%   { background: #f5f1ea; }
-          50%  { background: #ede9e0; }
-          100% { background: #f5f1ea; }
         }
       `}</style>
         </div>

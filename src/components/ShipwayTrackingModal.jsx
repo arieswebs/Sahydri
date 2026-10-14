@@ -117,9 +117,9 @@ export default function ShipwayTrackingModal({ isOpen, onClose, initialOrderId =
         .shipway-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(3, 14, 11, 0.82);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          background: rgba(6, 22, 17, 0.75);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           z-index: 10000;
           display: flex;
           align-items: center;
@@ -130,13 +130,13 @@ export default function ShipwayTrackingModal({ isOpen, onClose, initialOrderId =
         .shipway-modal-card {
           width: 100%;
           max-width: 580px;
-          background: linear-gradient(170deg, #09241b 0%, #051812 100%);
+          background: linear-gradient(170deg, var(--color-forest-900) 0%, var(--color-forest-950) 100%);
           border: 1px solid rgba(223, 190, 132, 0.35);
-          border-radius: 12px;
+          border-radius: var(--radius-lg);
           padding: 24px;
           color: #ffffff;
-          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 24px rgba(223, 190, 132, 0.12);
-          animation: shipwayFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: var(--shadow-dropdown);
+          animation: shipwayFadeIn 0.22s var(--ease-spring);
         }
 
         @keyframes shipwayFadeIn {

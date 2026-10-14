@@ -264,13 +264,16 @@ export default function CartDrawer({
           width: '100%',
           maxWidth: '480px',
           height: '100%',
+          maxHeight: '100vh',
           backgroundColor: '#faf8f4',
           color: '#0a221a',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '-16px 0 48px rgba(11, 37, 29, 0.18)',
           borderLeft: '1px solid rgba(14, 43, 33, 0.1)',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'hidden',
+          animation: 'slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -279,6 +282,7 @@ export default function CartDrawer({
           style={{
             height: '3px',
             width: '100%',
+            flexShrink: 0,
             background: 'linear-gradient(90deg, #9e8550 0%, #dfbe84 50%, #9e8550 100%)'
           }}
         />
@@ -286,7 +290,8 @@ export default function CartDrawer({
         {/* 1. Header (Warm Luxury Light) */}
         <div
           style={{
-            padding: '20px 24px',
+            padding: '18px 24px',
+            flexShrink: 0,
             borderBottom: '1px solid rgba(14, 43, 33, 0.08)',
             display: 'flex',
             alignItems: 'center',
@@ -376,6 +381,7 @@ export default function CartDrawer({
         <div
           style={{
             padding: '12px 24px',
+            flexShrink: 0,
             backgroundColor: freeShippingLeft === 0 ? '#eaf5ee' : '#eee8db',
             borderBottom: '1px solid rgba(14, 43, 33, 0.08)'
           }}
@@ -426,15 +432,18 @@ export default function CartDrawer({
           </div>
         </div>
 
-        {/* 3. Items List Area */}
+        {/* 3. Scrollable Cart Body (Products, Recommendations, Delivery, Coupons, Address) */}
         <div
+          className="cart-scrollable-body"
           style={{
-            flexGrow: 1,
+            flex: '1 1 0%',
+            minHeight: 0,
             overflowY: 'auto',
-            padding: '20px 24px',
+            padding: '18px 20px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '14px'
+            gap: '16px',
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           {cartItems.length === 0 ? (
@@ -498,12 +507,13 @@ export default function CartDrawer({
             </div>
           ) : (
             <>
-              {/* Product Cards */}
+              {/* Product Cards List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {cartItems.map((item) => (
                   <div
                     key={`${item.id}-${item.weight}`}
                     style={{
+                      flexShrink: 0,
                       display: 'flex',
                       gap: '14px',
                       backgroundColor: '#ffffff',
@@ -511,7 +521,7 @@ export default function CartDrawer({
                       borderRadius: '8px',
                       padding: '14px',
                       position: 'relative',
-                      boxShadow: '0 4px 14px rgba(11, 37, 29, 0.05)'
+                      boxShadow: '0 2px 8px rgba(11, 37, 29, 0.04)'
                     }}
                   >
                     {/* Thumbnail */}
@@ -665,11 +675,12 @@ export default function CartDrawer({
                 ))}
               </div>
 
-              {/* 4. Curator's Companion Add-On (Fills empty space with luxury curation) */}
+              {/* 4. Curator's Companion Add-On */}
               {recommendedCompanions.length > 0 && (
                 <div
                   style={{
-                    marginTop: '6px',
+                    flexShrink: 0,
+                    marginTop: '2px',
                     padding: '14px',
                     borderRadius: '8px',
                     backgroundColor: '#f3efe6',
@@ -771,198 +782,239 @@ export default function CartDrawer({
                   </div>
                 </div>
               )}
+
+              {/* 5. Delivery & Pincode Estimator (Scrolls with content) */}
+              <div style={{ flexShrink: 0 }}>
+                <DeliveryEstimator compact={true} theme="light" />
+              </div>
+
+              {/* 6. Promo Code Input & 1-Click Code (Scrolls with content) */}
+              <div
+                style={{
+                  flexShrink: 0,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2dad0',
+                  borderRadius: '8px',
+                  padding: '12px 14px'
+                }}
+              >
+                <div style={{ fontSize: '0.74rem', fontWeight: '700', color: '#0a221a', marginBottom: '8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  Offers &amp; Coupon Codes
+                </div>
+                <form onSubmit={(e) => { e.preventDefault(); handleApplyPromo(); }} style={{ display: 'flex', gap: '8px' }}>
+                  <div style={{ position: 'relative', flexGrow: 1 }}>
+                    <Tag size={14} color="#8c733b" style={{ position: 'absolute', top: '11px', left: '12px' }} />
+                    <input
+                      type="text"
+                      placeholder="Coupon code (SAHYDRI10)"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#faf8f4',
+                        border: '1px solid #d4cbb8',
+                        borderRadius: '4px',
+                        padding: '9px 12px 9px 34px',
+                        color: '#0a221a',
+                        fontSize: '0.8rem',
+                        outline: 'none',
+                        fontFamily: 'var(--font-sans)',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    style={{
+                      backgroundColor: '#0a221a',
+                      border: '1px solid #0a221a',
+                      color: '#f5e4be',
+                      borderRadius: '4px',
+                      padding: '9px 16px',
+                      fontSize: '0.78rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.2s ease',
+                      flexShrink: 0
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#174235')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0a221a')}
+                  >
+                    Apply
+                  </button>
+                </form>
+
+                {!promoApplied && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#706859' }}>Special Code:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyPromo('SAHYDRI10')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#8c733b',
+                        fontSize: '0.72rem',
+                        fontWeight: '700',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
+                    >
+                      Tap to apply SAHYDRI10 (10% OFF)
+                    </button>
+                  </div>
+                )}
+
+                {promoApplied && (
+                  <div style={{ fontSize: '0.74rem', color: '#17653d', marginTop: '8px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Check size={12} strokeWidth={2.5} />
+                    <span>10% Estate Connoisseur Discount Applied!</span>
+                  </div>
+                )}
+                {promoError && (
+                  <div style={{ fontSize: '0.74rem', color: '#b91c1c', marginTop: '8px' }}>
+                    {promoError}
+                  </div>
+                )}
+              </div>
+
+              {/* 7. Delivery Destination Address (Scrolls with content) */}
+              <div style={{ flexShrink: 0, background: '#ffffff', border: '1px solid #e2dad0', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showAddressEdit ? '8px' : '0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#0b251d', fontWeight: 600 }}>
+                    <MapPin size={14} color="#8c733b" />
+                    <span>Ship to: {deliveryAddress ? (deliveryAddress.length > 28 ? deliveryAddress.slice(0, 28) + '…' : deliveryAddress) : 'Set Address'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddressEdit(s => !s)}
+                    style={{ background: 'none', border: 'none', color: '#8c733b', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {showAddressEdit ? 'Save' : 'Change'}
+                  </button>
+                </div>
+                {showAddressEdit && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                    <input
+                      placeholder="Delivery Street Address & PIN"
+                      value={deliveryAddress}
+                      onChange={e => setDeliveryAddress(e.target.value)}
+                      style={{ width: '100%', padding: '7px 9px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
+                    />
+                    <input
+                      placeholder="Phone number for dispatch SMS"
+                      value={deliveryPhone}
+                      onChange={e => setDeliveryPhone(e.target.value)}
+                      style={{ width: '100%', padding: '7px 9px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 8. Guest notice */}
+              {!currentUser && (
+                <div style={{
+                  flexShrink: 0,
+                  background: '#f8f4ec',
+                  border: '1px solid #e2dad0',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '0.74rem', color: '#685e50' }}>
+                    Sign in to use saved addresses and track orders.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      if (onRequireLogin) onRequireLogin('/checkout');
+                      else window.location.href = '/login?redirect=/checkout';
+                    }}
+                    style={{
+                      background: '#0a221a',
+                      color: '#dfbe84',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '5px 10px',
+                      fontSize: '0.72rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Log In
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
 
-        {/* 5. Footer & Checkout Breakdown (Clean Light Luxury) */}
+        {/* 9. Fixed Docked Footer & Checkout CTA (Always Visible & Never Hidden) */}
         {cartItems.length > 0 && (
           <div
             style={{
+              flexShrink: 0,
               padding: '16px 20px',
-              borderTop: '1px solid rgba(14, 43, 33, 0.08)',
-              backgroundColor: '#f5f0e6'
+              borderTop: '1px solid rgba(14, 43, 33, 0.1)',
+              backgroundColor: '#f5f0e6',
+              boxShadow: '0 -6px 24px rgba(10, 34, 26, 0.08)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
             }}
           >
-            {/* Pincode & Delivery Date Estimator */}
-            <DeliveryEstimator compact={true} theme="light" />
-
-            {/* Promo Code Input */}
-            <div style={{ marginBottom: '14px' }}>
-              <form onSubmit={(e) => { e.preventDefault(); handleApplyPromo(); }} style={{ display: 'flex', gap: '8px' }}>
-                <div style={{ position: 'relative', flexGrow: 1 }}>
-                  <Tag size={14} color="#8c733b" style={{ position: 'absolute', top: '12px', left: '12px' }} />
-                  <input
-                    type="text"
-                    placeholder="Coupon code (SAHYDRI10)"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    style={{
-                      width: '100%',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #d4cbb8',
-                      borderRadius: '4px',
-                      padding: '10px 12px 10px 34px',
-                      color: '#0a221a',
-                      fontSize: '0.8rem',
-                      outline: 'none',
-                      fontFamily: 'var(--font-sans)'
-                    }}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  style={{
-                    backgroundColor: '#0a221a',
-                    border: '1px solid #0a221a',
-                    color: '#f5e4be',
-                    borderRadius: '4px',
-                    padding: '10px 18px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#174235')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0a221a')}
-                >
-                  Apply
-                </button>
-              </form>
-
-              {!promoApplied && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-                  <span style={{ fontSize: '0.7rem', color: '#706859' }}>Special Code:</span>
-                  <button
-                    onClick={() => handleApplyPromo('SAHYDRI10')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#8c733b',
-                      fontSize: '0.72rem',
-                      fontWeight: '700',
-                      textDecoration: 'underline',
-                      cursor: 'pointer',
-                      padding: 0
-                    }}
-                  >
-                    Tap to apply SAHYDRI10 (10% OFF)
-                  </button>
-                </div>
-              )}
-
-              {promoApplied && (
-                <div style={{ fontSize: '0.74rem', color: '#17653d', marginTop: '6px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Check size={12} strokeWidth={2.5} />
-                  <span>10% Estate Connoisseur Discount Applied!</span>
-                </div>
-              )}
-              {promoError && (
-                <div style={{ fontSize: '0.74rem', color: '#b91c1c', marginTop: '6px' }}>
-                  {promoError}
-                </div>
-              )}
-            </div>
-
             {/* Price Calculations Breakdown */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                fontSize: '0.86rem',
-                color: '#554f43',
-                marginBottom: '16px',
-                paddingTop: '10px',
-                borderTop: '1px solid rgba(14, 43, 33, 0.08)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Subtotal</span>
-                <span style={{ fontWeight: '600', color: '#0a221a' }}>₹{subtotal}</span>
-              </div>
-              {discountAmount > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#17653d' }}>
-                  <span>Discount (10%)</span>
-                  <span style={{ fontWeight: '600' }}>-₹{discountAmount}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '1.05rem', fontWeight: '800', letterSpacing: '0.01em', color: '#0a221a' }}>Grand Total</span>
+                  {discountAmount > 0 && (
+                    <span style={{ fontSize: '0.68rem', color: '#17653d', fontWeight: '700', backgroundColor: '#eaf5ee', padding: '2px 6px', borderRadius: '4px' }}>
+                      -₹{discountAmount} (10% OFF)
+                    </span>
+                  )}
                 </div>
-              )}
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Express Delivery</span>
-                <span style={{ fontWeight: '600', color: shippingFee === 0 ? '#17653d' : '#0a221a' }}>
-                  {shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  paddingTop: '12px',
-                  borderTop: '1px solid rgba(14, 43, 33, 0.12)',
-                  fontWeight: '700',
-                  color: '#0a221a'
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '1.05rem', letterSpacing: '0.02em' }}>Grand Total</div>
-                  <div style={{ fontSize: '0.68rem', color: '#7a7265', fontWeight: '400' }}>Inclusive of GST & All Estate Taxes</div>
+                <div style={{ fontSize: '0.74rem', color: '#706859', marginTop: '2px' }}>
+                  Subtotal: <strong>₹{subtotal}</strong> • Delivery: <strong style={{ color: shippingFee === 0 ? '#17653d' : '#0a221a' }}>{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</strong>
                 </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
                 <span
                   style={{
                     fontFamily: 'var(--font-sans)',
                     fontSize: '1.5rem',
+                    fontWeight: '800',
                     color: '#0a221a',
-                    letterSpacing: '-0.02em'
+                    letterSpacing: '-0.02em',
+                    lineHeight: '1'
                   }}
                 >
                   ₹{grandTotal}
                 </span>
+                <div style={{ fontSize: '0.64rem', color: '#7a7265', marginTop: '2px' }}>Inclusive of all taxes</div>
               </div>
-            </div>
-
-            {/* Delivery Destination Address */}
-            <div style={{ background: '#ffffff', border: '1px solid #d4cbb8', borderRadius: '6px', padding: '10px 12px', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showAddressEdit ? '8px' : '0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.76rem', color: '#0b251d', fontWeight: 600 }}>
-                  <MapPin size={13} color="#8c733b" />
-                  <span>Ship to: {deliveryAddress ? (deliveryAddress.length > 28 ? deliveryAddress.slice(0, 28) + '…' : deliveryAddress) : 'Set Address'}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAddressEdit(s => !s)}
-                  style={{ background: 'none', border: 'none', color: '#8c733b', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                  {showAddressEdit ? 'Save' : 'Change'}
-                </button>
-              </div>
-              {showAddressEdit && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
-                  <input
-                    placeholder="Delivery Street Address & PIN"
-                    value={deliveryAddress}
-                    onChange={e => setDeliveryAddress(e.target.value)}
-                    style={{ width: '100%', padding: '6px 8px', fontSize: '0.78rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
-                  />
-                  <input
-                    placeholder="Phone number for dispatch SMS"
-                    value={deliveryPhone}
-                    onChange={e => setDeliveryPhone(e.target.value)}
-                    style={{ width: '100%', padding: '6px 8px', fontSize: '0.78rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
-                  />
-                </div>
-              )}
             </div>
 
             {/* Payment Method Selector Pills */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => setPaymentMethod('razorpay')}
                 style={{
-                  flex: 1, padding: '8px 10px', fontSize: '0.76rem', fontWeight: 700, borderRadius: '4px', cursor: 'pointer',
+                  flex: 1,
+                  padding: '7px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
                   border: paymentMethod === 'razorpay' ? '1.5px solid #0b251d' : '1px solid #d4cbb8',
                   background: paymentMethod === 'razorpay' ? '#0b251d' : '#ffffff',
                   color: paymentMethod === 'razorpay' ? '#f5e4be' : '#4a4439',
@@ -975,7 +1027,12 @@ export default function CartDrawer({
                 type="button"
                 onClick={() => setPaymentMethod('cod')}
                 style={{
-                  flex: 1, padding: '8px 10px', fontSize: '0.76rem', fontWeight: 700, borderRadius: '4px', cursor: 'pointer',
+                  flex: 1,
+                  padding: '7px 10px',
+                  fontSize: '0.76rem',
+                  fontWeight: 700,
+                  borderRadius: '4px',
+                  cursor: 'pointer',
                   border: paymentMethod === 'cod' ? '1.5px solid #0b251d' : '1px solid #d4cbb8',
                   background: paymentMethod === 'cod' ? '#0b251d' : '#ffffff',
                   color: paymentMethod === 'cod' ? '#f5e4be' : '#4a4439',
@@ -986,46 +1043,6 @@ export default function CartDrawer({
               </button>
             </div>
 
-            {/* Guest notice */}
-            {!currentUser && (
-              <div style={{
-                background: '#faf8f4',
-                border: '1px solid #e2dad0',
-                borderRadius: '6px',
-                padding: '9px 12px',
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '8px'
-              }}>
-                <span style={{ fontSize: '0.74rem', color: '#685e50' }}>
-                  Sign in to use saved addresses and track orders.
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    if (onRequireLogin) onRequireLogin('/checkout');
-                    else window.location.href = '/login?redirect=/checkout';
-                  }}
-                  style={{
-                    background: '#0a221a',
-                    color: '#dfbe84',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 10px',
-                    fontSize: '0.72rem',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  Log In
-                </button>
-              </div>
-            )}
-
             {/* ── Main Action Button: Proceed to Dedicated Checkout Page ── */}
             <button
               onClick={() => {
@@ -1035,7 +1052,7 @@ export default function CartDrawer({
               }}
               style={{
                 width: '100%',
-                padding: '15px',
+                padding: '14px',
                 fontSize: '0.88rem',
                 background: 'linear-gradient(135deg, #0b251d 0%, #16402e 100%)',
                 color: '#f5e4be',
@@ -1049,7 +1066,7 @@ export default function CartDrawer({
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                boxShadow: '0 8px 24px rgba(10, 34, 26, 0.25)',
+                boxShadow: '0 4px 16px rgba(10, 34, 26, 0.25)',
                 transition: 'all 0.25s ease',
               }}
             >
@@ -1058,20 +1075,13 @@ export default function CartDrawer({
               <ArrowRight size={16} color="#dfbe84" />
             </button>
 
-            {/* Razorpay badge */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
-              <span style={{ fontSize: '0.66rem', color: '#9e8550', letterSpacing: '0.04em' }}>Supported:</span>
-              <span style={{ fontSize: '0.7rem', fontWeight: '700', color: '#3395FF' }}>UPI · Cards · NetBanking · COD</span>
-            </div>
-
-            {/* Luxury Trust Badges Line */}
+            {/* Razorpay & Trust badge */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginTop: '14px',
-                paddingTop: '10px',
+                paddingTop: '6px',
                 borderTop: '1px solid rgba(14, 43, 33, 0.06)',
                 fontSize: '0.68rem',
                 color: '#706859'
@@ -1083,11 +1093,11 @@ export default function CartDrawer({
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Leaf size={13} color="#8c733b" />
-                <span>NABL Lab Tested</span>
+                <span>100% Authentic</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Sparkles size={13} color="#8c733b" />
-                <span>Fast Secure Dispatch</span>
+                <span style={{ color: '#2563eb', fontWeight: 600 }}>UPI · Card · COD</span>
               </div>
             </div>
           </div>

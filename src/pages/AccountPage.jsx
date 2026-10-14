@@ -80,7 +80,7 @@ export default function AccountPage({ onOpenCart, onOpenSearch, onViewProduct })
         .account-page-root {
           min-height: 100vh;
           min-height: 100dvh;
-          background: #faf8f5;
+          background: var(--surface-ground);
           display: flex;
           flex-direction: column;
         }

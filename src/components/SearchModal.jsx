@@ -21,28 +21,30 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct }) {
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 18, 14, 0.8)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(6, 22, 17, 0.72)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         zIndex: 115,
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
         paddingTop: '80px',
         paddingLeft: '20px',
-        paddingRight: '20px'
+        paddingRight: '20px',
+        animation: 'fadeIn 0.2s var(--ease-spring)'
       }}
       onClick={onClose}
     >
       <div
         style={{
-          backgroundColor: '#0c261e',
+          backgroundColor: 'var(--color-forest-900)',
           color: '#ffffff',
-          border: '1px solid rgba(212, 175, 55, 0.4)',
-          borderRadius: '10px',
+          border: '1px solid rgba(223, 190, 132, 0.35)',
+          borderRadius: 'var(--radius-lg)',
           maxWidth: '620px',
           width: '100%',
           overflow: 'hidden',
-          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
+          boxShadow: 'var(--shadow-dropdown)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -53,8 +55,8 @@ export default function SearchModal({ isOpen, onClose, onSelectProduct }) {
             alignItems: 'center',
             gap: '12px',
             padding: '16px 20px',
-            borderBottom: '1px solid rgba(212, 175, 55, 0.25)',
-            backgroundColor: '#071b14'
+            borderBottom: '1px solid rgba(223, 190, 132, 0.2)',
+            backgroundColor: 'var(--color-forest-950)'
           }}
         >
           <Search size={20} color="#e5c98d" />

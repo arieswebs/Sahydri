@@ -35,26 +35,28 @@ export default function ProductQuickView({ product, onClose, onAddToCart, onView
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 18, 14, 0.75)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: 'rgba(6, 22, 17, 0.72)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         zIndex: 110,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px'
+        padding: '20px',
+        animation: 'fadeIn 0.2s var(--ease-spring)'
       }}
       onClick={onClose}
     >
       <div
         style={{
-          backgroundColor: '#0c261e',
+          backgroundColor: 'var(--color-forest-900)',
           color: '#ffffff',
-          border: '1px solid rgba(212, 175, 55, 0.4)',
-          borderRadius: '10px',
+          border: '1px solid rgba(223, 190, 132, 0.35)',
+          borderRadius: 'var(--radius-lg)',
           maxWidth: '820px',
           width: '100%',
           overflow: 'hidden',
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6)',
+          boxShadow: 'var(--shadow-dropdown)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           position: 'relative'

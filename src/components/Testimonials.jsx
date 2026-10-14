@@ -145,8 +145,8 @@ export default function Testimonials() {
 
       <style>{`
         .testimonials-section {
-          padding: clamp(48px, 6vw, 90px) 0;
-          background-color: #faf8f2;
+          padding: clamp(60px, 6vw, 90px) 0;
+          background-color: var(--surface-ground);
           overflow: hidden;
           width: 100%;
         }
@@ -176,21 +176,25 @@ export default function Testimonials() {
           width: 100%;
           flex-shrink: 0;
           box-sizing: border-box;
-          padding: 4px 6px;
+          padding: 6px 8px;
         }
 
         .testimonial-card {
-          background-color: #ffffff;
-          border: 1px solid #ebd9b8;
-          border-radius: 8px;
-          padding: clamp(24px, 4vw, 38px) clamp(18px, 3.5vw, 32px);
+          background-color: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-lg);
+          padding: clamp(26px, 4vw, 42px) clamp(20px, 3.5vw, 36px);
           display: flex;
           flex-direction: column;
-          box-shadow: 0 10px 30px rgba(11, 34, 26, 0.05);
+          box-shadow: var(--shadow-sm);
           position: relative;
           overflow: hidden;
           min-height: 220px;
           box-sizing: border-box;
+          transition: box-shadow var(--transition-normal);
+        }
+        .testimonial-card:hover {
+          box-shadow: var(--shadow-md);
         }
 
         .card-quote-bg {
@@ -204,15 +208,15 @@ export default function Testimonials() {
         .stars-row {
           display: flex;
           gap: 3px;
-          color: #d4af37;
+          color: var(--color-gold-500);
           margin-bottom: 16px;
         }
 
         .testimonial-quote {
           font-family: var(--font-serif);
-          font-size: clamp(1.02rem, 1.4vw, 1.22rem);
+          font-size: clamp(1.05rem, 1.4vw, 1.25rem);
           line-height: 1.65;
-          color: #26221c;
+          color: var(--color-forest-900);
           margin-bottom: 22px;
           flex-grow: 1;
         }
@@ -222,20 +226,20 @@ export default function Testimonials() {
           align-items: center;
           justify-content: space-between;
           padding-top: 16px;
-          border-top: 1px solid #f0e6d6;
+          border-top: 1px solid var(--surface-border-subtle);
           gap: 12px;
           flex-wrap: wrap;
         }
 
         .author-name {
           font-weight: 700;
-          font-size: clamp(0.88rem, 1.1vw, 0.95rem);
-          color: #0e2b21;
+          font-size: clamp(0.9rem, 1.1vw, 0.98rem);
+          color: var(--color-forest-900);
         }
 
         .author-meta {
           font-size: 0.74rem;
-          color: #7a7265;
+          color: var(--color-earth-500);
           margin-top: 2px;
         }
 

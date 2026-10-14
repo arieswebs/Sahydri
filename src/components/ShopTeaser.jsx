@@ -253,10 +253,10 @@ export default function ShopTeaser({ onGoShop, onAddToCart }) {
           </div>
 
           <p style={{
-            marginTop: '22px', fontSize: '0.78rem', color: '#a39b8e',
+            marginTop: '22px', fontSize: '0.8rem', color: 'var(--color-earth-500)',
             letterSpacing: '0.04em',
           }}>
-            Free shipping on orders above ₹499 · Sourced directly from farmers
+            Free express delivery on orders above ₹999 · Sourced directly from Kerala estates
           </p>
         </div>
       </div>
@@ -265,34 +265,38 @@ export default function ShopTeaser({ onGoShop, onAddToCart }) {
         .shop-teaser-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
+          gap: 24px;
         }
         @media (max-width: 1100px) {
           .shop-teaser-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
         }
         @media (max-width: 520px) {
-          .shop-teaser-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .shop-teaser-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
         }
         .teaser-card {
-          background: #ffffff;
-          border: 1px solid rgba(11,37,29,0.07);
-          border-radius: 6px;
+          background: var(--surface-card);
+          border: 1px solid var(--surface-border-subtle);
+          border-radius: var(--radius-md);
           overflow: hidden;
-          transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+          transition: all var(--transition-normal);
+          box-shadow: var(--shadow-xs);
         }
         .teaser-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 48px rgba(11,37,29,0.1);
-          border-color: rgba(212,175,55,0.3);
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-lg);
+          border-color: rgba(201, 164, 86, 0.35);
         }
         .shop-cta-btn:hover {
           transform: translateY(-2px);
-          box-shadow: 0 14px 40px rgba(11,37,29,0.35) !important;
-          background: linear-gradient(135deg, #0d2e23, #1a4d37) !important;
+          box-shadow: var(--shadow-md) !important;
+          background: linear-gradient(135deg, var(--color-forest-850), var(--color-forest-700)) !important;
+        }
+        .shop-cta-btn:active, .shop-cta-ghost:active {
+          transform: translateY(0) scale(0.98);
         }
         .shop-cta-ghost:hover {
-          background: rgba(11,37,29,0.06) !important;
-          border-color: rgba(11,37,29,0.5) !important;
+          background: rgba(10, 34, 26, 0.06) !important;
+          border-color: var(--color-forest-800) !important;
         }
       `}</style>
     </section>

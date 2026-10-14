@@ -75,7 +75,7 @@ export default function CheckoutPage({ onOrderComplete }) {
 
   // Totals calculation
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.price) || 0) * (item.quantity || 1), 0);
-  const freeShippingThreshold = 499;
+  const freeShippingThreshold = 999;
   const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : 99;
   const freeShippingLeft = Math.max(0, freeShippingThreshold - subtotal);
   const freeShippingPercent = Math.min(100, (subtotal / freeShippingThreshold) * 100);

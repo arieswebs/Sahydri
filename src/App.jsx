@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Leaf } from 'lucide-react';
+import './App.css';
 import { ShopProvider, useShop } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -185,12 +186,24 @@ function AppContent() {
       {toast && (
         <div style={{
           position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
-          backgroundColor: '#0c261e', border: '1px solid #d4af37', color: '#f5e4c3',
-          padding: '10px 22px', borderRadius: '30px', fontSize: '0.85rem', fontWeight: '600',
-          zIndex: 9999, boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
-          display: 'flex', alignItems: 'center', gap: '8px', animation: 'fadeIn 0.3s ease'
+          backgroundColor: 'rgba(6, 22, 17, 0.92)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(223, 190, 132, 0.35)',
+          color: 'var(--color-gold-300)',
+          padding: '10px 22px',
+          borderRadius: 'var(--radius-full)',
+          fontSize: 'var(--text-sm)',
+          fontWeight: '600',
+          letterSpacing: '0.02em',
+          zIndex: 9999,
+          boxShadow: 'var(--shadow-dropdown)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          animation: 'fadeIn 0.25s var(--ease-spring)'
         }}>
-          <Leaf size={14} color="#dfbe84" strokeWidth={1.8} />
+          <Leaf size={15} color="var(--color-gold-400)" strokeWidth={2} />
           <span>{toast}</span>
         </div>
       )}

@@ -643,11 +643,11 @@ export default function ProductDetailPage({
 
       <style>{`
         .product-page-root {
-          background-color: #faf8f4;
-          color: #1a2e25;
+          background-color: var(--surface-ground);
+          color: var(--color-earth-900);
           min-height: 100vh;
           padding-top: 100px;
-          font-family: var(--font-product);
+          font-family: var(--font-sans);
         }
 
         .product-breadcrumb-bar,
@@ -658,7 +658,7 @@ export default function ProductDetailPage({
         .pdp-tabs-section *,
         .companion-products-section,
         .companion-products-section * {
-          font-family: var(--font-product);
+          font-family: var(--font-sans);
         }
 
         /* 1. Breadcrumbs */
@@ -918,19 +918,19 @@ export default function ProductDetailPage({
         }
 
         .pdp-title {
-          font-family: var(--font-product);
-          font-size: clamp(1.8rem, 3.2vw, 2.6rem);
-          font-weight: 700;
-          color: #0c261e;
-          line-height: 1.2;
-          letter-spacing: -0.02em;
+          font-family: var(--font-serif);
+          font-size: clamp(2rem, 3.5vw, 2.85rem);
+          font-weight: 500;
+          color: var(--color-forest-900);
+          line-height: 1.18;
+          letter-spacing: -0.015em;
           margin-bottom: 6px;
         }
 
         .pdp-subname {
           font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-          color: #706859;
-          font-family: var(--font-product);
+          color: var(--color-earth-600);
+          font-family: var(--font-sans);
           font-style: normal;
           font-weight: 500;
           margin-bottom: 16px;
@@ -943,7 +943,7 @@ export default function ProductDetailPage({
           flex-wrap: wrap;
           margin-bottom: 22px;
           padding-bottom: 16px;
-          border-bottom: 1px solid rgba(14, 43, 33, 0.1);
+          border-bottom: 1px solid var(--surface-border-subtle);
         }
 
         .stars-cluster {
@@ -954,32 +954,33 @@ export default function ProductDetailPage({
         .rating-num {
           font-weight: 700;
           font-size: 0.95rem;
-          color: #0c261e;
+          color: var(--color-forest-900);
         }
 
         .rating-count {
           font-size: 0.78rem;
-          color: #726b5d;
+          color: var(--color-earth-500);
         }
 
         .verified-pill {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          background-color: #eaf5ee;
+          background-color: var(--color-success-bg);
           padding: 2px 8px;
-          border-radius: 12px;
+          border-radius: var(--radius-full);
           font-size: 0.68rem;
-          color: #1a4d33;
+          color: var(--color-success);
           font-weight: 600;
         }
 
         .pdp-price-box {
-          background-color: #f6f1e6;
-          border: 1px solid #ebd9b8;
-          border-radius: 6px;
+          background-color: var(--surface-elevated);
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-md);
           padding: 16px 20px;
           margin-bottom: 22px;
+          box-shadow: var(--shadow-xs);
         }
 
         .price-main-row {
@@ -992,36 +993,36 @@ export default function ProductDetailPage({
         .price-currency {
           font-size: 1.4rem;
           font-weight: 700;
-          color: #0c261e;
+          color: var(--color-forest-900);
         }
 
         .price-figure {
           font-family: var(--font-sans);
           font-size: 2.2rem;
-          font-weight: 700;
-          color: #0c261e;
+          font-weight: 800;
+          color: var(--color-forest-900);
           line-height: 1;
         }
 
         .price-original {
           font-size: 1.1rem;
-          color: #8f8576;
+          color: var(--color-earth-400);
           text-decoration: line-through;
         }
 
         .discount-tag {
-          background-color: #0c261e;
-          color: #dfbe84;
+          background-color: var(--color-forest-900);
+          color: var(--color-gold-300);
           font-size: 0.72rem;
           font-weight: 700;
           padding: 3px 8px;
-          border-radius: 4px;
+          border-radius: var(--radius-xs);
           letter-spacing: 0.04em;
         }
 
         .price-legal-note {
           font-size: 0.74rem;
-          color: #6a6255;
+          color: var(--color-earth-500);
           margin-top: 6px;
         }
 
@@ -1070,23 +1071,28 @@ export default function ProductDetailPage({
           align-items: center;
           justify-content: center;
           gap: 3px;
-          background-color: #ffffff;
-          border: 1px solid #d4c8b4;
-          border-radius: 4px;
+          background-color: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-sm);
           padding: 10px 8px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all var(--transition-fast);
           position: relative;
           min-height: 52px;
         }
 
         .weight-option-btn:hover {
-          border-color: #0c261e;
+          border-color: var(--color-forest-800);
+          transform: translateY(-1px);
+        }
+
+        .weight-option-btn:active {
+          transform: scale(0.98);
         }
 
         .weight-option-btn.weight-selected {
-          border-color: #0c261e;
-          background-color: #0c261e;
+          border-color: var(--color-forest-900);
+          background-color: var(--color-forest-900);
           color: #ffffff;
         }
 
@@ -1097,12 +1103,12 @@ export default function ProductDetailPage({
 
         .weight-opt-price {
           font-size: 0.72rem;
-          color: #9e8550;
+          color: var(--color-gold-text);
           font-weight: 600;
         }
 
         .weight-selected .weight-opt-price {
-          color: #dfbe84;
+          color: var(--color-gold-300);
         }
 
         .weight-check-dot {
@@ -1110,7 +1116,7 @@ export default function ProductDetailPage({
           top: 3px;
           right: 5px;
           font-size: 0.62rem;
-          color: #dfbe84;
+          color: var(--color-gold-300);
         }
 
         /* Actions: Qty & Add to Cart */
@@ -1124,9 +1130,9 @@ export default function ProductDetailPage({
         .quantity-controller {
           display: flex;
           align-items: center;
-          border: 1px solid #c2b59f;
-          border-radius: 4px;
-          background-color: #ffffff;
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-sm);
+          background-color: var(--surface-card);
           overflow: hidden;
           flex-shrink: 0;
           height: 48px;
@@ -1138,12 +1144,12 @@ export default function ProductDetailPage({
           background: none;
           border: none;
           font-size: 1.1rem;
-          color: #0c261e;
+          color: var(--color-forest-900);
           cursor: pointer;
-          transition: background-color 0.2s ease;
+          transition: background-color var(--transition-fast);
         }
         .qty-btn:hover {
-          background-color: #f2eee5;
+          background-color: var(--surface-elevated);
         }
 
         .qty-value {
@@ -1151,7 +1157,7 @@ export default function ProductDetailPage({
           text-align: center;
           font-weight: 700;
           font-size: 0.95rem;
-          color: #0c261e;
+          color: var(--color-forest-900);
         }
 
         .pdp-add-cart-btn {
@@ -1159,18 +1165,23 @@ export default function ProductDetailPage({
           padding: 0 20px;
           font-size: 0.86rem;
           height: 48px;
+          border-radius: var(--radius-sm);
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
           white-space: nowrap;
+          transition: all var(--transition-fast);
+        }
+        .pdp-add-cart-btn:active {
+          transform: scale(0.98);
         }
 
         .cart-added-state {
-          background-color: #74db93 !important;
-          color: #0c261e !important;
-          border-color: #74db93 !important;
+          background-color: var(--color-success) !important;
+          color: #ffffff !important;
+          border-color: var(--color-success) !important;
         }
 
         .pdp-buy-now-btn {
@@ -1178,23 +1189,30 @@ export default function ProductDetailPage({
           min-width: 130px;
           padding: 0 20px;
           height: 48px;
-          background-color: #0c261e;
-          color: #f5e4be;
-          border: 1px solid #0c261e;
-          border-radius: 4px;
+          background: linear-gradient(135deg, var(--color-forest-950) 0%, var(--color-forest-900) 100%);
+          color: var(--color-gold-300);
+          border: 1px solid rgba(223, 190, 132, 0.3);
+          border-radius: var(--radius-sm);
           font-size: 0.82rem;
           font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: all var(--transition-fast);
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: var(--shadow-xs);
         }
         .pdp-buy-now-btn:hover {
-          background-color: #174235;
-          border-color: #174235;
+          background: linear-gradient(135deg, var(--color-forest-900) 0%, var(--color-forest-800) 100%);
+          border-color: var(--color-gold-400);
+          color: #ffffff;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
+        }
+        .pdp-buy-now-btn:active {
+          transform: scale(0.98);
         }
 
         /* 4 Specs Grid */

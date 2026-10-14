@@ -293,8 +293,8 @@ export default function WhySahyadri() {
 
       <style>{`
         .story-section {
-          padding: clamp(36px, 5vw, 56px) 0;
-          background-color: #f5f1e8;
+          padding: clamp(60px, 6vw, 90px) 0;
+          background-color: var(--surface-ground);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -308,9 +308,9 @@ export default function WhySahyadri() {
           justify-content: space-between;
           flex-wrap: wrap;
           gap: 14px;
-          margin-bottom: 16px;
-          border-bottom: 1px solid rgba(14, 43, 33, 0.1);
-          padding-bottom: 14px;
+          margin-bottom: 24px;
+          border-bottom: 1px solid var(--surface-border-subtle);
+          padding-bottom: 16px;
           width: 100%;
         }
 
@@ -320,11 +320,11 @@ export default function WhySahyadri() {
 
         .whysahyadri-eyebrow {
           font-family: var(--font-sans);
-          font-size: 0.68rem;
+          font-size: 0.72rem;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #9e8550;
-          fontWeight: 600;
+          color: var(--color-gold-text);
+          font-weight: 700;
         }
 
         .whysahyadri-counter-pill {
@@ -332,20 +332,21 @@ export default function WhySahyadri() {
           align-items: center;
           gap: 4px;
           background-color: rgba(14, 43, 33, 0.08);
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 0.65rem;
-          font-weight: 600;
-          color: #0c261e;
+          padding: 3px 10px;
+          border-radius: var(--radius-full);
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: var(--color-forest-900);
         }
 
         .whysahyadri-header-title {
           font-family: var(--font-serif);
-          font-size: clamp(1.35rem, 2.5vw, 2.2rem);
+          font-size: clamp(1.6rem, 3vw, 2.5rem);
           font-weight: 500;
-          color: #0c261e;
+          color: var(--color-forest-900);
           line-height: 1.2;
-          margin-top: 4px;
+          margin-top: 6px;
+          letter-spacing: -0.01em;
           word-break: break-word;
         }
 

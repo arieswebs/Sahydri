@@ -34,7 +34,7 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
   };
 
   return (
-    <section id="shop" style={{ padding: '100px 0', backgroundColor: '#faf8f4' }}>
+    <section id="shop" style={{ padding: '80px 0', backgroundColor: 'var(--surface-ground)' }}>
       <div className="container">
         {/* Minimalist Section Header */}
         <div style={{ textAlign: 'center', marginBottom: '46px' }}>
@@ -450,10 +450,17 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
           }
         }
 
+        .luxury-card {
+          border-radius: var(--radius-md) !important;
+          background: var(--surface-card) !important;
+          border: 1px solid var(--surface-border-subtle) !important;
+          transition: all var(--transition-normal) !important;
+          box-shadow: var(--shadow-xs);
+        }
         .luxury-card:hover {
           transform: translateY(-4px);
-          box-shadow: 0 16px 36px rgba(11, 37, 29, 0.08);
-          border-color: rgba(212, 175, 55, 0.35);
+          box-shadow: var(--shadow-lg);
+          border-color: rgba(201, 164, 86, 0.4) !important;
         }
         .luxury-card:hover .card-media {
           transform: scale(1.05);
@@ -464,22 +471,32 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(11, 37, 29, 0.15);
+          background: rgba(10, 34, 26, 0.12);
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transition: opacity var(--transition-fast);
           pointer-events: none;
         }
         .luxury-card:hover .hover-action-overlay {
           opacity: 1;
         }
+        .add-btn {
+          border-radius: var(--radius-sm) !important;
+          transition: all var(--transition-fast) !important;
+        }
         .add-btn:hover {
-          background-color: #0b251d !important;
-          color: #f5e7c8 !important;
-          border-color: #0b251d !important;
+          background-color: var(--color-forest-900) !important;
+          color: var(--color-gold-300) !important;
+          border-color: var(--color-forest-900) !important;
+        }
+        .add-btn:active {
+          transform: scale(0.96);
+        }
+        .filter-pill {
+          transition: all var(--transition-fast) !important;
         }
         .filter-pill:hover {
-          border-color: #0b251d;
-          color: #0b251d;
+          border-color: var(--color-forest-900);
+          color: var(--color-forest-900);
         }
       `}</style>
     </section>

@@ -58,39 +58,42 @@ export default function CulturalHeritage() {
 
       <style>{`
         .heritage-section {
-          padding: clamp(48px, 6vw, 90px) 0;
-          background-color: #faf7f0;
+          padding: clamp(60px, 6vw, 90px) 0;
+          background-color: var(--surface-ground);
           overflow: hidden;
         }
 
         .heritage-card {
-          background-color: #ffffff;
-          border: 1px solid #dfbe84;
-          border-radius: 8px;
-          padding: clamp(18px, 3.5vw, 52px);
+          background-color: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-lg);
+          padding: clamp(24px, 4vw, 56px);
           position: relative;
-          box-shadow: 0 12px 36px rgba(11, 34, 26, 0.06);
+          box-shadow: var(--shadow-sm);
           width: 100%;
           box-sizing: border-box;
+          transition: box-shadow var(--transition-normal);
         }
-
-
+        .heritage-card:hover {
+          box-shadow: var(--shadow-md);
+        }
 
         .heritage-grid {
           display: grid;
           grid-template-columns: minmax(280px, 42%) 1fr;
-          gap: clamp(20px, 4vw, 48px);
+          gap: clamp(24px, 4vw, 52px);
           align-items: center;
           width: 100%;
         }
 
         .heritage-img-frame {
-          border: 1px solid #d4af37;
+          border: 1px solid rgba(201, 164, 86, 0.4);
           padding: 8px;
-          background-color: #fbf9f4;
-          border-radius: 4px;
+          background-color: var(--surface-elevated);
+          border-radius: var(--radius-sm);
           width: 100%;
           box-sizing: border-box;
+          box-shadow: var(--shadow-xs);
         }
 
         .heritage-img {
@@ -98,50 +101,51 @@ export default function CulturalHeritage() {
           height: auto;
           aspect-ratio: 4 / 3;
           object-fit: cover;
-          border-radius: 2px;
+          border-radius: var(--radius-xs);
           display: block;
         }
 
         .heritage-heading {
           font-family: var(--font-serif);
-          font-size: clamp(1.4rem, 2.8vw, 2.5rem);
+          font-size: clamp(1.5rem, 2.8vw, 2.4rem);
           font-weight: 500;
-          line-height: 1.25;
-          color: #0e2b21;
+          line-height: 1.22;
+          color: var(--color-forest-900);
           margin-bottom: 16px;
+          letter-spacing: -0.015em;
           word-break: break-word;
         }
 
         .heritage-body-p {
-          font-size: clamp(0.86rem, 1.1vw, 0.94rem);
-          line-height: 1.65;
-          color: #554f44;
+          font-size: clamp(0.88rem, 1.1vw, 0.96rem);
+          line-height: 1.7;
+          color: var(--color-earth-600);
           margin-bottom: 14px;
         }
 
         .heritage-quote-box {
-          background-color: #f6f1e6;
-          border-left: 3px solid #d4af37;
-          padding: clamp(12px, 2.5vw, 20px) clamp(14px, 3vw, 24px);
-          border-radius: 0 6px 6px 0;
+          background-color: var(--surface-elevated);
+          border-left: 3px solid var(--color-gold-500);
+          padding: clamp(14px, 2.5vw, 22px) clamp(16px, 3vw, 26px);
+          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
           position: relative;
-          margin-top: 18px;
+          margin-top: 20px;
           box-sizing: border-box;
         }
 
         .heritage-quote-text {
           font-family: var(--font-serif);
           font-style: italic;
-          font-size: clamp(0.92rem, 1.4vw, 1.08rem);
-          line-height: 1.5;
-          color: #1a2e25;
+          font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+          line-height: 1.55;
+          color: var(--color-forest-900);
           margin-bottom: 8px;
         }
 
         .heritage-quote-author {
-          font-size: 0.74rem;
-          font-weight: 600;
-          color: #82692e;
+          font-size: 0.76rem;
+          font-weight: 700;
+          color: var(--color-gold-text);
         }
 
         @media (max-width: 768px) {

@@ -572,19 +572,19 @@ export default function Navbar({
           left: 0;
           right: 0;
           z-index: 1000;
-          background-color: rgba(253, 251, 247, 0.96);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1px solid rgba(14, 43, 33, 0.08);
-          box-shadow: 0 1px 12px rgba(11, 37, 29, 0.04);
-          transition: padding 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+          background-color: rgba(250, 248, 244, 0.94);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid var(--surface-border-subtle);
+          box-shadow: var(--shadow-xs);
+          transition: padding var(--transition-normal), background-color var(--transition-normal), box-shadow var(--transition-normal);
           padding: 16px 0;
         }
 
         .sahyadri-navbar-scrolled {
           padding: 12px 0;
-          background-color: rgba(253, 251, 247, 0.98);
-          box-shadow: 0 4px 22px rgba(11, 37, 29, 0.07);
+          background-color: rgba(250, 248, 244, 0.98);
+          box-shadow: var(--shadow-sm);
           border-bottom-color: rgba(14, 43, 33, 0.12);
         }
 
@@ -600,14 +600,14 @@ export default function Navbar({
           display: none;
           background: none;
           border: 1px solid transparent;
-          color: #0a221a;
+          color: var(--color-forest-900);
           width: 44px;
           height: 44px;
-          border-radius: 8px;
+          border-radius: var(--radius-sm);
           cursor: pointer;
           align-items: center;
           justify-content: center;
-          transition: all 0.18s ease;
+          transition: all var(--transition-fast);
           flex-shrink: 0;
         }
 
@@ -630,13 +630,13 @@ export default function Navbar({
           height: 44px;
           border-radius: 50%;
           overflow: hidden;
-          border: 1.5px solid #dfbe84;
-          box-shadow: 0 2px 10px rgba(11, 37, 29, 0.12);
+          border: 1.5px solid var(--color-gold-400);
+          box-shadow: var(--shadow-sm);
           display: flex;
           align-items: center;
           justify-content: center;
           background-color: #ffffff;
-          transition: transform 0.25s ease;
+          transition: transform var(--transition-normal);
           flex-shrink: 0;
         }
 
@@ -660,20 +660,20 @@ export default function Navbar({
 
         .nav-brand-title {
           font-family: var(--font-sans);
-          font-size: 0.98rem;
-          letter-spacing: 0.12em;
+          font-size: 1.02rem;
+          letter-spacing: 0.14em;
           font-weight: 800;
-          color: #0a221a;
+          color: var(--color-forest-900);
           text-transform: uppercase;
           line-height: 1.1;
         }
 
         .nav-brand-sub {
           font-family: var(--font-sans);
-          font-size: 0.64rem;
-          letter-spacing: 0.22em;
+          font-size: 0.65rem;
+          letter-spacing: 0.24em;
           font-weight: 700;
-          color: #8c733b;
+          color: var(--color-gold-text);
           text-transform: uppercase;
           line-height: 1;
           margin-top: 1px;
@@ -689,7 +689,7 @@ export default function Navbar({
         .nav-dest-btn {
           font-family: var(--font-sans);
           font-size: 0.88rem;
-          color: #2e4339;
+          color: var(--color-earth-700);
           background: none;
           border: none;
           cursor: pointer;
@@ -697,11 +697,11 @@ export default function Navbar({
           letter-spacing: 0.03em;
           position: relative;
           padding: 10px 0;
-          transition: color 0.18s ease;
+          transition: color var(--transition-fast);
         }
 
         .nav-dest-btn:hover {
-          color: #0a221a;
+          color: var(--color-forest-900);
         }
 
         .nav-dest-btn::after {
@@ -712,9 +712,9 @@ export default function Navbar({
           transform: translateX(-50%);
           width: 0;
           height: 2px;
-          background-color: #8c733b;
-          border-radius: 2px;
-          transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          background-color: var(--color-gold-500);
+          border-radius: var(--radius-full);
+          transition: width var(--transition-fast);
         }
 
         .nav-dest-btn:hover::after,
@@ -723,7 +723,8 @@ export default function Navbar({
         }
 
         .nav-dest-active {
-          color: #0a221a;
+          color: var(--color-forest-900);
+          font-weight: 700;
         }
 
         /* ── Right Utilities Cluster ── */
@@ -737,7 +738,7 @@ export default function Navbar({
         .nav-util-btn {
           background: none;
           border: 1px solid transparent;
-          color: #1b3d31;
+          color: var(--color-forest-800);
           width: 44px;
           height: 44px;
           border-radius: 50%;
@@ -745,21 +746,25 @@ export default function Navbar({
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.18s ease;
+          transition: all var(--transition-fast);
           position: relative;
         }
 
         .nav-util-btn:hover {
           background-color: rgba(14, 43, 33, 0.06);
-          color: #0a221a;
+          color: var(--color-forest-950);
+          transform: translateY(-1px);
+        }
+        .nav-util-btn:active {
+          transform: translateY(0) scale(0.95);
         }
 
         .nav-bag-count {
           position: absolute;
           top: 2px;
           right: 2px;
-          background-color: #0a221a;
-          color: #dfbe84;
+          background-color: var(--color-forest-900);
+          color: var(--color-gold-300);
           font-size: 0.68rem;
           font-weight: 700;
           min-width: 19px;
@@ -771,23 +776,23 @@ export default function Navbar({
           justify-content: center;
           line-height: 1;
           box-shadow: 0 2px 6px rgba(10, 34, 26, 0.25);
-          border: 1.5px solid #fdfbf7;
+          border: 1.5px solid var(--surface-card);
         }
 
         /* ── Log In Button ── */
         .nav-login-btn {
-          background: #0a221a;
-          border: 1px solid #0a221a;
-          border-radius: 22px;
-          color: #dfbe84;
+          background: var(--color-forest-900);
+          border: 1px solid var(--color-forest-900);
+          border-radius: var(--radius-full);
+          color: var(--color-gold-300);
           font-weight: 700;
           font-size: 0.84rem;
           letter-spacing: 0.04em;
           padding: 9px 20px;
           cursor: pointer;
           font-family: inherit;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 6px rgba(10, 34, 26, 0.1);
+          transition: all var(--transition-fast);
+          box-shadow: var(--shadow-xs);
           white-space: nowrap;
           min-height: 40px;
           display: inline-flex;
@@ -796,11 +801,14 @@ export default function Navbar({
         }
 
         .nav-login-btn:hover {
-          background: #173f2f;
-          border-color: #173f2f;
+          background: var(--color-forest-800);
+          border-color: var(--color-forest-800);
           color: #ffffff;
           transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(10, 34, 26, 0.18);
+          box-shadow: var(--shadow-sm);
+        }
+        .nav-login-btn:active {
+          transform: translateY(0) scale(0.98);
         }
 
         /* ── Member Pill Badge ── */
@@ -814,10 +822,10 @@ export default function Navbar({
           gap: 8px;
           background: rgba(14, 43, 33, 0.06);
           border: 1px solid rgba(14, 43, 33, 0.12);
-          border-radius: 24px;
+          border-radius: var(--radius-full);
           padding: 5px 12px 5px 6px;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all var(--transition-fast);
           min-height: 40px;
         }
 
@@ -827,7 +835,7 @@ export default function Navbar({
         }
 
         .nav-admin-badge {
-          background: linear-gradient(135deg, #0a221a, #1b4030);
+          background: linear-gradient(135deg, var(--color-forest-950), var(--color-forest-800));
           border-color: rgba(223, 190, 132, 0.4);
         }
 
@@ -835,7 +843,7 @@ export default function Navbar({
           width: 30px;
           height: 30px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #1b4030, #0a221a);
+          background: linear-gradient(135deg, var(--color-forest-800), var(--color-forest-950));
           display: flex;
           align-items: center;
           justify-content: center;
@@ -843,19 +851,19 @@ export default function Navbar({
         }
 
         .nav-admin-badge .nav-member-avatar {
-          background: linear-gradient(135deg, #dfbe84, #9a7d25);
+          background: linear-gradient(135deg, var(--color-gold-400), var(--color-gold-600));
         }
 
         .nav-member-initials {
           font-size: 0.70rem;
           font-weight: 800;
-          color: #dfbe84;
+          color: var(--color-gold-300);
         }
 
         .nav-member-name {
           font-size: 0.84rem;
           font-weight: 700;
-          color: #0a221a;
+          color: var(--color-forest-900);
           letter-spacing: 0.02em;
           max-width: 90px;
           overflow: hidden;
@@ -864,15 +872,15 @@ export default function Navbar({
         }
 
         .nav-admin-badge .nav-member-name {
-          color: #dfbe84;
+          color: var(--color-gold-300);
         }
 
         .nav-chevron-icon {
-          color: #0a221a;
-          transition: transform 0.2s ease;
+          color: var(--color-forest-900);
+          transition: transform var(--transition-fast);
         }
         .nav-admin-badge .nav-chevron-icon {
-          color: #dfbe84;
+          color: var(--color-gold-300);
         }
         .nav-chevron-flipped {
           transform: rotate(180deg);
@@ -883,13 +891,13 @@ export default function Navbar({
           position: absolute;
           top: calc(100% + 8px);
           right: 0;
-          background: #ffffff;
-          border: 1px solid rgba(14, 43, 33, 0.12);
-          border-radius: 12px;
+          background: var(--surface-card);
+          border: 1px solid var(--surface-border);
+          border-radius: var(--radius-md);
           padding: 8px;
           min-width: 220px;
-          box-shadow: 0 16px 40px rgba(11, 37, 29, 0.14), 0 4px 12px rgba(11, 37, 29, 0.04);
-          animation: dropdownIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: var(--shadow-dropdown);
+          animation: dropdownIn 0.18s var(--ease-spring);
           z-index: 1050;
         }
 
@@ -900,19 +908,19 @@ export default function Navbar({
 
         .nav-user-header {
           padding: 10px 12px 10px;
-          border-bottom: 1px solid rgba(14, 43, 33, 0.08);
+          border-bottom: 1px solid var(--surface-border-subtle);
           margin-bottom: 6px;
         }
 
         .nav-user-name-text {
           font-weight: 700;
           font-size: 0.88rem;
-          color: #0a221a;
+          color: var(--color-forest-900);
         }
 
         .nav-user-email-text {
           font-size: 0.72rem;
-          color: #68726c;
+          color: var(--color-earth-500);
           margin-top: 2px;
           word-break: break-all;
         }
@@ -924,9 +932,9 @@ export default function Navbar({
           font-size: 0.62rem;
           font-weight: 800;
           letter-spacing: 0.06em;
-          background: rgba(140, 115, 59, 0.1);
-          color: #8c733b;
-          border-radius: 10px;
+          background: rgba(201, 164, 86, 0.15);
+          color: var(--color-gold-text);
+          border-radius: var(--radius-full);
           padding: 2px 8px;
           margin-top: 6px;
         }
@@ -937,16 +945,16 @@ export default function Navbar({
           gap: 10px;
           width: 100%;
           padding: 9px 12px;
-          border-radius: 7px;
+          border-radius: var(--radius-sm);
           border: none;
           background: none;
-          color: #243a30;
+          color: var(--color-earth-700);
           font-size: 0.82rem;
           font-weight: 600;
           cursor: pointer;
           font-family: inherit;
           text-align: left;
-          transition: background 0.15s ease, color 0.15s ease;
+          transition: background var(--transition-fast), color var(--transition-fast);
         }
 
         .nav-dropdown-item:hover {

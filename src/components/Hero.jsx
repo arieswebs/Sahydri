@@ -260,25 +260,35 @@ export default function Hero({ onExploreClick, onStoryClick }) {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          background: linear-gradient(135deg, #dfbe84 0%, #c49f57 100%);
-          border: 1px solid #dfbe84;
-          color: #071912;
+          background: linear-gradient(135deg, var(--color-gold-400) 0%, var(--color-gold-500) 100%);
+          border: 1px solid var(--color-gold-400);
+          color: var(--color-forest-950);
           font-family: var(--font-sans);
           font-size: 0.92rem;
           font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           padding: 15px 36px;
-          border-radius: 4px;
+          min-height: 48px;
+          border-radius: var(--radius-sm);
           cursor: pointer;
-          transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all var(--transition-normal);
           box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         }
 
         .hero-btn-primary:hover {
-          background: linear-gradient(135deg, #ebd4a8 0%, #d1ae67 100%);
+          background: linear-gradient(135deg, var(--color-gold-300) 0%, var(--color-gold-400) 100%);
           transform: translateY(-2px);
-          box-shadow: 0 8px 26px rgba(223, 190, 132, 0.36);
+          box-shadow: 0 8px 26px rgba(223, 190, 132, 0.42);
+        }
+
+        .hero-btn-primary:active {
+          transform: translateY(0) scale(0.98);
+        }
+
+        .hero-btn-primary:focus-visible {
+          outline: 2px solid var(--color-gold-300);
+          outline-offset: 3px;
         }
 
         /* ── Responsive Queries for Mobile & Tablet ── */

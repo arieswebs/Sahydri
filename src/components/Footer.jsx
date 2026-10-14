@@ -140,11 +140,11 @@ export default function Footer() {
 
       <style>{`
         .sahydri-footer {
-          background-color: #051913;
-          background: linear-gradient(180deg, #071f18 0%, #030e0b 100%);
+          background-color: var(--color-forest-950);
+          background: linear-gradient(180deg, var(--color-forest-950) 0%, #030c08 100%);
           color: #e5ede8;
           border-top: 1px solid rgba(223, 190, 132, 0.22);
-          padding: clamp(48px, 6vw, 72px) 0 28px 0;
+          padding: clamp(52px, 6vw, 76px) 0 32px 0;
           position: relative;
           width: 100%;
           overflow: hidden;
@@ -181,7 +181,7 @@ export default function Footer() {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          border: 1.5px solid rgba(223, 190, 132, 0.45);
+          border: 1.5px solid var(--color-gold-400);
           object-fit: cover;
           box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
           display: block;
@@ -194,19 +194,19 @@ export default function Footer() {
         }
 
         .footer-brand-name {
-          font-family: var(--font-display);
-          font-size: 1.18rem;
-          font-weight: 700;
-          letter-spacing: 0.18em;
+          font-family: var(--font-sans);
+          font-size: 1.15rem;
+          font-weight: 800;
+          letter-spacing: 0.16em;
           color: #ffffff;
         }
 
         .footer-brand-sub {
           font-family: var(--font-sans);
-          font-size: 0.64rem;
+          font-size: 0.65rem;
           font-weight: 700;
-          letter-spacing: 0.28em;
-          color: #dfbe84;
+          letter-spacing: 0.24em;
+          color: var(--color-gold-400);
           margin-top: 2px;
         }
 

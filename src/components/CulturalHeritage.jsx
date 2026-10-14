@@ -30,7 +30,7 @@ export default function CulturalHeritage() {
               <p className="heritage-body-p">
                 In the temple courtyards of Malabar, Kathakali artists spend hours applying sacred
                 mineral pigments—green pacha for nobility, fiery reds for primal force—before evoking
-                gods and cosmic myths. In the high valleys of Sahyadri, spice cultivation is treated
+                gods and cosmic myths. In the high valleys of Sahydri, spice cultivation is treated
                 with identical sacred devotion.
               </p>
 

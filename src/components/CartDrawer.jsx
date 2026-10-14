@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { useShop } from '../context/ShopContext';
+import DeliveryEstimator from './DeliveryEstimator';
 
 export default function CartDrawer({
   isOpen,
@@ -60,13 +61,13 @@ export default function CartDrawer({
 
   const handleApplyPromo = (codeToApply) => {
     const code = (codeToApply || promoCode).trim().toUpperCase();
-    if (code === 'SAHYADRI10' || code === 'KERALA10') {
+    if (code === 'SAHYDRI10' || code === 'SAHYADRI10' || code === 'KERALA10') {
       setDiscountPercent(10);
       setPromoApplied(true);
       setPromoError('');
       if (codeToApply) setPromoCode(codeToApply);
     } else {
-      setPromoError('Invalid coupon code. Try SAHYADRI10 for 10% off.');
+      setPromoError('Invalid coupon code. Try SAHYDRI10 for 10% off.');
     }
   };
 
@@ -160,7 +161,7 @@ export default function CartDrawer({
         key:         data.keyId,
         amount:      data.amount,
         currency:    data.currency,
-        name:        'Sahyadri Naturals',
+        name:        'Sahydri Organics',
         description: `Order of ${cartItems.length} item(s)`,
         image:       '/images/sahyadri-logo.png',
         order_id:    data.orderId,
@@ -776,11 +777,14 @@ export default function CartDrawer({
         {cartItems.length > 0 && (
           <div
             style={{
-              padding: '20px 24px',
+              padding: '16px 20px',
               borderTop: '1px solid rgba(14, 43, 33, 0.08)',
               backgroundColor: '#f5f0e6'
             }}
           >
+            {/* Pincode & Delivery Date Estimator */}
+            <DeliveryEstimator compact={true} theme="light" />
+
             {/* Promo Code Input */}
             <div style={{ marginBottom: '14px' }}>
               <form onSubmit={(e) => { e.preventDefault(); handleApplyPromo(); }} style={{ display: 'flex', gap: '8px' }}>
@@ -788,7 +792,7 @@ export default function CartDrawer({
                   <Tag size={14} color="#8c733b" style={{ position: 'absolute', top: '12px', left: '12px' }} />
                   <input
                     type="text"
-                    placeholder="Coupon code (SAHYADRI10)"
+                    placeholder="Coupon code (SAHYDRI10)"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     style={{
@@ -830,7 +834,7 @@ export default function CartDrawer({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
                   <span style={{ fontSize: '0.7rem', color: '#706859' }}>Special Code:</span>
                   <button
-                    onClick={() => handleApplyPromo('SAHYADRI10')}
+                    onClick={() => handleApplyPromo('SAHYDRI10')}
                     style={{
                       background: 'none',
                       border: 'none',
@@ -842,7 +846,7 @@ export default function CartDrawer({
                       padding: 0
                     }}
                   >
-                    Tap to apply SAHYADRI10 (10% OFF)
+                    Tap to apply SAHYDRI10 (10% OFF)
                   </button>
                 </div>
               )}

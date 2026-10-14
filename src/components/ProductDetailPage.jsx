@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import Footer from './Footer';
+import DeliveryEstimator from './DeliveryEstimator';
 
 export default function ProductDetailPage({
   product,
@@ -337,6 +338,9 @@ export default function ProductDetailPage({
               </button>
             </div>
 
+            {/* Delivery Date & Indian Pincode Checker */}
+            <DeliveryEstimator theme="light" />
+
             {/* Quick Guarantees Box (Direct Dispatch, NMR Purity, Fair Trade) placed right after Buy Now */}
             <div className="pdp-guarantees-card">
               <div className="guarantee-row">
@@ -345,7 +349,7 @@ export default function ProductDetailPage({
                 </div>
                 <div>
                   <div className="g-title">Direct Dispatch</div>
-                  <div className="g-sub">Hand-packed at Wayanad Agro-Reserve • Dispatched within 24h</div>
+                  <div className="g-sub">Hand-packed with care • Dispatched within 24 hours</div>
                 </div>
               </div>
 

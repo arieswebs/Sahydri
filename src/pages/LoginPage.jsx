@@ -132,7 +132,7 @@ export default function LoginPage() {
         showToast('Welcome back, Admin!');
         navigate('/admin', { replace: true });
       } else {
-        showToast('Welcome back to Sahyadri Organics!');
+        showToast('Welcome back to Sahydri Organics!');
         navigate(safeRedirect, { replace: true });
       }
     } catch {
@@ -226,14 +226,14 @@ export default function LoginPage() {
       {/* Top Heritage Bar */}
       <header className="auth-page-header">
         <div className="auth-header-inner">
-          <Link to="/" className="auth-brand-link" aria-label="Sahyadri Organics Homepage">
+          <Link to="/" className="auth-brand-link" aria-label="Sahydri Organics Homepage">
             <img
               src="/images/sahyadri-logo.png"
-              alt="Sahyadri Organics"
+              alt="Sahydri Organics"
               className="auth-brand-logo"
             />
             <div className="auth-brand-text">
-              <span className="auth-brand-name">SAHYADRI</span>
+              <span className="auth-brand-name">SAHYDRI</span>
               <span className="auth-brand-tag">ORGANICS · WESTERN GHATS</span>
             </div>
           </Link>
@@ -374,7 +374,7 @@ export default function LoginPage() {
 
               <div className="auth-card-footer">
                 <p className="auth-switch-text">
-                  New to Sahyadri Organics?{' '}
+                  New to Sahydri Organics?{' '}
                   <Link to={registerLink} className="auth-switch-link">
                     Create an account
                   </Link>

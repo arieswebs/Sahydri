@@ -208,21 +208,11 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
         return (
             <div
                 onClick={() => onViewProduct(product)}
-                style={{
-                    background: '#fff', borderRadius: '8px', border: '1px solid rgba(11,37,29,0.08)',
-                    overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                    transition: 'all 0.28s cubic-bezier(0.16,1,0.3,1)', position: 'relative'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(11,37,29,0.1)'; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(11,37,29,0.08)'; }}
+                className="shop-product-card"
             >
                 {/* Discount Badge */}
                 {disc > 0 && (
-                    <div style={{
-                        position: 'absolute', top: '10px', left: '10px', zIndex: 5,
-                        background: '#b91c1c', color: '#fff', fontSize: '0.7rem', fontWeight: 700,
-                        padding: '2px 8px', borderRadius: '4px', letterSpacing: '0.04em'
-                    }}>
+                    <div className="shop-product-disc">
                         -{disc}%
                     </div>
                 )}
@@ -230,60 +220,48 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                 {/* Wishlist */}
                 <button
                     onClick={e => handleWishlist(e, product.id)}
-                    style={{
-                        position: 'absolute', top: '10px', right: '10px', zIndex: 5,
-                        width: '30px', height: '30px', borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.9)', border: 'none',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'all 0.2s ease'
-                    }}
+                    className="shop-product-wishlist"
+                    aria-label={isWL ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                     <Heart size={14} color={isWL ? '#b91c1c' : '#9a9080'} fill={isWL ? '#b91c1c' : 'none'} />
                 </button>
 
                 {/* Product Image */}
-                <div style={{ position: 'relative', aspectRatio: '1/1', background: '#f5f1ea', overflow: 'hidden' }}>
+                <div className="shop-product-img-frame">
                     <img
                         src={product.image} alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
-                        onMouseEnter={e => e.target.style.transform = 'scale(1.06)'}
-                        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                        className="shop-product-img"
                     />
                     {/* Tag */}
                     {product.tag && (
-                        <div style={{
-                            position: 'absolute', bottom: '10px', left: '10px', zIndex: 4,
-                            background: 'rgba(11,37,29,0.85)', color: '#dfbe84',
-                            fontSize: '0.62rem', fontWeight: 700, padding: '3px 8px',
-                            borderRadius: '3px', letterSpacing: '0.1em'
-                        }}>
+                        <div className="shop-product-tag">
                             {product.tag}
                         </div>
                     )}
                 </div>
 
                 {/* Info */}
-                <div style={{ padding: '14px 14px 16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+                <div className="shop-product-info">
                     {/* Origin + Category */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '0.62rem', color: '#9e8550', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    <div className="shop-product-meta">
+                        <span className="shop-product-origin">
                             {product.originBadge || product.category}
                         </span>
-                        <span style={{ fontSize: '0.62rem', color: '#a09280', background: '#f5f1ea', padding: '1px 6px', borderRadius: '3px' }}>
+                        <span className="shop-product-weight">
                             {product.weight}
                         </span>
                     </div>
 
                     {/* Name */}
-                    <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0e2b21', lineHeight: 1.35, margin: '0 0 6px', minHeight: '2.4em' }}>
+                    <h3 className="shop-product-name">
                         {product.name}
                     </h3>
-                    <p style={{ fontSize: '0.75rem', color: '#7a7266', margin: '0 0 10px', lineHeight: 1.5 }}>
+                    <p className="shop-product-subname">
                         {product.subname}
                     </p>
 
                     {/* Rating */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '10px' }}>
+                    <div className="shop-product-rating">
                         <div style={{ display: 'flex', gap: '1px' }}>
                             {[1, 2, 3, 4, 5].map(s => (
                                 <Star key={s} size={11}
@@ -292,25 +270,19 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                                 />
                             ))}
                         </div>
-                        <span style={{ fontSize: '0.72rem', color: '#7a7266' }}>({product.reviewsCount})</span>
+                        <span className="shop-product-reviews">({product.reviewsCount})</span>
                     </div>
 
                     {/* Price + CTA */}
-                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(11,37,29,0.06)', paddingTop: '10px' }}>
-                        <div>
-                            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0d2820' }}>₹{product.price}</span>
-                            {disc > 0 && <span style={{ fontSize: '0.75rem', color: '#a39b8e', textDecoration: 'line-through', marginLeft: '5px' }}>₹{product.originalPrice}</span>}
+                    <div className="shop-product-footer">
+                        <div className="shop-product-pricing">
+                            <span className="shop-product-price">₹{product.price}</span>
+                            {disc > 0 && <span className="shop-product-orig-price">₹{product.originalPrice}</span>}
                         </div>
                         <button
                             onClick={e => handleAddToCart(e, product)}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '5px',
-                                padding: '7px 12px', fontSize: '0.75rem', fontWeight: 700,
-                                letterSpacing: '0.04em', borderRadius: '5px', cursor: 'pointer',
-                                border: 'none', transition: 'all 0.22s ease',
-                                background: isAdd ? '#1a4d34' : '#0b251d',
-                                color: isAdd ? '#74db93' : '#f5e7c8'
-                            }}
+                            className={`shop-product-add-btn ${isAdd ? 'shop-product-added' : ''}`}
+                            aria-label={`Add ${product.name} to cart`}
                         >
                             {isAdd ? <><Check size={12} strokeWidth={2.5} />Added</> : <><ShoppingBag size={12} />Add</>}
                         </button>
@@ -395,26 +367,12 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
             <div className="shop-top-banner">
                 <div className="container">
                     <div className="shop-top-banner-inner">
-                        <div className="shop-banner-header-row">
-                            <div className="shop-store-badge">
-                                <Leaf size={16} color="#dfbe84" />
-                                <span className="shop-store-title">
-                                    Sahyadri Store
-                                </span>
-                            </div>
-                            <div className="shop-free-shipping-tag">
-                                <Truck size={14} color="#dfbe84" />
-                                <span className="shipping-text-full">Free delivery over ₹999</span>
-                                <span className="shipping-text-short">Free &gt; ₹999</span>
-                            </div>
-                        </div>
-
                         <div className="shop-search-field-wrap">
-                            <Search size={17} className="shop-search-icon" />
+                            <Search size={18} className="shop-search-icon" />
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                placeholder="Search single-estate spices, raw honey, oils…"
+                                placeholder="Search spices, honey, oils…"
                                 className="shop-search-input"
                                 aria-label="Search catalogue products"
                             />
@@ -423,8 +381,9 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                                     onClick={() => setSearch('')}
                                     className="shop-search-clear-btn"
                                     aria-label="Clear search"
+                                    title="Clear search"
                                 >
-                                    <X size={15} />
+                                    <X size={14} />
                                 </button>
                             )}
                         </div>
@@ -538,9 +497,9 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
 
                         {/* Product Cards */}
                         {productsLoading ? (
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                            <div className="shop-grid">
                                 {[...Array(6)].map((_, i) => (
-                                    <div key={i} style={{ background: '#fff', borderRadius: '8px', height: '340px', animation: 'shimmer 1.5s infinite' }} />
+                                    <div key={i} style={{ background: '#fff', borderRadius: '8px', height: '280px', animation: 'shimmer 1.5s infinite' }} />
                                 ))}
                             </div>
                         ) : filtered.length === 0 ? (
@@ -568,38 +527,18 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
             <style>{`
         .shop-top-banner {
           background: linear-gradient(135deg, #0b251d 0%, #163a2a 100%);
-          padding: 14px 0 16px;
+          padding: 16px 0;
           border-bottom: 1px solid rgba(223, 190, 132, 0.18);
         }
         .shop-top-banner-inner {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 20px;
+          justify-content: center;
           width: 100%;
         }
-        .shop-banner-header-row {
-          display: contents;
-        }
-        .shop-store-badge {
-          order: 1;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex-shrink: 0;
-        }
-        .shop-store-title {
-          color: #f5e7c8;
-          font-family: var(--font-serif), Georgia, serif;
-          font-weight: 700;
-          font-size: 1.15rem;
-          letter-spacing: 0.03em;
-          white-space: nowrap;
-        }
         .shop-search-field-wrap {
-          order: 2;
           flex: 1;
-          max-width: 520px;
+          max-width: 580px;
           position: relative;
           display: flex;
           align-items: center;
@@ -607,58 +546,68 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
         }
         .shop-search-icon {
           position: absolute;
-          left: 14px;
+          left: 18px;
           top: 50%;
           transform: translateY(-50%);
-          color: #1b4b3c;
+          color: #dfbe84;
           pointer-events: none;
           z-index: 2;
+          transition: all 0.2s ease;
         }
         .shop-search-input {
           width: 100%;
-          height: 44px;
-          padding: 0 42px 0 44px;
+          height: 46px;
+          padding: 0 44px 0 48px;
           box-sizing: border-box;
-          background: #ffffff;
-          border: 1.5px solid #dfbe84;
-          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          border: 1px solid rgba(223, 190, 132, 0.35);
+          border-radius: 9999px;
           font-size: 0.92rem;
-          color: #0b251d;
+          color: #f7f3ea;
           outline: none;
           font-family: inherit;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+          transition: all 0.25s ease;
         }
         .shop-search-input::placeholder {
-          color: #687970;
+          color: rgba(245, 231, 200, 0.62);
           font-weight: 400;
         }
+        .shop-search-input:hover {
+          background: rgba(255, 255, 255, 0.12);
+          border-color: rgba(223, 190, 132, 0.55);
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        }
         .shop-search-input:focus {
+          background: rgba(7, 27, 20, 0.75);
           border-color: #dfbe84;
-          box-shadow: 0 0 0 3px rgba(223, 190, 132, 0.35);
+          box-shadow: 0 0 0 3px rgba(223, 190, 132, 0.25), 0 8px 28px rgba(0, 0, 0, 0.32);
         }
         .shop-search-clear-btn {
           position: absolute;
-          right: 10px;
+          right: 14px;
           top: 50%;
           transform: translateY(-50%);
-          width: 26px;
-          height: 26px;
+          width: 24px;
+          height: 24px;
           border-radius: 50%;
-          background: rgba(11, 37, 29, 0.08);
-          border: none;
+          background: rgba(223, 190, 132, 0.2);
+          border: 1px solid rgba(223, 190, 132, 0.3);
           cursor: pointer;
-          color: #575146;
+          color: #dfbe84;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 0;
           z-index: 2;
-          transition: background 0.15s ease, color 0.15s ease;
+          transition: all 0.2s ease;
         }
         .shop-search-clear-btn:hover {
-          background: rgba(11, 37, 29, 0.15);
+          background: #dfbe84;
           color: #0b251d;
+          transform: translateY(-50%) scale(1.08);
         }
         .shop-free-shipping-tag {
           order: 3;
@@ -845,6 +794,199 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
           grid-template-columns: repeat(3, 1fr);
           gap: 16px;
         }
+
+        /* ── Product Card (Grid) ── */
+        .shop-product-card {
+          background: #ffffff;
+          border-radius: 8px;
+          border: 1px solid rgba(11, 37, 29, 0.08);
+          overflow: hidden;
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+        }
+        .shop-product-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px rgba(11, 37, 29, 0.1);
+          border-color: rgba(212, 175, 55, 0.4);
+        }
+        .shop-product-disc {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 5;
+          background: #b91c1c;
+          color: #ffffff;
+          font-size: 0.7rem;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 4px;
+          letter-spacing: 0.04em;
+        }
+        .shop-product-wishlist {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          z-index: 5;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.9);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          transition: all 0.2s ease;
+        }
+        .shop-product-wishlist:hover {
+          transform: scale(1.08);
+          background: #ffffff;
+        }
+        .shop-product-img-frame {
+          position: relative;
+          aspect-ratio: 1 / 1;
+          background: #f5f1ea;
+          overflow: hidden;
+        }
+        .shop-product-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease;
+        }
+        .shop-product-card:hover .shop-product-img {
+          transform: scale(1.06);
+        }
+        .shop-product-tag {
+          position: absolute;
+          bottom: 10px;
+          left: 10px;
+          z-index: 4;
+          background: rgba(11, 37, 29, 0.85);
+          color: #dfbe84;
+          font-size: 0.62rem;
+          font-weight: 700;
+          padding: 3px 8px;
+          border-radius: 3px;
+          letter-spacing: 0.1em;
+        }
+        .shop-product-info {
+          padding: 14px 14px 16px;
+          display: flex;
+          flex-direction: column;
+          flex-grow: 1;
+        }
+        .shop-product-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 4px;
+          gap: 6px;
+        }
+        .shop-product-origin {
+          font-size: 0.62rem;
+          color: #9e8550;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .shop-product-weight {
+          font-size: 0.62rem;
+          color: #a09280;
+          background: #f5f1ea;
+          padding: 1px 6px;
+          border-radius: 3px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .shop-product-name {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: #0e2b21;
+          line-height: 1.35;
+          margin: 0 0 6px;
+          min-height: 2.4em;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .shop-product-subname {
+          font-size: 0.75rem;
+          color: #7a7266;
+          margin: 0 0 10px;
+          line-height: 1.4;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .shop-product-rating {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-bottom: 10px;
+        }
+        .shop-product-reviews {
+          font-size: 0.72rem;
+          color: #7a7266;
+        }
+        .shop-product-footer {
+          margin-top: auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-top: 1px solid rgba(11, 37, 29, 0.06);
+          padding-top: 10px;
+          gap: 6px;
+        }
+        .shop-product-pricing {
+          display: flex;
+          align-items: baseline;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .shop-product-price {
+          font-size: 1.1rem;
+          font-weight: 700;
+          color: #0d2820;
+        }
+        .shop-product-orig-price {
+          font-size: 0.75rem;
+          color: #a39b8e;
+          text-decoration: line-through;
+        }
+        .shop-product-add-btn {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 7px 12px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          border-radius: 5px;
+          cursor: pointer;
+          border: none;
+          transition: all 0.22s ease;
+          background: #0b251d;
+          color: #f5e7c8;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .shop-product-add-btn:hover {
+          background: #173f2f;
+        }
+        .shop-product-added {
+          background: #1a4d34 !important;
+          color: #74db93 !important;
+        }
+
         .shop-list-card {
           background: #ffffff;
           border-radius: 8px;
@@ -922,55 +1064,79 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
         @media (max-width: 860px) {
           .shop-sidebar-wrapper { display: none !important; }
           .shop-mobile-filter-btn { display: flex !important; }
-          .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+          .shop-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
         }
         @media (max-width: 768px) {
+          .shop-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px 10px !important;
+          }
+          .shop-product-info {
+            padding: 10px 10px 12px;
+          }
+          .shop-product-name {
+            font-size: 0.84rem;
+            min-height: 2.3em;
+            margin-bottom: 4px;
+            line-height: 1.25;
+          }
+          .shop-product-subname {
+            font-size: 0.70rem;
+            margin-bottom: 6px;
+          }
+          .shop-product-price {
+            font-size: 0.96rem;
+          }
+          .shop-product-orig-price {
+            font-size: 0.70rem;
+          }
+          .shop-product-add-btn {
+            padding: 6px 9px;
+            font-size: 0.70rem;
+            gap: 4px;
+          }
+          .shop-product-wishlist {
+            top: 7px;
+            right: 7px;
+            width: 27px;
+            height: 27px;
+          }
+          .shop-product-disc {
+            top: 7px;
+            left: 7px;
+            font-size: 0.64rem;
+            padding: 2px 6px;
+          }
+          .shop-product-tag {
+            bottom: 7px;
+            left: 7px;
+            font-size: 0.58rem;
+            padding: 2px 6px;
           .shop-top-banner {
-            padding: 12px 0 14px;
+            padding: 12px 0;
           }
           .shop-top-banner-inner {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-          }
-          .shop-banner-header-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             width: 100%;
           }
-          .shop-store-badge {
-            order: unset;
-          }
-          .shop-store-title {
-            font-size: 1.05rem;
-          }
-          .shop-free-shipping-tag {
-            order: unset;
-            font-size: 0.74rem;
-          }
           .shop-search-field-wrap {
-            order: unset;
             width: 100%;
             max-width: 100%;
             margin: 0;
           }
           .shop-search-input {
             height: 44px;
-            font-size: 16px; /* Prevents iOS Safari auto-zoom on input focus */
-            padding: 0 40px 0 42px;
-            border-radius: 8px;
+            font-size: 15px; /* Prevents iOS Safari auto-zoom on input focus */
+            padding: 0 40px 0 44px;
+            border-radius: 9999px;
           }
-        }
-        @media (max-width: 360px) {
-          .shipping-text-full {
-            display: none;
+          .shop-search-icon {
+            left: 15px;
           }
-          .shipping-text-short {
-            display: inline;
-          }
-          .shop-store-title {
-            font-size: 0.95rem;
+          .shop-search-clear-btn {
+            right: 12px;
           }
         }
         @media (max-width: 580px) {
@@ -1018,7 +1184,82 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
         }
         @media (max-width: 480px) {
           .shop-grid {
-            grid-template-columns: repeat(1, 1fr);
+            grid-template-columns: repeat(2, 1fr) !important; /* Always 2 products in a row on small phones */
+            gap: 10px 8px !important;
+          }
+          .shop-product-info {
+            padding: 8px 8px 10px;
+          }
+          .shop-product-meta {
+            margin-bottom: 2px;
+          }
+          .shop-product-origin {
+            font-size: 0.56rem;
+          }
+          .shop-product-weight {
+            font-size: 0.56rem;
+            padding: 1px 4px;
+          }
+          .shop-product-name {
+            font-size: 0.78rem;
+            line-height: 1.25;
+            min-height: 2.2em;
+            margin-bottom: 3px;
+          }
+          .shop-product-subname {
+            font-size: 0.65rem;
+            margin-bottom: 4px;
+          }
+          .shop-product-rating {
+            margin-bottom: 6px;
+            gap: 3px;
+          }
+          .shop-product-reviews {
+            font-size: 0.65rem;
+          }
+          .shop-product-footer {
+            padding-top: 6px;
+            gap: 4px;
+          }
+          .shop-product-pricing {
+            gap: 2px;
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .shop-product-price {
+            font-size: 0.88rem;
+          }
+          .shop-product-orig-price {
+            font-size: 0.62rem;
+            margin-left: 0;
+          }
+          .shop-product-add-btn {
+            padding: 5px 8px;
+            font-size: 0.66rem;
+            border-radius: 4px;
+            gap: 3px;
+          }
+          .shop-product-wishlist {
+            top: 6px;
+            right: 6px;
+            width: 25px;
+            height: 25px;
+          }
+          .shop-product-wishlist svg {
+            width: 12px;
+            height: 12px;
+          }
+          .shop-product-disc {
+            top: 6px;
+            left: 6px;
+            font-size: 0.60rem;
+            padding: 2px 5px;
+          }
+          .shop-product-tag {
+            bottom: 6px;
+            left: 6px;
+            font-size: 0.54rem;
+            padding: 2px 5px;
           }
           .shop-categories-bar {
             padding: 8px 0;
@@ -1037,6 +1278,10 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
           }
         }
         @media (max-width: 360px) {
+          .shop-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px 6px !important;
+          }
           .shop-categories-inner {
             gap: 5px;
           }
@@ -1045,11 +1290,18 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
             font-size: 0.70rem;
             border-radius: 14px;
           }
-          .shop-store-title {
-            font-size: 0.96rem;
+          .shop-product-info {
+            padding: 6px 6px 8px;
           }
-          .shop-free-shipping-tag {
-            font-size: 0.70rem;
+          .shop-product-name {
+            font-size: 0.74rem;
+          }
+          .shop-product-price {
+            font-size: 0.82rem;
+          }
+          .shop-product-add-btn {
+            padding: 4px 6px;
+            font-size: 0.62rem;
           }
         }
         @keyframes shimmer {

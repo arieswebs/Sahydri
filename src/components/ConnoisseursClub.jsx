@@ -22,7 +22,7 @@ export default function ConnoisseursClub() {
           </span>
 
           <h2 className="connoisseurs-title">
-            Join the Sahyadri Connoisseurs Guild
+            Join the Sahydri Connoisseurs Guild
           </h2>
 
           <p className="connoisseurs-desc">
@@ -64,7 +64,7 @@ export default function ConnoisseursClub() {
 
       <style>{`
         .connoisseurs-section {
-          padding: clamp(52px, 7vw, 84px) 0;
+          padding: clamp(32px, 4.5vw, 54px) 0;
           background-color: #f7f3ea;
           position: relative;
         }
@@ -73,17 +73,15 @@ export default function ConnoisseursClub() {
           background-color: #ffffff;
           border: 1.5px solid #dfbe84;
           border-radius: 8px;
-          padding: clamp(36px, 5.5vw, 60px) clamp(20px, 4vw, 52px);
+          padding: clamp(26px, 3.8vw, 42px) clamp(18px, 3.2vw, 38px);
           text-align: center;
           color: #0c261e;
           box-shadow: 0 16px 40px rgba(11, 34, 26, 0.05);
           position: relative;
-          max-width: 860px;
+          max-width: 680px;
           margin: 0 auto;
           box-sizing: border-box;
         }
-
-
 
         .connoisseurs-eyebrow {
           font-family: var(--font-display);
@@ -92,40 +90,41 @@ export default function ConnoisseursClub() {
           text-transform: uppercase;
           color: #9e8550;
           display: block;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
           font-weight: 600;
         }
 
         .connoisseurs-title {
           font-family: var(--font-serif);
-          font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+          font-size: clamp(1.45rem, 2.8vw, 2.2rem);
           font-weight: 500;
           color: #0c261e;
-          margin-bottom: 12px;
+          margin-bottom: 8px;
           line-height: 1.22;
         }
 
         .connoisseurs-desc {
-          font-size: clamp(0.88rem, 1.1vw, 0.96rem);
+          font-size: clamp(0.85rem, 1vw, 0.94rem);
           color: #554f44;
-          max-width: 580px;
-          margin: 0 auto 30px auto;
-          line-height: 1.65;
+          max-width: 540px;
+          margin: 0 auto 18px auto;
+          line-height: 1.55;
         }
 
         .connoisseurs-form {
           display: flex;
-          max-width: 520px;
+          max-width: 500px;
           margin: 0 auto;
           gap: 10px;
-          flex-wrap: wrap;
+          align-items: stretch;
         }
 
         .input-wrap {
-          flex: 1 1 280px;
+          flex: 1 1 auto;
           position: relative;
           display: flex;
           align-items: center;
+          min-height: 44px;
         }
 
         .input-icon {
@@ -136,10 +135,12 @@ export default function ConnoisseursClub() {
 
         .connoisseurs-input {
           width: 100%;
+          height: 100%;
+          min-height: 44px;
           background-color: #faf8f4;
           border: 1px solid #d8ccb8;
           border-radius: 4px;
-          padding: 13px 16px 13px 40px;
+          padding: 10px 16px 10px 40px;
           color: #0c261e;
           font-size: 0.9rem;
           outline: none;
@@ -155,9 +156,14 @@ export default function ConnoisseursClub() {
         }
 
         .connoisseurs-submit-btn {
-          padding: 13px 26px;
+          padding: 11px 24px;
+          min-height: 44px;
           flex-shrink: 0;
           cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
         }
 
         .connoisseurs-success {
@@ -166,7 +172,7 @@ export default function ConnoisseursClub() {
           gap: 10px;
           background-color: #edf7f1;
           border: 1px solid #74db93;
-          padding: 14px 24px;
+          padding: 12px 20px;
           border-radius: 4px;
           color: #1a4d33;
           font-size: 0.88rem;
@@ -174,22 +180,47 @@ export default function ConnoisseursClub() {
         }
 
         .connoisseurs-reassurance {
-          margin-top: 16px;
+          margin-top: 12px;
           font-size: 0.72rem;
           color: #8c8273;
           letter-spacing: 0.02em;
         }
 
         @media (max-width: 640px) {
+          .connoisseurs-section {
+            padding: 24px 0;
+          }
           .connoisseurs-card {
-            padding: 28px 16px;
+            padding: 22px 16px;
+            max-width: 100%;
+          }
+          .connoisseurs-title {
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+          }
+          .connoisseurs-desc {
+            font-size: 0.84rem;
+            margin: 0 auto 16px auto;
+            line-height: 1.5;
           }
           .connoisseurs-form {
             flex-direction: column;
             gap: 10px;
+            width: 100%;
+          }
+          .input-wrap {
+            flex: none;
+            width: 100%;
+            min-height: 44px;
           }
           .connoisseurs-submit-btn {
             width: 100%;
+            min-height: 44px;
+            padding: 12px 20px;
+          }
+          .connoisseurs-reassurance {
+            margin-top: 10px;
+            font-size: 0.70rem;
           }
         }
       `}</style>

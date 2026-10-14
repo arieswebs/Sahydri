@@ -32,7 +32,7 @@ export default function WhySahyadri() {
       subtitle: "Traditional granite mortars rotating under 38°C to guard delicate volatile oils.",
       image: "/images/cardamom.jpg",
       location: "Heritage Milled • Slow Batch Curing",
-      narrative: "Industrial hammer-mills blaze above 85°C, burning away volatile terpenes and aromatic soul. At Sahyadri, heritage granite chakkis turn slowly at 40 RPM, never exceeding 38°C—locking in up to 40% more volatile essential oils, natural curcumin, and therapeutic pungency.",
+      narrative: "Industrial hammer-mills blaze above 85°C, burning away volatile terpenes and aromatic soul. At Sahydri, heritage granite chakkis turn slowly at 40 RPM, never exceeding 38°C—locking in up to 40% more volatile essential oils, natural curcumin, and therapeutic pungency.",
       stats: [
         { label: "Milling Heat", value: "< 38°C" },
         { label: "Volatile Oils", value: "+40%" },
@@ -47,7 +47,7 @@ export default function WhySahyadri() {
       title: "Raw Forest Nectar, Unheated & Untamed",
       subtitle: "Gathered from high cliffs and wild cavities. 100% unpasteurized with live mountain pollen.",
       image: "/images/honey.jpg",
-      location: "Deep Forest Groves • Nilgiri & Sahyadri Foothills",
+      location: "Deep Forest Groves • Nilgiri & Sahydri Foothills",
       narrative: "Commercial honeys are boiled, pasteurized, and diluted with corn syrup. Our Kadar tribal gatherers harvest wild combs from cliff escarpments at night. Filtered gently through cotton muslin at room temperature, our raw nectar retains live enzymes, wild medicinal pollens, and 0% added sugar.",
       stats: [
         { label: "Added Sugar", value: "0.0%" },

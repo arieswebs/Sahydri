@@ -72,7 +72,7 @@ export default function RegisterPage() {
       }
 
       login(data.user, data.accessToken, data.refreshToken);
-      showToast(`Welcome to Sahyadri Organics, ${data.user.name}!`);
+      showToast(`Welcome to Sahydri Organics, ${data.user.name}!`);
       navigate(safeRedirect, { replace: true });
     } catch {
       setError('Could not connect to registration server. Please check backend connection.');
@@ -87,14 +87,14 @@ export default function RegisterPage() {
     <div className="auth-page-wrapper">
       <header className="auth-page-header">
         <div className="auth-header-inner">
-          <Link to="/" className="auth-brand-link" aria-label="Sahyadri Organics Homepage">
+          <Link to="/" className="auth-brand-link" aria-label="Sahydri Organics Homepage">
             <img
               src="/images/sahyadri-logo.png"
-              alt="Sahyadri Organics"
+              alt="Sahydri Organics"
               className="auth-brand-logo"
             />
             <div className="auth-brand-text">
-              <span className="auth-brand-name">SAHYADRI</span>
+              <span className="auth-brand-name">SAHYDRI</span>
               <span className="auth-brand-tag">ORGANICS · WESTERN GHATS</span>
             </div>
           </Link>
@@ -114,7 +114,7 @@ export default function RegisterPage() {
             </div>
             <h1 className="auth-card-title">Create an Account</h1>
             <p className="auth-card-desc">
-              Join the Sahyadri Connoisseurs circle for priority harvest releases and seamless order tracking.
+              Join the Sahydri Connoisseurs circle for priority harvest releases and seamless order tracking.
             </p>
           </div>
 

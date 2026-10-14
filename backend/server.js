@@ -7,6 +7,7 @@ import productRoutes  from './routes/productRoutes.js';
 import orderRoutes    from './routes/orderRoutes.js';
 import razorpayRoutes from './routes/razorpayRoutes.js';
 import authRoutes     from './routes/authRoutes.js';
+import shippingRoutes from './routes/shippingRoutes.js';
 import { initDatabase, isDatabaseConnected } from './config/db.js';
 
 const app  = express();
@@ -49,8 +50,9 @@ app.use('/api', globalLimiter);
 app.use('/api/auth',     authRoutes);
 app.use('/api/products', productRoutes);
 
-// ── Order & Payment Routes ────────────────────────────────────────────────────
+// ── Order, Shipping & Payment Routes ──────────────────────────────────────────
 app.use('/api/orders',   orderRoutes);
+app.use('/api/shipping', shippingRoutes);
 app.use('/api/razorpay', razorpayRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────

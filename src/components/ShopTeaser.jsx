@@ -68,7 +68,7 @@ export default function ShopTeaser({ onGoShop, onAddToCart }) {
             letterSpacing: '-0.02em', lineHeight: '1.1',
             marginBottom: '18px',
           }}>
-            The Sahyadri Collection
+            The Sahydri Collection
           </h2>
 
           <p style={{

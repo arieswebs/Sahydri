@@ -6,6 +6,7 @@ import {
     LayoutDashboard, Settings, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { getShipwayTrackingUrl } from '../services/shipwayService';
 
 // ─── Status Metadata ──────────────────────────────────────────────────────────
 const STATUS_META = {
@@ -357,9 +358,36 @@ export default function CustomerDashboard({
                                                     </div>
 
                                                     <div className="account-order-bottom">
-                                                        <span className="account-order-method">
-                                                            Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
-                                                        </span>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                                                            <span className="account-order-method">
+                                                                Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(getShipwayTrackingUrl(order.id), '_blank');
+                                                                }}
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    background: 'rgba(223, 190, 132, 0.12)',
+                                                                    border: '1px solid rgba(223, 190, 132, 0.35)',
+                                                                    color: '#dfbe84',
+                                                                    padding: '4px 10px',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.72rem',
+                                                                    fontWeight: '600',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                                title="Track live on Shipway"
+                                                            >
+                                                                <Truck size={12} />
+                                                                <span>Track with Shipway</span>
+                                                                <ExternalLink size={10} />
+                                                            </button>
+                                                        </div>
                                                         <div className="account-order-total-group">
                                                             <span className="account-order-total-label">Total:</span>
                                                             <span className="account-order-total-val">₹{Number(order.total || 0).toLocaleString('en-IN')}</span>
@@ -450,9 +478,36 @@ export default function CustomerDashboard({
                                                     </div>
 
                                                     <div className="account-order-bottom">
-                                                        <span className="account-order-method">
-                                                            Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
-                                                        </span>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                                                            <span className="account-order-method">
+                                                                Paid via {order.paymentMethod || 'Razorpay / Prepaid'}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(getShipwayTrackingUrl(order.id), '_blank');
+                                                                }}
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '6px',
+                                                                    background: 'rgba(223, 190, 132, 0.12)',
+                                                                    border: '1px solid rgba(223, 190, 132, 0.35)',
+                                                                    color: '#dfbe84',
+                                                                    padding: '4px 10px',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '0.72rem',
+                                                                    fontWeight: '600',
+                                                                    cursor: 'pointer'
+                                                                }}
+                                                                title="Track live on Shipway"
+                                                            >
+                                                                <Truck size={12} />
+                                                                <span>Track with Shipway</span>
+                                                                <ExternalLink size={10} />
+                                                            </button>
+                                                        </div>
                                                         <div className="account-order-total-group">
                                                             <span className="account-order-total-label">Total Paid:</span>
                                                             <span className="account-order-total-val">₹{Number(order.total || 0).toLocaleString('en-IN')}</span>

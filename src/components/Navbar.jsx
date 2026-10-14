@@ -117,7 +117,7 @@ export default function Navbar({
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-nav-drawer"
           >
-            <Menu size={20} strokeWidth={2} />
+            <Menu size={23} strokeWidth={2.2} />
           </button>
 
           {/* ── Brand Logo Lockup ── */}
@@ -125,24 +125,20 @@ export default function Navbar({
             href="/"
             onClick={handleBrandClick}
             className="nav-brand-lockup"
-            aria-label="Sahyadri Organics Homepage"
+            aria-label="Sahydri Organics Homepage"
           >
             <div className="nav-logo-badge">
               <img
                 src="/images/sahyadri-logo.png"
-                alt="Sahyadri Organics"
+                alt="Sahydri Organics"
                 className="nav-logo-img"
-                width="36"
-                height="36"
+                width="42"
+                height="42"
               />
             </div>
             <div className="nav-brand-text-col">
-              <span className="nav-brand-title">
-                SAHYADRI <span className="nav-brand-gold">ORGANICS</span>
-              </span>
-              <span className="nav-brand-origin desktop-only">
-                KERALA · WESTERN GHATS
-              </span>
+              <span className="nav-brand-title">SAHYDRI</span>
+              <span className="nav-brand-sub">ORGANICS</span>
             </div>
           </a>
 
@@ -190,7 +186,7 @@ export default function Navbar({
               title="Search products"
               aria-label="Search spices and honey"
             >
-              <Search size={18} strokeWidth={1.8} />
+              <Search size={21} strokeWidth={2} />
             </button>
 
             {/* Shopping Cart Drawer Trigger */}
@@ -200,7 +196,7 @@ export default function Navbar({
               title="Shopping Bag"
               aria-label={`Shopping bag containing ${cartCount} items`}
             >
-              <ShoppingBag size={18} strokeWidth={1.8} />
+              <ShoppingBag size={21} strokeWidth={2} />
               {cartCount > 0 && (
                 <span className="nav-bag-count" aria-hidden="true">
                   {cartCount > 99 ? '99+' : cartCount}
@@ -220,7 +216,7 @@ export default function Navbar({
                 >
                   <div className="nav-member-avatar" aria-hidden="true">
                     {isAdmin ? (
-                      <Shield size={12} color="#0c1f14" />
+                      <Shield size={14} color="#0c1f14" />
                     ) : (
                       <span className="nav-member-initials">{initials}</span>
                     )}
@@ -229,7 +225,7 @@ export default function Navbar({
                     {isAdmin ? 'Admin' : firstName}
                   </span>
                   <ChevronDown
-                    size={12}
+                    size={14}
                     className={`nav-chevron-icon ${userMenuOpen ? 'nav-chevron-flipped' : ''}`}
                   />
                 </button>
@@ -359,12 +355,8 @@ export default function Navbar({
                   />
                 </div>
                 <div className="nav-brand-text-col">
-                  <span className="nav-brand-title" style={{ fontSize: '0.88rem' }}>
-                    SAHYADRI <span className="nav-brand-gold">ORGANICS</span>
-                  </span>
-                  <span className="nav-brand-origin" style={{ fontSize: '0.55rem' }}>
-                    WESTERN GHATS · KERALA
-                  </span>
+                  <span className="nav-brand-title" style={{ fontSize: '0.88rem' }}>SAHYDRI</span>
+                  <span className="nav-brand-sub" style={{ fontSize: '0.58rem' }}>ORGANICS</span>
                 </div>
               </a>
 
@@ -384,7 +376,7 @@ export default function Navbar({
                 className="mobile-drawer-search-btn"
               >
                 <Search size={15} color="#8c733b" />
-                <span>Search spices, honey & powders…</span>
+                <span>Search products…</span>
               </button>
             </div>
 
@@ -393,14 +385,14 @@ export default function Navbar({
 
               {/* Group 1: Product Categories */}
               <div className="mobile-nav-group">
-                <span className="mobile-group-title">HARVEST CATALOGUE</span>
+                <span className="mobile-group-title">SHOP</span>
                 <button
                   className="mobile-nav-link-btn"
                   onClick={() => { setMobileMenuOpen(false); onGoShop?.(); }}
                 >
                   <div className="mobile-link-left">
                     <Sparkles size={16} className="mobile-link-icon" />
-                    <span>Shop All Harvests</span>
+                    <span>All Products</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -410,7 +402,7 @@ export default function Navbar({
                 >
                   <div className="mobile-link-left">
                     <Leaf size={16} className="mobile-link-icon" />
-                    <span>Single-Estate Spices</span>
+                    <span>Spices</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -420,7 +412,17 @@ export default function Navbar({
                 >
                   <div className="mobile-link-left">
                     <Sparkles size={16} className="mobile-link-icon" />
-                    <span>Raw Forest Honey</span>
+                    <span>Honey</span>
+                  </div>
+                  <ChevronRight size={15} className="mobile-link-arrow" />
+                </button>
+                <button
+                  className="mobile-nav-link-btn"
+                  onClick={() => { setMobileMenuOpen(false); onGoShop?.(); }}
+                >
+                  <div className="mobile-link-left">
+                    <Leaf size={16} className="mobile-link-icon" />
+                    <span>Oils</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -428,14 +430,14 @@ export default function Navbar({
 
               {/* Group 2: Heritage & Provenance */}
               <div className="mobile-nav-group">
-                <span className="mobile-group-title">ORIGIN & ESTATE</span>
+                <span className="mobile-group-title">ABOUT</span>
                 <button
                   className="mobile-nav-link-btn"
                   onClick={() => { setMobileMenuOpen(false); onScrollToSection?.('story'); }}
                 >
                   <div className="mobile-link-left">
                     <Compass size={16} className="mobile-link-icon" />
-                    <span>Rainforest Story</span>
+                    <span>Our Story</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -445,7 +447,7 @@ export default function Navbar({
                 >
                   <div className="mobile-link-left">
                     <Compass size={16} className="mobile-link-icon" />
-                    <span>Cultural Heritage</span>
+                    <span>Heritage</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -455,7 +457,7 @@ export default function Navbar({
                 >
                   <div className="mobile-link-left">
                     <Shield size={16} className="mobile-link-icon" />
-                    <span>Purity & NMR Labs</span>
+                    <span>Purity & Testing</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -465,7 +467,7 @@ export default function Navbar({
                 >
                   <div className="mobile-link-left">
                     <MapPin size={16} className="mobile-link-icon" />
-                    <span>Estate Contact</span>
+                    <span>Contact Us</span>
                   </div>
                   <ChevronRight size={15} className="mobile-link-arrow" />
                 </button>
@@ -473,7 +475,7 @@ export default function Navbar({
 
               {/* Group 3: Account Status & Actions */}
               <div className="mobile-nav-group mobile-account-group">
-                <span className="mobile-group-title">CUSTOMER ACCESS</span>
+                <span className="mobile-group-title">ACCOUNT</span>
                 {currentUser ? (
                   <div className="mobile-logged-in-box">
                     <div className="mobile-customer-info-row">
@@ -536,7 +538,7 @@ export default function Navbar({
                 ) : (
                   <div className="mobile-auth-guest-box">
                     <p className="mobile-guest-desc">
-                      Sign in to track orders, manage your delivery address, and access member harvest discounts.
+                      Sign in to track orders, manage addresses, and access member discounts.
                     </p>
                     <div className="mobile-guest-actions-row">
                       <button
@@ -574,15 +576,15 @@ export default function Navbar({
           backdrop-filter: blur(16px);
           -webkit-backdrop-filter: blur(16px);
           border-bottom: 1px solid rgba(14, 43, 33, 0.08);
-          box-shadow: 0 1px 10px rgba(11, 37, 29, 0.03);
+          box-shadow: 0 1px 12px rgba(11, 37, 29, 0.04);
           transition: padding 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
-          padding: 12px 0;
+          padding: 16px 0;
         }
 
         .sahyadri-navbar-scrolled {
-          padding: 8px 0;
+          padding: 12px 0;
           background-color: rgba(253, 251, 247, 0.98);
-          box-shadow: 0 4px 20px rgba(11, 37, 29, 0.06);
+          box-shadow: 0 4px 22px rgba(11, 37, 29, 0.07);
           border-bottom-color: rgba(14, 43, 33, 0.12);
         }
 
@@ -590,7 +592,7 @@ export default function Navbar({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
+          gap: 16px;
         }
 
         /* ── Mobile Hamburger Toggle ── */
@@ -599,8 +601,8 @@ export default function Navbar({
           background: none;
           border: 1px solid transparent;
           color: #0a221a;
-          width: 42px;
-          height: 42px;
+          width: 44px;
+          height: 44px;
           border-radius: 8px;
           cursor: pointer;
           align-items: center;
@@ -610,7 +612,7 @@ export default function Navbar({
         }
 
         .nav-mobile-toggle-btn:hover {
-          background-color: rgba(14, 43, 33, 0.05);
+          background-color: rgba(14, 43, 33, 0.06);
         }
 
         /* ── Brand Lockup ── */
@@ -618,18 +620,18 @@ export default function Navbar({
           text-decoration: none;
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
           cursor: pointer;
           flex-shrink: 0;
         }
 
         .nav-logo-badge {
-          width: 38px;
-          height: 38px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           overflow: hidden;
           border: 1.5px solid #dfbe84;
-          box-shadow: 0 2px 8px rgba(11, 37, 29, 0.1);
+          box-shadow: 0 2px 10px rgba(11, 37, 29, 0.12);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -639,7 +641,7 @@ export default function Navbar({
         }
 
         .nav-brand-lockup:hover .nav-logo-badge {
-          transform: scale(1.04);
+          transform: scale(1.05);
         }
 
         .nav-logo-img {
@@ -652,29 +654,28 @@ export default function Navbar({
         .nav-brand-text-col {
           display: flex;
           flex-direction: column;
-          line-height: 1.15;
+          line-height: 1;
+          justify-content: center;
         }
 
         .nav-brand-title {
           font-family: var(--font-sans);
-          font-size: 0.92rem;
-          letter-spacing: 0.1em;
+          font-size: 0.98rem;
+          letter-spacing: 0.12em;
           font-weight: 800;
           color: #0a221a;
           text-transform: uppercase;
+          line-height: 1.1;
         }
 
-        .nav-brand-gold {
+        .nav-brand-sub {
+          font-family: var(--font-sans);
+          font-size: 0.64rem;
+          letter-spacing: 0.22em;
+          font-weight: 700;
           color: #8c733b;
-          font-weight: 600;
-        }
-
-        .nav-brand-origin {
-          font-size: 0.58rem;
-          letter-spacing: 0.14em;
-          color: #68726c;
-          font-weight: 600;
           text-transform: uppercase;
+          line-height: 1;
           margin-top: 1px;
         }
 
@@ -682,12 +683,12 @@ export default function Navbar({
         .nav-links-desktop {
           display: flex;
           align-items: center;
-          gap: 28px;
+          gap: 32px;
         }
 
         .nav-dest-btn {
           font-family: var(--font-sans);
-          font-size: 0.82rem;
+          font-size: 0.88rem;
           color: #2e4339;
           background: none;
           border: none;
@@ -695,7 +696,7 @@ export default function Navbar({
           font-weight: 600;
           letter-spacing: 0.03em;
           position: relative;
-          padding: 8px 0;
+          padding: 10px 0;
           transition: color 0.18s ease;
         }
 
@@ -729,7 +730,7 @@ export default function Navbar({
         .nav-utilities-cluster {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 10px;
           flex-shrink: 0;
         }
 
@@ -737,8 +738,8 @@ export default function Navbar({
           background: none;
           border: 1px solid transparent;
           color: #1b3d31;
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           cursor: pointer;
           display: flex;
@@ -749,20 +750,20 @@ export default function Navbar({
         }
 
         .nav-util-btn:hover {
-          background-color: rgba(14, 43, 33, 0.05);
+          background-color: rgba(14, 43, 33, 0.06);
           color: #0a221a;
         }
 
         .nav-bag-count {
           position: absolute;
-          top: 1px;
-          right: 1px;
+          top: 2px;
+          right: 2px;
           background-color: #0a221a;
           color: #dfbe84;
-          font-size: 0.62rem;
+          font-size: 0.68rem;
           font-weight: 700;
-          min-width: 17px;
-          height: 17px;
+          min-width: 19px;
+          height: 19px;
           border-radius: 10px;
           padding: 0 4px;
           display: flex;
@@ -777,18 +778,18 @@ export default function Navbar({
         .nav-login-btn {
           background: #0a221a;
           border: 1px solid #0a221a;
-          border-radius: 20px;
+          border-radius: 22px;
           color: #dfbe84;
           font-weight: 700;
-          font-size: 0.78rem;
+          font-size: 0.84rem;
           letter-spacing: 0.04em;
-          padding: 7px 16px;
+          padding: 9px 20px;
           cursor: pointer;
           font-family: inherit;
           transition: all 0.2s ease;
           box-shadow: 0 2px 6px rgba(10, 34, 26, 0.1);
           white-space: nowrap;
-          min-height: 36px;
+          min-height: 40px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -810,14 +811,14 @@ export default function Navbar({
         .nav-member-badge {
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 8px;
           background: rgba(14, 43, 33, 0.06);
           border: 1px solid rgba(14, 43, 33, 0.12);
           border-radius: 24px;
-          padding: 4px 10px 4px 5px;
+          padding: 5px 12px 5px 6px;
           cursor: pointer;
           transition: all 0.2s ease;
-          min-height: 36px;
+          min-height: 40px;
         }
 
         .nav-member-badge:hover {
@@ -831,8 +832,8 @@ export default function Navbar({
         }
 
         .nav-member-avatar {
-          width: 26px;
-          height: 26px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           background: linear-gradient(135deg, #1b4030, #0a221a);
           display: flex;
@@ -846,13 +847,13 @@ export default function Navbar({
         }
 
         .nav-member-initials {
-          font-size: 0.64rem;
+          font-size: 0.70rem;
           font-weight: 800;
           color: #dfbe84;
         }
 
         .nav-member-name {
-          font-size: 0.78rem;
+          font-size: 0.84rem;
           font-weight: 700;
           color: #0a221a;
           letter-spacing: 0.02em;
@@ -1238,24 +1239,36 @@ export default function Navbar({
           }
         }
 
+        @media (max-width: 768px) {
+          .sahyadri-navbar {
+            padding: 14px 0;
+          }
+          .sahyadri-navbar-scrolled {
+            padding: 11px 0;
+          }
+        }
+
         @media (max-width: 480px) {
           .desktop-only {
             display: none !important;
           }
           .sahyadri-navbar {
-            padding: 7px 0;
+            padding: 13px 0;
+          }
+          .sahyadri-navbar-scrolled {
+            padding: 10px 0;
           }
           .nav-content-container {
-            gap: 4px;
+            gap: 8px;
           }
           .nav-brand-lockup {
             min-width: 0;
             flex: 1 1 auto;
-            gap: 6px;
+            gap: 8px;
           }
           .nav-logo-badge {
-            width: 30px;
-            height: 30px;
+            width: 38px;
+            height: 38px;
             flex-shrink: 0;
           }
           .nav-brand-text-col {
@@ -1263,27 +1276,113 @@ export default function Navbar({
             overflow: hidden;
           }
           .nav-brand-title {
-            font-size: 0.76rem;
-            letter-spacing: 0.03em;
+            font-size: 0.82rem;
+            letter-spacing: 0.10em;
+            line-height: 1.1;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          }
+          .nav-brand-sub {
+            font-size: 0.54rem;
+            letter-spacing: 0.20em;
+            line-height: 1;
+            white-space: nowrap;
           }
           .nav-utilities-cluster {
-            gap: 3px;
+            gap: 6px;
             flex-shrink: 0;
           }
           .nav-mobile-toggle-btn {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             flex-shrink: 0;
             padding: 0;
           }
           .nav-util-btn {
-            width: 36px;
-            height: 36px;
+            width: 42px;
+            height: 42px;
             flex-shrink: 0;
             padding: 0;
+          }
+          .nav-login-btn {
+            padding: 7px 15px;
+            font-size: 0.80rem;
+            min-height: 38px;
+            border-radius: 19px;
+          }
+          .nav-member-badge {
+            padding: 4px 8px 4px 4px;
+            min-height: 38px;
+            gap: 5px;
+          }
+          .nav-member-avatar {
+            width: 28px;
+            height: 28px;
+          }
+          .nav-member-initials {
+            font-size: 0.68rem;
+          }
+        }
+
+        /* ── Specific Optimizations for iPhone SE (375px) ── */
+        @media (max-width: 380px) {
+          .sahyadri-navbar {
+            padding: 11px 0;
+          }
+          .nav-content-container {
+            gap: 6px;
+          }
+          .nav-brand-title {
+            font-size: 0.82rem;
+            letter-spacing: 0.03em;
+          }
+          .nav-logo-badge {
+            width: 35px;
+            height: 35px;
+          }
+          .nav-mobile-toggle-btn {
+            width: 40px;
+            height: 40px;
+          }
+          .nav-util-btn {
+            width: 40px;
+            height: 40px;
+          }
+          .nav-login-btn {
+            padding: 6px 12px;
+            font-size: 0.76rem;
+            min-height: 36px;
+          }
+        }
+
+        /* ── iPhone SE 1st Gen & Ultra-compact (320px) ── */
+        @media (max-width: 340px) {
+          .sahyadri-navbar {
+            padding: 8px 0;
+          }
+          .nav-content-container {
+            gap: 4px;
+          }
+          .nav-brand-lockup {
+            gap: 5px;
+          }
+          .nav-logo-badge {
+            width: 30px;
+            height: 30px;
+          }
+          .nav-brand-title {
+            font-size: 0.74rem;
+            letter-spacing: 0.02em;
+          }
+          .nav-mobile-toggle-btn {
+            width: 36px;
+            height: 36px;
+          }
+          .nav-util-btn {
+            width: 36px;
+            height: 36px;
+          }
+          .nav-utilities-cluster {
+            gap: 4px;
           }
           .nav-login-btn {
             padding: 5px 10px;
@@ -1295,80 +1394,6 @@ export default function Navbar({
             padding: 3px 6px 3px 3px;
             min-height: 32px;
             gap: 4px;
-          }
-          .nav-member-avatar {
-            width: 24px;
-            height: 24px;
-          }
-          .nav-member-initials {
-            font-size: 0.60rem;
-          }
-        }
-
-        /* ── Specific Optimizations for iPhone SE (375px) ── */
-        @media (max-width: 380px) {
-          .nav-content-container {
-            gap: 3px;
-          }
-          .nav-brand-title {
-            font-size: 0.72rem;
-            letter-spacing: 0.02em;
-          }
-          .nav-mobile-toggle-btn {
-            width: 35px;
-            height: 35px;
-          }
-          .nav-util-btn {
-            width: 35px;
-            height: 35px;
-          }
-          .nav-login-btn {
-            padding: 5px 8px;
-            font-size: 0.70rem;
-            min-height: 30px;
-          }
-        }
-
-        /* ── iPhone SE 1st Gen & Ultra-compact (320px) ── */
-        @media (max-width: 340px) {
-          .sahyadri-navbar {
-            padding: 5px 0;
-          }
-          .nav-content-container {
-            gap: 2px;
-          }
-          .nav-brand-lockup {
-            gap: 4px;
-          }
-          .nav-logo-badge {
-            width: 26px;
-            height: 26px;
-          }
-          .nav-brand-title {
-            font-size: 0.66rem;
-            letter-spacing: 0.01em;
-          }
-          .nav-mobile-toggle-btn {
-            width: 32px;
-            height: 32px;
-          }
-          .nav-util-btn {
-            width: 32px;
-            height: 32px;
-          }
-          .nav-utilities-cluster {
-            gap: 2px;
-          }
-          .nav-login-btn {
-            padding: 4px 6px;
-            font-size: 0.65rem;
-            min-height: 28px;
-            border-radius: 12px;
-          }
-          .nav-member-badge {
-            padding: 2px 4px 2px 2px;
-            min-height: 28px;
-            gap: 2px;
           }
         }
       `}</style>

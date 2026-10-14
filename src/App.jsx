@@ -7,7 +7,7 @@ import Hero from './components/Hero';
 import ShopTeaser from './components/ShopTeaser';
 import CulturalHeritage from './components/CulturalHeritage';
 import WhySahyadri from './components/WhySahyadri';
-import CulinaryGallery from './components/CulinaryGallery';
+import ArtisanCollections from './components/ArtisanCollections';
 import Testimonials from './components/Testimonials';
 import ConnoisseursClub from './components/ConnoisseursClub';
 import Footer from './components/Footer';
@@ -15,6 +15,7 @@ import CartDrawer from './components/CartDrawer';
 import ProductQuickView from './components/ProductQuickView';
 import SearchModal from './components/SearchModal';
 import OrderSuccessModal from './components/OrderSuccessModal';
+import ShipwayTrackingModal from './components/ShipwayTrackingModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import ShopPage from './components/ShopPage';
 import AdminDashboard from './components/AdminDashboard';
@@ -23,6 +24,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AccountPage from './pages/AccountPage';
 import { PRODUCTS } from './data/products';
+import { pushOrderToShipway } from './services/shipwayService';
 
 /* ── Product Detail Route Wrapper ─────────────────────────────────────────── */
 function ProductDetailRoute({
@@ -71,6 +73,7 @@ function AppContent() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
 
   // If user navigates to /checkout, open the cart drawer ready to finalize
   useEffect(() => {
@@ -123,6 +126,8 @@ function AppContent() {
   };
 
   const handleCheckout = (orderData) => {
+    // Notify Shipway logistics for automated dispatch & tracking
+    pushOrderToShipway(orderData);
     setCompletedOrder(orderData);
     clearCart();
     setIsCartOpen(false);
@@ -217,6 +222,13 @@ function AppContent() {
       <OrderSuccessModal
         orderData={completedOrder}
         onClose={() => setCompletedOrder(null)}
+        onOpenTracking={(orderId) => setTrackingOrderId(orderId || true)}
+      />
+
+      <ShipwayTrackingModal
+        isOpen={Boolean(trackingOrderId)}
+        initialOrderId={typeof trackingOrderId === 'string' ? trackingOrderId : ''}
+        onClose={() => setTrackingOrderId(null)}
       />
 
       {/* ── Routes ── */}
@@ -253,7 +265,7 @@ function AppContent() {
               />
               <CulturalHeritage />
               <WhySahyadri />
-              <CulinaryGallery />
+              <ArtisanCollections onAddToCart={handleAddToCart} onGoShop={() => navigate('/shop')} />
               <Testimonials />
               <ConnoisseursClub onJoinClick={() => navigate('/register')} />
               <Footer />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Star, ShoppingCart, ShieldCheck, MapPin, Wind, Sparkles, Check } from 'lucide-react';
+import DeliveryEstimator from './DeliveryEstimator';
 
 export default function ProductQuickView({ product, onClose, onAddToCart, onViewProduct }) {
   const [selectedWeight, setSelectedWeight] = useState(product ? product.weight : '100g');
@@ -214,6 +215,9 @@ export default function ProductQuickView({ product, onClose, onAddToCart, onView
               ))}
             </div>
           </div>
+
+          {/* Delivery & Pincode Checker */}
+          <DeliveryEstimator compact={true} theme="dark" />
 
           {/* Action Row */}
           <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>

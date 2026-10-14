@@ -1,6 +1,7 @@
 import { orders, products } from '../data/store.js';
 import { sanitizeString, sanitizeEmail, sanitizeAddress, sanitizeNumber } from '../utils/sanitize.js';
 import { query, isDatabaseConnected } from '../config/db.js';
+import { pushOrderToShipway } from '../utils/shipway.js';
 
 // Format MySQL order row to frontend shape
 function formatOrder(r) {
@@ -166,6 +167,9 @@ export const createOrder = async (req, res) => {
             }
             orders.unshift(newOrder);
 
+            // Asynchronously dispatch to Shipway for fulfillment & tracking
+            pushOrderToShipway(newOrder).catch(e => console.warn('[Shipway Auto-Push]', e.message));
+
             return res.status(201).json({ success: true, data: newOrder });
         }
     } catch (err) {
@@ -181,6 +185,10 @@ export const createOrder = async (req, res) => {
         }
     }
     orders.unshift(newOrder);
+
+    // Asynchronously dispatch to Shipway for fulfillment & tracking
+    pushOrderToShipway(newOrder).catch(e => console.warn('[Shipway Auto-Push]', e.message));
+
     res.status(201).json({ success: true, data: newOrder });
 };
 

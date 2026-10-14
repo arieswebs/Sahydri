@@ -24,6 +24,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AccountPage from './pages/AccountPage';
+import CheckoutPage from './pages/CheckoutPage';
 import { PRODUCTS } from './data/products';
 import { pushOrderToShipway } from './services/shipwayService';
 
@@ -76,10 +77,10 @@ function AppContent() {
   const [completedOrder, setCompletedOrder] = useState(null);
   const [trackingOrderId, setTrackingOrderId] = useState(null);
 
-  // If user navigates to /checkout, open the cart drawer ready to finalize
+  // Ensure cart drawer is closed when on dedicated /checkout page
   useEffect(() => {
     if (location.pathname === '/checkout') {
-      setIsCartOpen(true);
+      setIsCartOpen(false);
     }
   }, [location.pathname]);
 
@@ -123,7 +124,9 @@ function AppContent() {
 
   const handleBuyNow = (product) => {
     handleAddToCart(product);
-    setIsCartOpen(true);
+    setIsCartOpen(false);
+    navigate('/checkout');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCheckout = (orderData) => {
@@ -201,6 +204,10 @@ function AppContent() {
         onRemoveItem={removeFromCart}
         onCheckout={handleCheckout}
         onAddToCart={handleAddToCart}
+        onProceedToCheckout={() => {
+          setIsCartOpen(false);
+          navigate('/checkout');
+        }}
         onRequireLogin={(redirectDest) => {
           setIsCartOpen(false);
           navigate(`/login?redirect=${encodeURIComponent(redirectDest || '/checkout')}`);
@@ -353,33 +360,11 @@ function AppContent() {
           }
         />
 
-        {/* 6. Checkout Route (Opens Cart Drawer) */}
+        {/* 6. Dedicated Full Checkout Page */}
         <Route
           path="/checkout"
           element={
-            <>
-              <Navbar
-                cartCount={cartItemCount}
-                wishlistCount={wishlist.length}
-                onOpenCart={() => setIsCartOpen(true)}
-                onOpenSearch={() => setIsSearchOpen(true)}
-                onGoHome={() => navigate('/')}
-                onGoShop={() => navigate('/shop')}
-                solidBackground={true}
-                activePage="shop"
-                currentUser={currentUser}
-                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
-                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
-                onOpenAccountSection={handleAccountSection}
-                onScrollToSection={scrollToSection}
-              />
-              <ShopPage
-                onViewProduct={handleViewProduct}
-                onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyNow}
-              />
-              <Footer />
-            </>
+            <CheckoutPage onOrderComplete={handleCheckout} />
           }
         />
 

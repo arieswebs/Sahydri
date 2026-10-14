@@ -14,7 +14,8 @@ import {
   Lock,
   Truck,
   Loader,
-  Package
+  Package,
+  MapPin
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
 import { useShop } from '../context/ShopContext';
@@ -28,7 +29,8 @@ export default function CartDrawer({
   onRemoveItem,
   onCheckout,
   onAddToCart,
-  onRequireLogin
+  onRequireLogin,
+  onProceedToCheckout
 }) {
   const { API, currentUser, showToast, authFetch, createOrder } = useShop();
   const [promoCode, setPromoCode] = useState('');
@@ -1024,66 +1026,36 @@ export default function CartDrawer({
               </div>
             )}
 
-            {/* ── Main Action Button ── */}
+            {/* ── Main Action Button: Proceed to Dedicated Checkout Page ── */}
             <button
               onClick={() => {
-                if (!currentUser) {
-                  onClose();
-                  if (onRequireLogin) onRequireLogin('/checkout');
-                  else window.location.href = '/login?redirect=/checkout';
-                  return;
-                }
-                if (paymentMethod === 'cod') handleCodCheckout();
-                else handleRazorpayCheckout();
+                onClose();
+                if (onProceedToCheckout) onProceedToCheckout();
+                else window.location.href = '/checkout';
               }}
-              disabled={paymentLoading}
               style={{
                 width: '100%',
                 padding: '15px',
                 fontSize: '0.88rem',
-                background: paymentLoading
-                  ? 'linear-gradient(135deg, #0a221a, #1a3a2a)'
-                  : 'linear-gradient(135deg, #0b251d 0%, #16402e 100%)',
+                background: 'linear-gradient(135deg, #0b251d 0%, #16402e 100%)',
                 color: '#f5e4be',
                 fontWeight: '800',
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 border: 'none',
                 borderRadius: '4px',
-                cursor: paymentLoading ? 'not-allowed' : 'pointer',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
                 boxShadow: '0 8px 24px rgba(10, 34, 26, 0.25)',
                 transition: 'all 0.25s ease',
-                opacity: paymentLoading ? 0.8 : 1,
               }}
             >
-              {paymentLoading ? (
-                <>
-                  <Loader size={16} color="#dfbe84" style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>RECORDING ORDER IN DATABASE…</span>
-                </>
-              ) : !currentUser ? (
-                <>
-                  <Lock size={15} color="#dfbe84" />
-                  <span>SIGN IN TO CHECKOUT</span>
-                  <ArrowRight size={16} color="#dfbe84" />
-                </>
-              ) : paymentMethod === 'cod' ? (
-                <>
-                  <Package size={16} color="#dfbe84" />
-                  <span>CONFIRM ORDER (CASH ON DELIVERY)</span>
-                  <ArrowRight size={16} color="#dfbe84" />
-                </>
-              ) : (
-                <>
-                  <Lock size={15} color="#dfbe84" />
-                  <span>PAY SECURELY WITH RAZORPAY</span>
-                  <ArrowRight size={16} color="#dfbe84" />
-                </>
-              )}
+              <Lock size={15} color="#dfbe84" />
+              <span>PROCEED TO CHECKOUT • ₹{grandTotal}</span>
+              <ArrowRight size={16} color="#dfbe84" />
             </button>
 
             {/* Razorpay badge */}

@@ -21,6 +21,82 @@ import { PRODUCTS } from '../data/products';
 import Footer from './Footer';
 import DeliveryEstimator from './DeliveryEstimator';
 
+// Dynamic weight options & price calculations tailored to product type.
+// Base quantity (multiplier 1.0 / default product weight) is always guaranteed to be FIRST.
+export const getPackOptions = (p) => {
+  if (!p) return [];
+
+  // Priority: custom weights configured in admin portal
+  if (Array.isArray(p.weights) && p.weights.length > 0) {
+    const list = p.weights.map(w => {
+      const wLabel = w.weight || w.label || String(w);
+      const wPrice = w.price !== undefined ? Number(w.price) : Number(p.price);
+      const wOrigPrice = w.originalPrice !== undefined ? Number(w.originalPrice) : Number(p.originalPrice || p.price);
+      return {
+        label: wLabel,
+        price: wPrice,
+        originalPrice: wOrigPrice,
+        multiplier: (Number(wPrice) && Number(p.price)) ? (Number(wPrice) / Number(p.price)) : 1,
+        stock: w.stock
+      };
+    });
+    // Ensure base quantity is first
+    const baseIdx = list.findIndex(w => (p.weight && w.label.toLowerCase().includes(p.weight.toLowerCase())) || w.multiplier === 1.0);
+    if (baseIdx > 0) {
+      return [list[baseIdx], ...list.filter((_, idx) => idx !== baseIdx)];
+    }
+    return list;
+  }
+
+  if (p.category === 'oils') {
+    return [
+      { label: '1 L Glass Bottle', multiplier: 1.0 },
+      { label: '500ml Bottle', multiplier: 0.55 },
+      { label: '2 L Reserve Canister', multiplier: 1.9 }
+    ];
+  }
+  if (p.category === 'honey') {
+    if (p.weight === '1kg') {
+      return [
+        { label: '1kg Heritage Pot', multiplier: 1.0 },
+        { label: '500g Glass Jar', multiplier: 0.55 },
+        { label: '2kg Estate Reserve', multiplier: 1.9 }
+      ];
+    }
+    return [
+      { label: '500g Raw Honey Jar', multiplier: 1.0 },
+      { label: '250g Artisanal Jar', multiplier: 0.55 },
+      { label: '1kg Heritage Crock', multiplier: 1.9 }
+    ];
+  }
+  if (p.id === 'cardamom-pepper-combo') {
+    return [
+      { label: 'Twin Gift Set', multiplier: 1.0 },
+      { label: 'Grand Heritage Gift Box', multiplier: 1.8 }
+    ];
+  }
+  if (p.weight === '1kg') {
+    return [
+      { label: '1kg Master Pack', multiplier: 1.0 },
+      { label: '500g Pouch', multiplier: 0.55 },
+      { label: '2kg Bulk Sack', multiplier: 1.9 }
+    ];
+  }
+  if (p.weight === '250g') {
+    return [
+      { label: '250g Heritage Tin', multiplier: 1.0 },
+      { label: '100g Trial Pouch', multiplier: 0.45 },
+      { label: '500g Reserve Pack', multiplier: 1.9 }
+    ];
+  }
+  // Default whole spices & stone ground powders
+  return [
+    { label: '100g Aroma-Lock Pouch', multiplier: 1.0 },
+    { label: '250g Heritage Tin', multiplier: 2.25 },
+    { label: '500g Estate Reserve Pack', multiplier: 4.2 }
+  ];
+};
+
 export default function ProductDetailPage({
   product,
   onBack,
@@ -30,79 +106,15 @@ export default function ProductDetailPage({
   onToggleWishlist,
   onSelectProduct
 }) {
-  const [selectedWeight, setSelectedWeight] = useState(product.weight || '100g');
+  const [selectedWeight, setSelectedWeight] = useState(() => {
+    const packs = getPackOptions(product);
+    return packs[0]?.label || product?.weight || '100g';
+  });
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('terroir');
   const [selectedImageIdx, setSelectedImageIdx] = useState(0);
   const [addedAnimation, setAddedAnimation] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-
-  // Dynamic weight options & price calculations tailored to product type
-  const getPackOptions = (p) => {
-    // Priority: custom weights configured in admin portal
-    if (Array.isArray(p.weights) && p.weights.length > 0) {
-      return p.weights.map(w => {
-        const wLabel = w.weight || w.label || String(w);
-        const wPrice = w.price !== undefined ? Number(w.price) : Number(p.price);
-        const wOrigPrice = w.originalPrice !== undefined ? Number(w.originalPrice) : Number(p.originalPrice || p.price);
-        return {
-          label: wLabel,
-          price: wPrice,
-          originalPrice: wOrigPrice,
-          multiplier: (Number(wPrice) && Number(p.price)) ? (Number(wPrice) / Number(p.price)) : 1,
-          stock: w.stock
-        };
-      });
-    }
-
-    if (p.category === 'oils') {
-      return [
-        { label: '500ml Bottle', multiplier: 0.55 },
-        { label: '1 L Glass Bottle', multiplier: 1.0 },
-        { label: '2 L Reserve Canister', multiplier: 1.9 }
-      ];
-    }
-    if (p.category === 'honey') {
-      if (p.weight === '1kg') {
-        return [
-          { label: '500g Glass Jar', multiplier: 0.55 },
-          { label: '1kg Heritage Pot', multiplier: 1.0 },
-          { label: '2kg Estate Reserve', multiplier: 1.9 }
-        ];
-      }
-      return [
-        { label: '250g Artisanal Jar', multiplier: 0.55 },
-        { label: '500g Raw Honey Jar', multiplier: 1.0 },
-        { label: '1kg Heritage Crock', multiplier: 1.9 }
-      ];
-    }
-    if (p.id === 'cardamom-pepper-combo') {
-      return [
-        { label: 'Twin Gift Set', multiplier: 1.0 },
-        { label: 'Grand Heritage Gift Box', multiplier: 1.8 }
-      ];
-    }
-    if (p.weight === '1kg') {
-      return [
-        { label: '500g Pouch', multiplier: 0.55 },
-        { label: '1kg Master Pack', multiplier: 1.0 },
-        { label: '2kg Bulk Sack', multiplier: 1.9 }
-      ];
-    }
-    if (p.weight === '250g') {
-      return [
-        { label: '100g Trial Pouch', multiplier: 0.45 },
-        { label: '250g Heritage Tin', multiplier: 1.0 },
-        { label: '500g Reserve Pack', multiplier: 1.9 }
-      ];
-    }
-    // Default whole spices & stone ground powders
-    return [
-      { label: '100g Aroma-Lock Pouch', multiplier: 1.0 },
-      { label: '250g Heritage Tin', multiplier: 2.25 },
-      { label: '500g Estate Reserve Pack', multiplier: 4.2 }
-    ];
-  };
 
   const weightOptions = getPackOptions(product);
 
@@ -110,7 +122,7 @@ export default function ProductDetailPage({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const packs = getPackOptions(product);
-    const defaultPack = packs.find((o) => o.multiplier === 1.0) || packs[0];
+    const defaultPack = packs[0] || packs.find((o) => o.multiplier === 1.0);
     setSelectedWeight(defaultPack?.label || product.weight || '100g');
     setQuantity(1);
     setSelectedImageIdx(0);

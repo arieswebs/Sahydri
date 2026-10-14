@@ -1,31 +1,15 @@
 import React, { useState } from 'react';
 import { X, Star, ShoppingCart, ShieldCheck, MapPin, Wind, Sparkles, Check } from 'lucide-react';
 import DeliveryEstimator from './DeliveryEstimator';
+import { getPackOptions } from './ProductDetailPage';
 
 export default function ProductQuickView({ product, onClose, onAddToCart, onViewProduct }) {
-  const [selectedWeight, setSelectedWeight] = useState(product ? product.weight : '100g');
+  const weights = getPackOptions(product);
+  const [selectedWeight, setSelectedWeight] = useState(() => weights[0]?.label || product?.weight || '100g');
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
   if (!product) return null;
-
-  const weights = (Array.isArray(product.weights) && product.weights.length > 0)
-    ? product.weights.map(w => {
-        const wLabel = w.weight || w.label || String(w);
-        const wPrice = w.price !== undefined ? Number(w.price) : Number(product.price);
-        const wOrigPrice = w.originalPrice !== undefined ? Number(w.originalPrice) : Number(product.originalPrice || product.price);
-        return {
-          label: wLabel,
-          price: wPrice,
-          originalPrice: wOrigPrice,
-          multiplier: (Number(wPrice) && Number(product.price)) ? (Number(wPrice) / Number(product.price)) : 1
-        };
-      })
-    : [
-        { label: product.weight || '100g', multiplier: 1 },
-        { label: '250g', multiplier: 2.2 },
-        { label: '500g Family Pack', multiplier: 4.0 }
-      ];
 
   const selectedOption = weights.find(w => w.label === selectedWeight) || weights[0];
   const currentMultiplier = selectedOption?.multiplier || 1;

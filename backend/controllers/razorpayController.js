@@ -20,10 +20,10 @@ async function getActiveCredentials() {
             if (rows && rows.length > 0) {
                 const map = {};
                 rows.forEach(r => { map[r.key_name] = r.key_value; });
-                if (map['razorpay_key_id'] !== undefined) memoryConfig.keyId = map['razorpay_key_id'];
-                if (map['razorpay_key_secret'] !== undefined) memoryConfig.keySecret = map['razorpay_key_secret'];
+                if (map['razorpay_key_id'] && map['razorpay_key_id'].trim() !== '') memoryConfig.keyId = map['razorpay_key_id'].trim();
+                if (map['razorpay_key_secret'] && map['razorpay_key_secret'].trim() !== '') memoryConfig.keySecret = map['razorpay_key_secret'].trim();
                 if (map['razorpay_webhook_secret'] !== undefined) memoryConfig.webhookSecret = map['razorpay_webhook_secret'];
-                if (map['razorpay_mode'] !== undefined) memoryConfig.mode = map['razorpay_mode'];
+                if (map['razorpay_mode'] && map['razorpay_mode'].trim() !== '') memoryConfig.mode = map['razorpay_mode'];
                 if (map['razorpay_enabled'] !== undefined) memoryConfig.enabled = map['razorpay_enabled'] === '1' || map['razorpay_enabled'] === 'true';
             }
         }

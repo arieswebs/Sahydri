@@ -19,6 +19,7 @@ import ShipwayTrackingModal from './components/ShipwayTrackingModal';
 import ProductDetailPage from './components/ProductDetailPage';
 import ShopPage from './components/ShopPage';
 import AdminDashboard from './components/AdminDashboard';
+import AdminPortalAuth from './components/AdminPortalAuth';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -382,14 +383,14 @@ function AppContent() {
           }
         />
 
-        {/* 7. Dedicated Admin Dashboard (Protected Route) */}
+        {/* 7. Dedicated Admin Dashboard & Portal Gateway */}
         <Route
           path="/admin"
           element={
             currentUser?.role === 'admin' ? (
               <AdminDashboard onClose={() => navigate('/')} />
             ) : (
-              <Navigate to="/login?redirect=/admin" replace />
+              <AdminPortalAuth onLoginSuccess={() => navigate('/admin')} />
             )
           }
         />

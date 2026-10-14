@@ -9,15 +9,28 @@ export default function ProductQuickView({ product, onClose, onAddToCart, onView
 
   if (!product) return null;
 
-  const weights = [
-    { label: product.weight, multiplier: 1 },
-    { label: '250g', multiplier: 2.2 },
-    { label: '500g Family Pack', multiplier: 4.0 }
-  ];
+  const weights = (Array.isArray(product.weights) && product.weights.length > 0)
+    ? product.weights.map(w => {
+        const wLabel = w.weight || w.label || String(w);
+        const wPrice = w.price !== undefined ? Number(w.price) : Number(product.price);
+        const wOrigPrice = w.originalPrice !== undefined ? Number(w.originalPrice) : Number(product.originalPrice || product.price);
+        return {
+          label: wLabel,
+          price: wPrice,
+          originalPrice: wOrigPrice,
+          multiplier: (Number(wPrice) && Number(product.price)) ? (Number(wPrice) / Number(product.price)) : 1
+        };
+      })
+    : [
+        { label: product.weight || '100g', multiplier: 1 },
+        { label: '250g', multiplier: 2.2 },
+        { label: '500g Family Pack', multiplier: 4.0 }
+      ];
 
-  const currentMultiplier = weights.find(w => w.label === selectedWeight)?.multiplier || 1;
-  const currentPrice = Math.round(product.price * currentMultiplier);
-  const currentOriginal = Math.round(product.originalPrice * currentMultiplier);
+  const selectedOption = weights.find(w => w.label === selectedWeight) || weights[0];
+  const currentMultiplier = selectedOption?.multiplier || 1;
+  const currentPrice = selectedOption?.price !== undefined ? selectedOption.price : Math.round(product.price * currentMultiplier);
+  const currentOriginal = selectedOption?.originalPrice !== undefined ? selectedOption.originalPrice : Math.round(product.originalPrice * currentMultiplier);
 
   const handleAdd = () => {
     onAddToCart({

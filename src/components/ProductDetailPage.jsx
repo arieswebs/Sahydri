@@ -39,6 +39,22 @@ export default function ProductDetailPage({
 
   // Dynamic weight options & price calculations tailored to product type
   const getPackOptions = (p) => {
+    // Priority: custom weights configured in admin portal
+    if (Array.isArray(p.weights) && p.weights.length > 0) {
+      return p.weights.map(w => {
+        const wLabel = w.weight || w.label || String(w);
+        const wPrice = w.price !== undefined ? Number(w.price) : Number(p.price);
+        const wOrigPrice = w.originalPrice !== undefined ? Number(w.originalPrice) : Number(p.originalPrice || p.price);
+        return {
+          label: wLabel,
+          price: wPrice,
+          originalPrice: wOrigPrice,
+          multiplier: (Number(wPrice) && Number(p.price)) ? (Number(wPrice) / Number(p.price)) : 1,
+          stock: w.stock
+        };
+      });
+    }
+
     if (p.category === 'oils') {
       return [
         { label: '500ml Bottle', multiplier: 0.55 },
@@ -95,24 +111,34 @@ export default function ProductDetailPage({
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const packs = getPackOptions(product);
     const defaultPack = packs.find((o) => o.multiplier === 1.0) || packs[0];
-    setSelectedWeight(defaultPack.label);
+    setSelectedWeight(defaultPack?.label || product.weight || '100g');
     setQuantity(1);
     setSelectedImageIdx(0);
   }, [product.id]);
 
-  const currentMultiplier = weightOptions.find((w) => w.label === selectedWeight)?.multiplier || 1;
-  const currentPrice = Math.round(product.price * currentMultiplier);
-  const currentOriginalPrice = Math.round(product.originalPrice * currentMultiplier);
+  const selectedPack = weightOptions.find((w) => w.label === selectedWeight) || weightOptions[0];
+  const currentMultiplier = selectedPack?.multiplier || 1;
+  const currentPrice = selectedPack?.price !== undefined ? selectedPack.price : Math.round(product.price * currentMultiplier);
+  const currentOriginalPrice = selectedPack?.originalPrice !== undefined ? selectedPack.originalPrice : Math.round(product.originalPrice * currentMultiplier);
   const discountAmount = currentOriginalPrice - currentPrice;
   const isWishlisted = wishlist.includes(product.id);
 
-  // Gallery images (main product, terroir, whole harvest, NMR certificate)
-  const galleryImages = [
-    { src: product.image, label: 'Estate Product' },
-    { src: '/images/products/cardamom_sahydri.jpg', label: 'Whole Pods' },
-    { src: '/images/estate.jpg', label: 'Rainforest Canopy' },
-    { src: '/images/hero.jpg', label: 'Wayanad Mountain' }
-  ];
+  // Gallery images (dynamic support for multiple photos from product.images)
+  const productImagesList = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : (product.image ? [product.image] : []);
+
+  const galleryImages = productImagesList.length > 1
+    ? productImagesList.map((src, i) => ({
+        src,
+        label: i === 0 ? 'Primary Product' : `Estate View ${i + 1}`
+      }))
+    : [
+        { src: product.image || '/images/products/cardamom_sahydri.jpg', label: 'Estate Product' },
+        { src: '/images/products/cardamom_sahydri.jpg', label: 'Whole Pods' },
+        { src: '/images/estate.jpg', label: 'Rainforest Canopy' },
+        { src: '/images/hero.jpg', label: 'Sahydri Foothills' }
+      ];
 
   const handleAddToCart = () => {
     onAddToCart({

@@ -18,16 +18,20 @@ export async function initDatabase() {
     const database = process.env.DB_NAME || 'sahyadri_db';
 
     try {
-        // 1. Establish initial connection without database selected to create it if not present
-        const initConn = await mysql.createConnection({
-            host,
-            port,
-            user,
-            password,
-        });
-
-        await initConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
-        await initConn.end();
+        // 1. In local dev, attempt to create database if privileges allow (silently ignore on shared hosting)
+        try {
+            const initConn = await mysql.createConnection({
+                host,
+                port,
+                user,
+                password,
+                connectTimeout: 4000,
+            });
+            await initConn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
+            await initConn.end();
+        } catch {
+            // On shared hosts (Hostinger/cPanel), database is pre-allocated and connection without db is restricted.
+        }
 
         // 2. Create the connection pool with the database selected
         pool = mysql.createPool({
@@ -41,7 +45,12 @@ export async function initDatabase() {
             queueLimit: Number(process.env.DB_QUEUE_LIMIT) || 0,
             enableKeepAlive: true,
             keepAliveInitialDelay: 0,
+            connectTimeout: 4000,
         });
+
+        // Test connection
+        const conn = await pool.getConnection();
+        conn.release();
 
         // 3. Create tables if not present
         await pool.query(`
@@ -69,6 +78,7 @@ export async function initDatabase() {
                 price DECIMAL(10, 2) NOT NULL,
                 original_price DECIMAL(10, 2) NOT NULL,
                 weight VARCHAR(50) DEFAULT 'Standard',
+                weights TEXT DEFAULT NULL,
                 rating DECIMAL(3, 2) DEFAULT 5.00,
                 reviews_count INT DEFAULT 0,
                 stock INT DEFAULT 0,
@@ -76,6 +86,7 @@ export async function initDatabase() {
                 type_tag VARCHAR(50) DEFAULT '',
                 origin_badge VARCHAR(50) DEFAULT '',
                 image VARCHAR(500) DEFAULT '',
+                images TEXT DEFAULT NULL,
                 description TEXT DEFAULT NULL,
                 elevation VARCHAR(100) DEFAULT '',
                 harvest_season VARCHAR(100) DEFAULT '',
@@ -87,22 +98,60 @@ export async function initDatabase() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
+        // Migrations: add images and weights columns if not existing
+        try {
+            await pool.query(`ALTER TABLE products ADD COLUMN images TEXT DEFAULT NULL AFTER image`);
+        } catch { /* already exists or ignored */ }
+        try {
+            await pool.query(`ALTER TABLE products ADD COLUMN weights TEXT DEFAULT NULL AFTER weight`);
+        } catch { /* already exists or ignored */ }
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS orders (
                 id VARCHAR(100) NOT NULL PRIMARY KEY,
                 customer_name VARCHAR(120) NOT NULL,
                 customer_email VARCHAR(191) NOT NULL,
+                customer_phone VARCHAR(30) DEFAULT '',
                 items JSON NOT NULL,
                 total DECIMAL(10, 2) NOT NULL,
                 status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
                 address TEXT NOT NULL,
+                pincode VARCHAR(10) DEFAULT '',
+                estimated_delivery VARCHAR(100) DEFAULT '',
                 payment_method VARCHAR(50) DEFAULT 'Razorpay',
                 razorpay_order_id VARCHAR(100) DEFAULT '',
                 razorpay_payment_id VARCHAR(100) DEFAULT '',
+                shipway_order_id VARCHAR(100) DEFAULT '',
+                shipway_tracking_url VARCHAR(500) DEFAULT '',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_orders_customer_email (customer_email),
                 INDEX idx_orders_status (status)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS coupons (
+                code VARCHAR(50) NOT NULL PRIMARY KEY,
+                discount DECIMAL(10, 2) NOT NULL,
+                type ENUM('percent', 'flat') NOT NULL DEFAULT 'percent',
+                min_order DECIMAL(10, 2) DEFAULT 0.00,
+                times_used INT DEFAULT 0,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                id VARCHAR(50) NOT NULL PRIMARY KEY,
+                product_id VARCHAR(100) NOT NULL,
+                customer_name VARCHAR(120) NOT NULL,
+                rating INT NOT NULL DEFAULT 5,
+                comment TEXT DEFAULT NULL,
+                verified BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_reviews_product (product_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
@@ -115,6 +164,14 @@ export async function initDatabase() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS store_settings (
+                key_name VARCHAR(100) NOT NULL PRIMARY KEY,
+                key_value TEXT DEFAULT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
         // 4. Seed initial data if tables are empty
         await seedDatabase();
 
@@ -123,7 +180,8 @@ export async function initDatabase() {
         return pool;
     } catch (err) {
         dbConnected = false;
-        console.error(`⚠️  [MySQL] Connection failed (${err.message}). In-memory store fallback active.`);
+        const errMsg = err.code || err.message || 'Connection error';
+        console.error(`⚠️  [MySQL] Connection failed (${errMsg}). In-memory store fallback active.`);
         return null;
     }
 }

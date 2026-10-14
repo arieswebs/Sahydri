@@ -317,8 +317,8 @@ export let orders = [
 export let users = [
     {
         id: "USR-001",
-        name: "Admin Sahyadri",
-        email: "admin@sahyadri.com",
+        name: "Admin Sahydri",
+        email: "care@sahydriorganics.com",
         password: "admin123",
         role: "admin"
     },

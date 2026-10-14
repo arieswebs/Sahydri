@@ -32,7 +32,7 @@ export const sendAdminOTP = async (email) => {
     // If Gmail is not configured, log to console (dev mode)
     if (!process.env.GMAIL_USER || process.env.GMAIL_USER === 'your_gmail@gmail.com') {
         console.log(`\n⚡ [DEV MODE] Admin OTP for ${email}: ${otp}  (expires in ${process.env.OTP_EXPIRES_MINUTES || 10} mins)\n`);
-        return { success: true, devMode: true };
+        return { success: true, devMode: true, otp };
     }
 
     const transporter = createTransporter();

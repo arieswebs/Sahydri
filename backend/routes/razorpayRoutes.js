@@ -1,12 +1,22 @@
 import express from 'express';
-import { createRazorpayOrder, verifyRazorpayPayment } from '../controllers/razorpayController.js';
+import { 
+    createRazorpayOrder, 
+    verifyRazorpayPayment,
+    getRazorpayConfig,
+    updateRazorpayConfig,
+    testRazorpayConnection
+} from '../controllers/razorpayController.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// POST /api/razorpay/create-order  →  creates a Razorpay order
+// Public checkout endpoints
 router.post('/create-order', createRazorpayOrder);
-
-// POST /api/razorpay/verify  →  verifies signature after payment
 router.post('/verify', verifyRazorpayPayment);
+
+// Admin gateway configuration endpoints
+router.get('/config', requireAuth, requireAdmin, getRazorpayConfig);
+router.post('/config', requireAuth, requireAdmin, updateRazorpayConfig);
+router.post('/test', requireAuth, requireAdmin, testRazorpayConnection);
 
 export default router;

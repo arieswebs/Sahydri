@@ -121,6 +121,8 @@ export default function Footer() {
           </p>
 
           <div className="footer-legal-links">
+            <a href="/admin" className="footer-legal-link">Admin Portal</a>
+            <span className="footer-legal-sep">·</span>
             <a href="#shop" className="footer-legal-link">Privacy Policy</a>
             <span className="footer-legal-sep">·</span>
             <a href="#shop" className="footer-legal-link">Terms of Service</a>

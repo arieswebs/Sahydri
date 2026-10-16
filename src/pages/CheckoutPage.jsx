@@ -13,7 +13,8 @@ import {
   Minus,
   Trash2,
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  ShoppingBag
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useShop } from '../context/ShopContext';
@@ -23,10 +24,12 @@ export default function CheckoutPage({ onOrderComplete }) {
   const navigate = useNavigate();
   const {
     cart,
+    addToCart,
     updateQuantity,
     removeFromCart,
     clearCart,
     currentUser,
+    products,
     API,
     authFetch,
     createOrder,
@@ -38,9 +41,9 @@ export default function CheckoutPage({ onOrderComplete }) {
   const [email, setEmail] = useState(() => currentUser?.email || '');
   const [phone, setPhone] = useState(() => currentUser?.phone || '');
   const [address, setAddress] = useState(() => currentUser?.address || '');
-  const [city, setCity] = useState('Wayanad');
-  const [stateName, setStateName] = useState('Kerala');
-  const [pincode, setPincode] = useState('673121');
+  const [city, setCity] = useState(() => currentUser?.city || '');
+  const [stateName, setStateName] = useState(() => currentUser?.state || '');
+  const [pincode, setPincode] = useState(() => currentUser?.pincode || '');
 
   // Payment & Promo state
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cod'
@@ -126,6 +129,15 @@ export default function CheckoutPage({ onOrderComplete }) {
       if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
       return false;
     }
+    if (email.trim() && !/\S+@\S+\.\S+/.test(email.trim())) {
+      const msg = 'Please enter a valid email address for order confirmation.';
+      setFormError(msg);
+      setInvalidField('email');
+      showToast(msg);
+      const el = document.getElementById('checkout-email');
+      if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      return false;
+    }
     setFormError('');
     setInvalidField('');
     return true;
@@ -133,7 +145,7 @@ export default function CheckoutPage({ onOrderComplete }) {
 
   // Complete Order & Trigger Success
   const finalizeOrder = (orderPayload, resultData) => {
-    clearCart();
+    // Note: clearCart() is called by App.handleCheckout — don't double-clear
     if (onOrderComplete) {
       onOrderComplete(resultData || { ...orderPayload, id: 'ORD-' + Date.now() });
     } else {
@@ -244,7 +256,7 @@ export default function CheckoutPage({ onOrderComplete }) {
         currency: data.currency,
         name: 'Sahydri Organics',
         description: `Order of ${cart.length} item(s)`,
-        image: '/images/sahyadri-logo.png',
+        image: 'https://cdn-icons-png.flaticon.com/512/628/628283.png',
         order_id: data.orderId,
         prefill: {
           name: fullName.trim(),
@@ -256,7 +268,7 @@ export default function CheckoutPage({ onOrderComplete }) {
 
         handler: async (response) => {
           try {
-            await authFetch(`${API}/razorpay/verify`, {
+            const verifyRes = await authFetch(`${API}/razorpay/verify`, {
               method: 'POST',
               body: JSON.stringify({
                 razorpay_order_id: response.razorpay_order_id,
@@ -264,6 +276,12 @@ export default function CheckoutPage({ onOrderComplete }) {
                 razorpay_signature: response.razorpay_signature,
               }),
             });
+            const verifyData = await verifyRes.json();
+            if (!verifyData.success) {
+              showToast('Payment verification failed — please contact support.');
+              setPaymentLoading(false);
+              return;
+            }
 
             const orderPayload = {
               customerName: fullName.trim(),
@@ -292,11 +310,15 @@ export default function CheckoutPage({ onOrderComplete }) {
           }
           setPaymentLoading(false);
         },
+      };
 
-        'modal.ondismiss': () => {
+      // Razorpay dismiss callback — must be inside 'modal' object
+      options.modal = {
+        ...(options.modal || {}),
+        ondismiss: () => {
           showToast('Payment cancelled');
           setPaymentLoading(false);
-        },
+        }
       };
 
       const rzp = new window.Razorpay(options);
@@ -313,37 +335,285 @@ export default function CheckoutPage({ onOrderComplete }) {
   };
 
   if (cart.length === 0) {
+    const featured = (products || []).slice(0, 4);
+
     return (
-      <div style={{ minHeight: '80vh', backgroundColor: '#faf8f4', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '30px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '460px', background: '#ffffff', border: '1px solid #e5dfd5', borderRadius: '14px', padding: '40px 30px', boxShadow: '0 10px 30px rgba(11,37,29,0.06)' }}>
-          <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(14,43,33,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' }}>
-            <Package size={28} color="#0e2b21" />
+      <div style={{ minHeight: '100vh', backgroundColor: '#faf8f4', color: '#0a221a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+        {/* Top Navigation */}
+        <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e7e0d5', position: 'sticky', top: 0, zIndex: 40 }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <button
+              onClick={() => navigate('/shop')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0e2b21',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '0.86rem',
+                fontWeight: 600
+              }}
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Shop</span>
+            </button>
+            <div
+              onClick={() => navigate('/')}
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '1.25rem', fontWeight: 800, color: '#0a221a', cursor: 'pointer', letterSpacing: '-0.02em' }}
+            >
+              Sahydri Organics
+            </div>
+            <button
+              onClick={() => navigate('/shop')}
+              style={{
+                background: '#f4efe6',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '8px',
+                color: '#0a221a',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Explore Shop
+            </button>
           </div>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.6rem', color: '#0a221a', margin: '0 0 10px' }}>Your Cart is Empty</h2>
-          <p style={{ color: '#685e50', fontSize: '0.88rem', lineHeight: 1.6, margin: '0 0 24px' }}>
-            You do not have any estate harvest items selected for checkout.
-          </p>
-          <button
-            onClick={() => navigate('/shop')}
+        </header>
+
+        {/* Content Container */}
+        <div style={{ maxWidth: '1100px', margin: '36px auto 60px', padding: '0 20px' }}>
+          {/* Hero Empty Basket Banner */}
+          <div
             style={{
-              padding: '12px 28px',
-              backgroundColor: '#0a221a',
-              color: '#dfbe84',
-              border: 'none',
-              borderRadius: '6px',
-              fontWeight: 700,
-              fontSize: '0.86rem',
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
+              backgroundColor: '#ffffff',
+              border: '1px solid #eae4d8',
+              borderRadius: '20px',
+              padding: '44px 24px',
+              textAlign: 'center',
+              boxShadow: '0 12px 36px rgba(10,34,26,0.04)',
+              marginBottom: '44px'
             }}
           >
-            <span>Explore Estate Shop</span>
-            <ChevronRight size={15} />
-          </button>
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(14, 43, 33, 0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px auto'
+              }}
+            >
+              <ShoppingBag size={28} color="#0a221a" strokeWidth={1.8} />
+            </div>
+
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '1.9rem', color: '#0a221a', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
+              Your Cart is Empty
+            </h2>
+            <p style={{ color: '#685e50', fontSize: '0.94rem', maxWidth: '480px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+              You don't have any items in your harvest basket right now. Explore our pure single-origin Kerala spices, wild honeys, and farm-fresh organic harvests below.
+            </p>
+
+            <button
+              onClick={() => navigate('/shop')}
+              style={{
+                padding: '12px 28px',
+                backgroundColor: '#0a221a',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                fontWeight: 700,
+                fontSize: '0.88rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'background-color 0.15s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#13392d'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0a221a'; }}
+            >
+              <span>Explore All Products</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          {/* Featured Products Grid */}
+          {featured.length > 0 && (
+            <div style={{ marginBottom: '44px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '22px' }}>
+                <div>
+                  <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '1.5rem', color: '#0a221a', margin: '0 0 4px', fontWeight: 700 }}>
+                    Popular Products to Explore
+                  </h3>
+                  <p style={{ color: '#7a7062', fontSize: '0.86rem', margin: 0 }}>
+                    100% authentic, NMR-tested purity harvested in Wayanad
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate('/shop')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#0a221a',
+                    fontWeight: 700,
+                    fontSize: '0.86rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>View All Products</span>
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+                gap: '20px'
+              }}>
+                {featured.map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #eae4d8',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 4px 16px rgba(10,34,26,0.04)',
+                      transition: 'transform 0.18s ease, box-shadow 0.18s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 12px 28px rgba(10,34,26,0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(10,34,26,0.04)';
+                    }}
+                  >
+                    <div style={{ height: '175px', overflow: 'hidden', position: 'relative', backgroundColor: '#f5f1ea' }}>
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                      {(p.originBadge || p.tag) && (
+                        <span style={{
+                          position: 'absolute',
+                          top: '10px',
+                          left: '10px',
+                          backgroundColor: 'rgba(10,34,26,0.85)',
+                          color: '#dfbe84',
+                          fontSize: '0.68rem',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase'
+                        }}>
+                          {p.originBadge || p.tag}
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#7a7062', fontWeight: 600, textTransform: 'uppercase' }}>
+                          {p.category}
+                        </span>
+                        {p.weight && (
+                          <span style={{ fontSize: '0.72rem', color: '#7a7062' }}>
+                            {p.weight}
+                          </span>
+                        )}
+                      </div>
+
+                      <h4 style={{ fontSize: '0.96rem', fontWeight: 700, color: '#0a221a', margin: '0 0 6px', lineHeight: 1.35 }}>
+                        {p.name}
+                      </h4>
+
+                      <div style={{ marginTop: 'auto', paddingTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                          <span style={{ fontSize: '1.08rem', fontWeight: 800, color: '#0a221a' }}>
+                            â‚¹{p.price}
+                          </span>
+                          {p.originalPrice && p.originalPrice > p.price && (
+                            <span style={{ fontSize: '0.78rem', color: '#9a9080', textDecoration: 'line-through', marginLeft: '6px' }}>
+                              â‚¹{p.originalPrice}
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            addToCart(p);
+                            showToast(`Added ${p.name} to cart!`);
+                          }}
+                          style={{
+                            padding: '7px 14px',
+                            backgroundColor: '#0a221a',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'background-color 0.15s ease'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#13392d'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0a221a'; }}
+                        >
+                          <Plus size={13} />
+                          <span>Add to Cart</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Trust Highlights */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '16px',
+            padding: '24px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #eae4d8',
+            borderRadius: '16px',
+            textAlign: 'center'
+          }}>
+            <div>
+              <ShieldCheck size={24} color="#0a221a" style={{ margin: '0 auto 8px' }} />
+              <div style={{ fontWeight: 700, fontSize: '0.86rem', color: '#0a221a' }}>100% NMR Tested</div>
+              <div style={{ fontSize: '0.76rem', color: '#7a7062', marginTop: '2px' }}>Zero adulteration guaranteed</div>
+            </div>
+            <div>
+              <Package size={24} color="#0a221a" style={{ margin: '0 auto 8px' }} />
+              <div style={{ fontWeight: 700, fontSize: '0.86rem', color: '#0a221a' }}>Direct from Wayanad</div>
+              <div style={{ fontSize: '0.76rem', color: '#7a7062', marginTop: '2px' }}>Sustainably hand-harvested</div>
+            </div>
+            <div>
+              <Truck size={24} color="#0a221a" style={{ margin: '0 auto 8px' }} />
+              <div style={{ fontWeight: 700, fontSize: '0.86rem', color: '#0a221a' }}>Express Safe Delivery</div>
+              <div style={{ fontSize: '0.76rem', color: '#7a7062', marginTop: '2px' }}>Packed in protective glass jars</div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -351,7 +621,7 @@ export default function CheckoutPage({ onOrderComplete }) {
 
   return (
     <div style={{ backgroundColor: '#faf8f4', minHeight: '100vh', color: '#0a221a', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
-      {/* ── Top Bar / Header ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Top Bar / Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e7e0d5', position: 'sticky', top: 0, zIndex: 40 }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <button
@@ -377,7 +647,7 @@ export default function CheckoutPage({ onOrderComplete }) {
             style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
           >
             <img src="/images/sahyadri-logo.png" alt="Sahydri Logo" style={{ width: '34px', height: '34px', borderRadius: '50%' }} />
-            <span style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.25rem', fontWeight: 800, color: '#0a221a', letterSpacing: '0.04em' }}>
+            <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '1.25rem', fontWeight: 800, color: '#0a221a', letterSpacing: '0.04em' }}>
               SAHYDRI
             </span>
           </div>
@@ -389,11 +659,11 @@ export default function CheckoutPage({ onOrderComplete }) {
         </div>
       </header>
 
-      {/* ── Main Two-Column Layout ────────────────────────────────────────── */}
+      {/* â”€â”€ Main Two-Column Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '36px 24px 80px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: '32px', alignItems: 'start' }} className="checkout-grid">
 
-          {/* ── Left Column: Shipping & Payment ────────────────────────────── */}
+          {/* â”€â”€ Left Column: Shipping & Payment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div>
             {/* Free Shipping Progress Strip */}
             <div style={{ background: '#f4efe5', border: '1px solid #dfd7c7', borderRadius: '10px', padding: '14px 18px', marginBottom: '24px' }}>
@@ -401,8 +671,8 @@ export default function CheckoutPage({ onOrderComplete }) {
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Truck size={16} color="#8c733b" />
                   {freeShippingLeft === 0
-                    ? '🎉 You have unlocked FREE Express Delivery across India!'
-                    : `Add ₹${freeShippingLeft} more for FREE Express Delivery`}
+                    ? 'ðŸŽ‰ You have unlocked FREE Express Delivery across India!'
+                    : `Add â‚¹${freeShippingLeft} more for FREE Express Delivery`}
                 </span>
                 <span style={{ color: '#8c733b' }}>{Math.round(freeShippingPercent)}%</span>
               </div>
@@ -417,7 +687,7 @@ export default function CheckoutPage({ onOrderComplete }) {
                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0a221a', color: '#dfbe84', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>
                   1
                 </div>
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a221a', margin: 0, fontFamily: 'Playfair Display, serif' }}>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a221a', margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   Delivery Address & Contact
                 </h2>
               </div>
@@ -579,7 +849,7 @@ export default function CheckoutPage({ onOrderComplete }) {
                 <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0a221a', color: '#dfbe84', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 800 }}>
                   2
                 </div>
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a221a', margin: 0, fontFamily: 'Playfair Display, serif' }}>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a221a', margin: 0, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                   Select Payment Method
                 </h2>
               </div>
@@ -611,7 +881,7 @@ export default function CheckoutPage({ onOrderComplete }) {
                         <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '0.66rem', fontWeight: 800, padding: '2px 6px', borderRadius: '4px' }}>RECOMMENDED</span>
                       </div>
                       <p style={{ margin: '3px 0 0', fontSize: '0.74rem', color: '#64748b' }}>
-                        Instant verification • UPI (Google Pay, PhonePe, Paytm), Debit & Credit Cards, NetBanking
+                        Instant verification â€¢ UPI (Google Pay, PhonePe, Paytm), Debit & Credit Cards, NetBanking
                       </p>
                     </div>
                   </div>
@@ -698,17 +968,17 @@ export default function CheckoutPage({ onOrderComplete }) {
                 {paymentLoading ? (
                   <>
                     <Loader size={18} color="#dfbe84" style={{ animation: 'spin 1s linear infinite' }} />
-                    <span>Processing Secure Order…</span>
+                    <span>Processing Secure Orderâ€¦</span>
                   </>
                 ) : paymentMethod === 'cod' ? (
                   <>
                     <Package size={18} color="#dfbe84" />
-                    <span>Confirm Order (Cash on Delivery) • ₹{grandTotal}</span>
+                    <span>Confirm Order (Cash on Delivery) â€¢ â‚¹{grandTotal}</span>
                   </>
                 ) : (
                   <>
                     <Lock size={18} color="#dfbe84" />
-                    <span>Pay Securely with Razorpay • ₹{grandTotal}</span>
+                    <span>Pay Securely with Razorpay â€¢ â‚¹{grandTotal}</span>
                   </>
                 )}
               </button>
@@ -717,9 +987,9 @@ export default function CheckoutPage({ onOrderComplete }) {
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <ShieldCheck size={14} color="#15803d" /> Verified Direct Estate Harvest
                 </span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>Direct Wayanad Logistics</span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>Easy Returns</span>
               </div>
             </div>
@@ -728,9 +998,9 @@ export default function CheckoutPage({ onOrderComplete }) {
             <DeliveryEstimator theme="light" />
           </div>
 
-          {/* ── Right Column: Order Summary ────────────────────────────────── */}
+          {/* â”€â”€ Right Column: Order Summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div style={{ background: '#ffffff', border: '1px solid #e7e0d5', borderRadius: '12px', padding: '24px', position: 'sticky', top: '80px', boxShadow: '0 4px 20px rgba(11,37,29,0.04)' }}>
-            <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.15rem', color: '#0a221a', margin: '0 0 16px', paddingBottom: '12px', borderBottom: '1px solid #f1ece4' }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: '1.15rem', color: '#0a221a', margin: '0 0 16px', paddingBottom: '12px', borderBottom: '1px solid #f1ece4' }}>
               Order Summary ({cart.reduce((s, i) => s + (i.quantity || 1), 0)} items)
             </h3>
 
@@ -783,7 +1053,7 @@ export default function CheckoutPage({ onOrderComplete }) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0a221a' }}>
-                      ₹{(Number(item.price) || 0) * (item.quantity || 1)}
+                      â‚¹{(Number(item.price) || 0) * (item.quantity || 1)}
                     </span>
                   </div>
                 </div>
@@ -848,16 +1118,16 @@ export default function CheckoutPage({ onOrderComplete }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.82rem', color: '#475569', paddingBottom: '16px', borderBottom: '1px solid #f1ece4' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Subtotal</span>
-                <span style={{ fontWeight: 600, color: '#0a221a' }}>₹{subtotal}</span>
+                <span style={{ fontWeight: 600, color: '#0a221a' }}>â‚¹{subtotal}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Express Doorstep Delivery</span>
-                <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `₹${shippingFee}`}</span>
+                <span>{shippingFee === 0 ? <strong style={{ color: '#15803d' }}>FREE</strong> : `â‚¹${shippingFee}`}</span>
               </div>
               {discountAmount > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#15803d', fontWeight: 700 }}>
                   <span>Connoisseur Privilege Discount</span>
-                  <span>-₹{discountAmount}</span>
+                  <span>-â‚¹{discountAmount}</span>
                 </div>
               )}
             </div>
@@ -872,7 +1142,7 @@ export default function CheckoutPage({ onOrderComplete }) {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0a221a', letterSpacing: '-0.02em' }}>
-                  ₹{grandTotal}
+                  â‚¹{grandTotal}
                 </span>
               </div>
             </div>

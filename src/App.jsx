@@ -26,6 +26,7 @@ import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AccountPage from './pages/AccountPage';
 import CheckoutPage from './pages/CheckoutPage';
+import NotFoundPage from './pages/NotFoundPage';
 import { PRODUCTS } from './data/products';
 import { pushOrderToShipway } from './services/shipwayService';
 
@@ -243,7 +244,10 @@ function AppContent() {
       <OrderSuccessModal
         orderData={completedOrder}
         onClose={() => setCompletedOrder(null)}
-        onOpenTracking={(orderId) => setTrackingOrderId(orderId || true)}
+        onOpenTracking={(orderId) => {
+          setCompletedOrder(null);
+          setTrackingOrderId(orderId || true);
+        }}
       />
 
       <ShipwayTrackingModal
@@ -283,6 +287,7 @@ function AppContent() {
               <ShopTeaser
                 onGoShop={() => navigate('/shop')}
                 onAddToCart={handleAddToCart}
+                onViewProduct={(p) => handleViewProduct(p)}
               />
               <CulturalHeritage />
               <WhySahyadri />
@@ -393,8 +398,35 @@ function AppContent() {
           }
         />
 
-        {/* 8. Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 8. Custom 404 Not Found Route */}
+        <Route
+          path="*"
+          element={
+            <>
+              <Navbar
+                cartCount={cartItemCount}
+                wishlistCount={wishlist.length}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onGoHome={() => navigate('/')}
+                onGoShop={() => navigate('/shop')}
+                solidBackground={true}
+                activePage="404"
+                currentUser={currentUser}
+                onOpenAuth={(mode) => navigate(mode === 'register' || mode === 'signup' ? '/register' : '/login')}
+                onOpenDashboard={() => currentUser?.role === 'admin' ? navigate('/admin') : navigate('/account')}
+                onOpenAccountSection={handleAccountSection}
+                onScrollToSection={scrollToSection}
+              />
+              <NotFoundPage
+                onOpenSearch={() => setIsSearchOpen(true)}
+                onOpenTracking={(orderId) => setTrackingOrderId(orderId || true)}
+                onViewProduct={handleViewProduct}
+              />
+              <Footer />
+            </>
+          }
+        />
       </Routes>
     </div>
   );

@@ -1,11 +1,14 @@
 /**
  * Shipway Shipping & Logistics Service for Sahydri Organics
- * Configured with live account credentials
+ * Credentials are stored server-side only (backend .env)
  */
 
+import { secureFetch } from './csrf.js';
+
+// API base — matches ShopContext; reads from env in production
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || 'http://localhost:5000/api';
+
 export const SHIPWAY_CONFIG = {
-  accountEmail: 'sahyadrigold520@gmail.com',
-  licenseKey: '4N9D0Ox6sR7N87A868ThM1flc48Y731q',
   carrierPartners: ['Delhivery Express', 'BlueDart Premium', 'DTDC Air', 'XpressBees', 'Shadowfax'],
   trackingBaseUrl: 'https://shipway.com/track',
   connected: true
@@ -25,7 +28,7 @@ export function getShipwayTrackingUrl(orderId) {
  */
 export async function pushOrderToShipway(order) {
   try {
-    const res = await fetch('/api/shipping/push-order', {
+    const res = await secureFetch(`${API_BASE}/shipping/push-order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(order)

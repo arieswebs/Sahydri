@@ -1,7 +1,7 @@
 import express from 'express';
 import {
     getAllOrders, getOrderById, getMyOrders,
-    createOrder, updateOrderStatus, deleteOrder
+    createOrder, updateOrderStatus, deleteOrder, getAllCustomers
 } from '../controllers/orderController.js';
 import { requireAuth, requireAdmin, optionalAuth } from '../middleware/auth.js';
 
@@ -12,6 +12,9 @@ router.post('/', optionalAuth, createOrder);
 
 // Authenticated customer: fetch their personal order history
 router.get('/my-orders', requireAuth, getMyOrders);
+
+// Admin-only: view all aggregated customers from orders
+router.get('/customers/all', requireAuth, requireAdmin, getAllCustomers);
 
 // Admin-only: view all orders
 router.get('/', requireAuth, requireAdmin, getAllOrders);

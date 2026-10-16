@@ -2,12 +2,64 @@
 import bcrypt from 'bcryptjs';
 import { users } from '../data/store.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
-import { sendAdminOTP, verifyOTP } from '../utils/mailer.js';
+import { sendAdminOTP, verifyOTP, sendPasswordResetOTP, verifyResetOTP } from '../utils/mailer.js';
 import { sanitizeString, sanitizeEmail, sanitizePhone, sanitizeAddress } from '../utils/sanitize.js';
 import { query, isDatabaseConnected } from '../config/db.js';
 
-// In-memory refresh token allowlist
-const validRefreshTokens = new Set();
+// ── Refresh Token Store (DB-backed with in-memory cache) ──────────────────────
+const memoryTokens = new Set();
+
+// Ensure refresh_tokens table exists
+(async () => {
+    try {
+        if (isDatabaseConnected()) {
+            await query(`
+                CREATE TABLE IF NOT EXISTS refresh_tokens (
+                    token VARCHAR(512) PRIMARY KEY,
+                    user_id VARCHAR(64) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_user (user_id)
+                )
+            `);
+        }
+    } catch { /* table may already exist */ }
+})();
+
+const validRefreshTokens = {
+    async add(token, userId = '') {
+        memoryTokens.add(token);
+        try {
+            if (isDatabaseConnected()) {
+                await query('INSERT IGNORE INTO refresh_tokens (token, user_id) VALUES (?, ?)', [token, userId]);
+            }
+        } catch { /* DB unavailable — in-memory only */ }
+    },
+    has(token) {
+        // Synchronous check for in-memory cache — async DB check done in refresh handler
+        return memoryTokens.has(token);
+    },
+    async hasAsync(token) {
+        if (memoryTokens.has(token)) return true;
+        try {
+            if (isDatabaseConnected()) {
+                const rows = await query('SELECT token FROM refresh_tokens WHERE token = ?', [token]);
+                if (rows.length > 0) {
+                    memoryTokens.add(token); // re-cache
+                    return true;
+                }
+            }
+        } catch { /* DB unavailable */ }
+        return false;
+    },
+    async delete(token) {
+        memoryTokens.delete(token);
+        try {
+            if (isDatabaseConnected()) {
+                await query('DELETE FROM refresh_tokens WHERE token = ?', [token]);
+            }
+        } catch { /* DB unavailable */ }
+    }
+};
 
 // ── POST /api/auth/login ──────────────────────────────────────────────────────
 export const loginHandler = async (req, res) => {
@@ -30,9 +82,10 @@ export const loginHandler = async (req, res) => {
 
     if (isAdminEmail) {
         const hashFromEnv = process.env.ADMIN_PASSWORD_HASH;
-        let passwordOk = password === 'Sahydri@2004' || password === 'admin123';
+        let passwordOk = false;
 
-        if (!passwordOk && hashFromEnv) {
+        // Only allow bcrypt-verified passwords — no plaintext fallbacks
+        if (hashFromEnv) {
             passwordOk = await bcrypt.compare(password, hashFromEnv);
         }
         if (!passwordOk && isDatabaseConnected()) {
@@ -195,7 +248,8 @@ export const refreshHandler = async (req, res) => {
     if (!refreshToken) {
         return res.status(401).json({ success: false, message: 'Refresh token required.' });
     }
-    if (!validRefreshTokens.has(refreshToken)) {
+    const isValid = await validRefreshTokens.hasAsync(refreshToken);
+    if (!isValid) {
         return res.status(401).json({ success: false, message: 'Refresh token revoked or invalid.' });
     }
     try {
@@ -227,9 +281,9 @@ export const refreshHandler = async (req, res) => {
 };
 
 // ── POST /api/auth/logout ─────────────────────────────────────────────────────
-export const logoutHandler = (req, res) => {
+export const logoutHandler = async (req, res) => {
     const { refreshToken } = req.body;
-    if (refreshToken) validRefreshTokens.delete(refreshToken);
+    if (refreshToken) await validRefreshTokens.delete(refreshToken);
     return res.json({ success: true, message: 'Logged out successfully.' });
 };
 
@@ -421,4 +475,76 @@ export const updateProfileHandler = async (req, res) => {
         message: 'Profile updated successfully.',
         user: updatedUser
     });
+};
+
+// ── POST /api/auth/forgot-password ───────────────────────────────────────────
+export const forgotPasswordHandler = async (req, res) => {
+    const rawEmail = req.body?.email;
+    const email = sanitizeEmail(rawEmail);
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Valid email address is required.' });
+    }
+
+    // Always respond with success to avoid email enumeration
+    try {
+        const sendResult = await sendPasswordResetOTP(email);
+        return res.json({
+            success: true,
+            devMode: sendResult.devMode,
+            devOtp: sendResult.devMode ? sendResult.otp : undefined,
+            message: sendResult.devMode
+                ? `Verification Code: ${sendResult.otp} (Dev Mode)`
+                : `Password reset instructions sent to ${email.replace(/(.{2}).*@/, '$1***@')}`,
+        });
+    } catch (err) {
+        console.error('Password reset dispatch error:', err);
+        return res.status(500).json({ success: false, message: 'Could not send reset code. Please try again later.' });
+    }
+};
+
+// ── POST /api/auth/reset-password ─────────────────────────────────────────────
+export const resetPasswordHandler = async (req, res) => {
+    const rawEmail = req.body?.email;
+    const rawOtp = req.body?.otp;
+    const rawPassword = req.body?.password;
+
+    const email = sanitizeEmail(rawEmail);
+    const otp = sanitizeString(rawOtp, 10);
+    const password = typeof rawPassword === 'string' ? rawPassword.trim() : '';
+
+    if (!email || !otp || !password) {
+        return res.status(400).json({ success: false, message: 'Email, OTP code, and new password are required.' });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long.' });
+    }
+
+    const verification = verifyResetOTP(email, otp);
+    if (!verification.valid) {
+        return res.status(400).json({ success: false, message: verification.reason });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    try {
+        if (isDatabaseConnected()) {
+            const result = await query('UPDATE users SET password = ? WHERE LOWER(email) = ?', [hashedPassword, email]);
+            if (result.affectedRows > 0) {
+                return res.json({ success: true, message: 'Password has been successfully updated. You may now sign in.' });
+            }
+        }
+    } catch (err) {
+        console.error('MySQL reset password error:', err.message);
+    }
+
+    // In-memory fallback
+    const user = users.find(u => u.email.toLowerCase() === email);
+    if (user) {
+        user.password = hashedPassword;
+        return res.json({ success: true, message: 'Password has been successfully updated. You may now sign in.' });
+    }
+
+    return res.json({ success: true, message: 'Password has been updated. You may now sign in.' });
 };

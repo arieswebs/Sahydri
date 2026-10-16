@@ -18,6 +18,7 @@ import {
   Flame
 } from 'lucide-react';
 import { PRODUCTS } from '../data/products';
+import { useShop } from '../context/ShopContext';
 import Footer from './Footer';
 import DeliveryEstimator from './DeliveryEstimator';
 
@@ -185,7 +186,8 @@ export default function ProductDetailPage({
   };
 
   // Companion products (other products excluding the current one)
-  const companionProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  const { products } = useShop();
+  const companionProducts = (products || []).filter((p) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="product-page-root">
@@ -599,43 +601,45 @@ export default function ProductDetailPage({
         </div>
 
         {/* 4. Companion Products / Frequently Paired Together */}
-        <div className="companion-products-section">
-          <div className="companion-header">
-            <span className="section-subtitle">— RECOMMENDED —</span>
-            <h3 className="companion-title">Frequently Bought Together</h3>
-          </div>
+        {companionProducts.length > 0 && (
+          <div className="companion-products-section">
+            <div className="companion-header">
+              <span className="section-subtitle">— RECOMMENDED —</span>
+              <h3 className="companion-title">Frequently Bought Together</h3>
+            </div>
 
-          <div className="companion-grid">
-            {companionProducts.map((comp) => (
-              <div
-                key={comp.id}
-                onClick={() => onSelectProduct(comp)}
-                className="companion-card"
-              >
-                <div className="comp-img-wrap">
-                  <img src={comp.image} alt={comp.name} className="comp-img" />
-                  <span className="comp-weight">{comp.weight}</span>
-                </div>
-                <div className="comp-body">
-                  <div className="comp-name">{comp.name}</div>
-                  <div className="comp-price-row">
-                    <span className="comp-price">₹{comp.price}</span>
-                    <span className="comp-orig">₹{comp.originalPrice}</span>
+            <div className="companion-grid">
+              {companionProducts.map((comp) => (
+                <div
+                  key={comp.id}
+                  onClick={() => onSelectProduct(comp)}
+                  className="companion-card"
+                >
+                  <div className="comp-img-wrap">
+                    <img src={comp.image} alt={comp.name} className="comp-img" />
+                    <span className="comp-weight">{comp.weight}</span>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddToCart({ ...comp, quantity: 1 });
-                    }}
-                    className="comp-add-btn"
-                  >
-                    + Add to Cart
-                  </button>
+                  <div className="comp-body">
+                    <div className="comp-name">{comp.name}</div>
+                    <div className="comp-price-row">
+                      <span className="comp-price">₹{comp.price}</span>
+                      <span className="comp-orig">₹{comp.originalPrice}</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToCart({ ...comp, quantity: 1 });
+                      }}
+                      className="comp-add-btn"
+                    >
+                      + Add to Cart
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 5. Minimalist Brand Footer */}

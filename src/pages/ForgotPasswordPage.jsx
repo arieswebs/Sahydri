@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Mail, ArrowRight, KeyRound, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, ArrowRight, KeyRound, ArrowLeft, CheckCircle2, AlertCircle, Lock } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { secureFetch } from '../services/csrf.js';
 
 export default function ForgotPasswordPage() {
-  const { showToast } = useShop();
+  const { showToast, API } = useShop();
+  const apiBase = API || 'http://localhost:5000/api';
   const [searchParams] = useSearchParams();
   const rawRedirect = searchParams.get('redirect');
 
+  const [step, setStep] = useState('request'); // 'request' | 'reset' | 'success'
   const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [devOtpNotice, setDevOtpNotice] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleRequestOtp = async (e) => {
     e.preventDefault();
     const cleanEmail = email.trim();
     if (!cleanEmail || !/\S+@\S+\.\S+/.test(cleanEmail)) {
@@ -24,12 +30,65 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      // Simulate/perform recovery dispatch
-      await new Promise(res => setTimeout(res, 800));
-      setSubmitted(true);
-      showToast('Recovery link sent to your email');
+      const res = await secureFetch(`${apiBase}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Could not send recovery instructions. Please try again.');
+        return;
+      }
+      if (data.devMode && data.devOtp) {
+        setDevOtpNotice(`Dev Mode Code: ${data.devOtp}`);
+        setOtp(data.devOtp);
+      }
+      setStep('reset');
+      showToast('Verification code sent to your email');
     } catch {
-      setError('Could not process request. Please try again.');
+      setError('Network error. Could not reach server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!otp.trim()) {
+      setError('Please enter the 6-digit verification code.');
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await secureFetch(`${apiBase}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          otp: otp.trim(),
+          password: newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Failed to reset password. Please check the code.');
+        return;
+      }
+      setStep('success');
+      showToast('Password updated successfully!');
+    } catch {
+      setError('Network error. Could not reach server.');
     } finally {
       setLoading(false);
     }
@@ -64,11 +123,17 @@ export default function ForgotPasswordPage() {
         <div className="auth-card">
           <div className="auth-card-top">
             <div className="auth-card-badge">
-              <KeyRound size={18} color="#dfbe84" />
+              <KeyRound size={22} color="#0b251d" />
             </div>
-            <h1 className="auth-card-title">Reset Password</h1>
+            <h1 className="auth-card-title">
+              {step === 'success' ? 'Password Reset' : step === 'reset' ? 'Set New Password' : 'Reset Password'}
+            </h1>
             <p className="auth-card-desc">
-              Enter your registered email address and we will send you secure recovery instructions.
+              {step === 'success'
+                ? 'Your password has been securely reset. You can now log into your account.'
+                : step === 'reset'
+                ? `Enter the 6-digit code sent to ${email} and choose your new password.`
+                : 'Enter your registered email address to receive secure recovery instructions.'}
             </p>
           </div>
 
@@ -79,22 +144,117 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {submitted ? (
+          {devOtpNotice && step === 'reset' && (
+            <div style={{
+              background: '#fef9c3',
+              border: '1px solid #fde047',
+              color: '#854d0e',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              marginBottom: '16px'
+            }}>
+              ⚡ {devOtpNotice}
+            </div>
+          )}
+
+          {step === 'success' ? (
             <div className="auth-success-state">
               <div className="auth-success-icon-box">
                 <CheckCircle2 size={36} color="#15803d" />
               </div>
-              <h2 className="auth-success-heading">Check Your Inbox</h2>
+              <h2 className="auth-success-heading">Password Updated!</h2>
               <p className="auth-success-desc">
-                If an account exists for <strong>{email}</strong>, you will receive password reset instructions shortly.
+                Your credentials have been securely updated. You can now sign in with your new password.
               </p>
               <Link to={loginLink} className="auth-primary-btn" style={{ textDecoration: 'none' }}>
-                <span>Return to Sign In</span>
+                <span>Proceed to Sign In</span>
                 <ArrowRight size={16} />
               </Link>
             </div>
+          ) : step === 'reset' ? (
+            <form onSubmit={handleResetPassword} className="auth-form-stack" noValidate>
+              <div className="auth-field-group">
+                <label className="auth-field-label" htmlFor="reset-otp">
+                  6-Digit Verification Code
+                </label>
+                <div className="auth-input-container">
+                  <KeyRound size={16} className="auth-input-icon" />
+                  <input
+                    id="reset-otp"
+                    type="text"
+                    maxLength={10}
+                    required
+                    placeholder="Enter 6-digit code"
+                    value={otp}
+                    onChange={(e) => { setOtp(e.target.value); setError(''); }}
+                    className="auth-input-element"
+                  />
+                </div>
+              </div>
+
+              <div className="auth-field-group">
+                <label className="auth-field-label" htmlFor="reset-new-password">
+                  New Password
+                </label>
+                <div className="auth-input-container">
+                  <Lock size={16} className="auth-input-icon" />
+                  <input
+                    id="reset-new-password"
+                    type="password"
+                    minLength={6}
+                    required
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                    className="auth-input-element"
+                  />
+                </div>
+              </div>
+
+              <div className="auth-field-group">
+                <label className="auth-field-label" htmlFor="reset-confirm-password">
+                  Confirm New Password
+                </label>
+                <div className="auth-input-container">
+                  <Lock size={16} className="auth-input-icon" />
+                  <input
+                    id="reset-confirm-password"
+                    type="password"
+                    minLength={6}
+                    required
+                    placeholder="Re-enter new password"
+                    value={confirmPassword}
+                    onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                    className="auth-input-element"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="auth-primary-btn"
+              >
+                <span>{loading ? 'Updating Password…' : 'Update Password'}</span>
+                {!loading && <ArrowRight size={16} />}
+              </button>
+
+              <div className="auth-card-footer">
+                <p className="auth-switch-text">
+                  Didn't receive code?{' '}
+                  <button
+                    type="button"
+                    onClick={() => { setStep('request'); setError(''); }}
+                    style={{ background: 'none', border: 'none', color: '#0b251d', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    Resend code
+                  </button>
+                </p>
+              </div>
+            </form>
           ) : (
-            <form onSubmit={handleSubmit} className="auth-form-stack" noValidate>
+            <form onSubmit={handleRequestOtp} className="auth-form-stack" noValidate>
               <div className="auth-field-group">
                 <label className="auth-field-label" htmlFor="forgot-email">
                   Email Address
@@ -241,15 +401,17 @@ export default function ForgotPasswordPage() {
         }
 
         .auth-card-badge {
-          width: 44px;
-          height: 44px;
+          width: 52px;
+          height: 52px;
           border-radius: 50%;
-          background: #0a221a;
-          margin: 0 auto 14px;
+          background: #ffffff;
+          border: 2px solid rgba(223, 190, 132, 0.5);
+          margin: 0 auto 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(10, 34, 26, 0.18);
+          box-shadow: 0 4px 16px rgba(10, 34, 26, 0.12);
+          overflow: hidden;
         }
 
         .auth-card-title {

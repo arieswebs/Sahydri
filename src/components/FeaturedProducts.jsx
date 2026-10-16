@@ -13,6 +13,8 @@ export default function FeaturedProducts({ onViewProduct, onAddToCart, onToggleW
         .map(id => products.find(p => p.id === id))
         .filter(Boolean);
 
+    if (featured.length === 0) return null;
+
     const handleAdd = (e, product) => {
         e.stopPropagation();
         onAddToCart(product);
@@ -152,6 +154,7 @@ export default function FeaturedProducts({ onViewProduct, onAddToCart, onToggleW
                                         </div>
                                         <button
                                             onClick={e => handleAdd(e, product)}
+                                            className="feat-add-btn"
                                             style={{
                                                 display: 'flex', alignItems: 'center', gap: '6px',
                                                 padding: '9px 16px', fontSize: '0.78rem', fontWeight: 700,
@@ -224,6 +227,11 @@ export default function FeaturedProducts({ onViewProduct, onAddToCart, onToggleW
         }
         .feat-card:hover .feat-overlay {
           opacity: 1 !important;
+        }
+        .feat-add-btn:hover {
+          background: #174233 !important;
+          color: #ffffff !important;
+          transform: translateY(-1px);
         }
       `}</style>
         </section>

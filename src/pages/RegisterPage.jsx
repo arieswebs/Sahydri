@@ -12,7 +12,7 @@ function getSafeRedirect(redirectParam, defaultPath = '/account') {
 }
 
 export default function RegisterPage() {
-  const { login, currentUser, showToast, API } = useShop();
+  const { login, currentUser, showToast, API, secureFetch } = useShop();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const rawRedirect = searchParams.get('redirect');
@@ -58,7 +58,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      const res = await fetch(`${API}/auth/signup`, {
+      const res = await secureFetch(`${API}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: cleanName, email: cleanEmail, password: cleanPass }),
@@ -110,7 +110,16 @@ export default function RegisterPage() {
         <div className="auth-card">
           <div className="auth-card-top">
             <div className="auth-card-badge">
-              <UserPlus size={18} color="#dfbe84" />
+              <img
+                src="/images/sahyadri-logo.png"
+                alt="Sahydri Organics Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '50%'
+                }}
+              />
             </div>
             <h1 className="auth-card-title">Create an Account</h1>
             <p className="auth-card-desc">
@@ -323,15 +332,17 @@ export default function RegisterPage() {
         }
 
         .auth-card-badge {
-          width: 44px;
-          height: 44px;
+          width: 52px;
+          height: 52px;
           border-radius: 50%;
-          background: #0a221a;
-          margin: 0 auto 14px;
+          background: #ffffff;
+          border: 2px solid rgba(223, 190, 132, 0.5);
+          margin: 0 auto 16px;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(10, 34, 26, 0.18);
+          box-shadow: 0 4px 16px rgba(10, 34, 26, 0.12);
+          overflow: hidden;
         }
 
         .auth-card-title {

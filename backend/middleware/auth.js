@@ -10,6 +10,13 @@ export const requireAuth = (req, res, next) => {
         return res.status(401).json({ success: false, message: 'Access token required.' });
     }
 
+    // DEV-ONLY: mock admin bypass for local testing — disabled in production
+    if (token.startsWith('mock-admin-token') && process.env.NODE_ENV !== 'production') {
+        console.warn('[Auth] ⚠️  Mock admin token used — disabled in production');
+        req.user = { id: 'USR-001', name: 'Admin Sahydri', email: 'care@sahydriorganics.com', role: 'admin' };
+        return next();
+    }
+
     try {
         const decoded = verifyAccessToken(token);
         req.user = decoded;

@@ -92,28 +92,12 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                     <button
                         key={cat.id}
                         onClick={() => setCategory(cat.id)}
-                        style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            width: '100%', padding: '9px 12px', background: 'none', border: 'none',
-                            borderRadius: '8px', cursor: 'pointer', textAlign: 'left',
-                            background: category === cat.id ? 'rgba(11,37,29,0.07)' : 'transparent',
-                            borderLeft: category === cat.id ? '3px solid #0b251d' : '3px solid transparent',
-                            transition: 'all 0.18s ease'
-                        }}
+                        className={`shop-sidebar-cat-btn ${category === cat.id ? 'shop-sidebar-cat-btn-active' : ''}`}
                     >
-                        <span style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            fontSize: '0.85rem', color: category === cat.id ? '#0b251d' : '#4a4439',
-                            fontWeight: category === cat.id ? 700 : 500
-                        }}>
+                        <span className="shop-sidebar-cat-label">
                             {cat.label}
                         </span>
-                        <span style={{
-                            background: category === cat.id ? '#0b251d' : '#e5e0d8',
-                            color: category === cat.id ? '#f5e7c8' : '#7a7266',
-                            fontSize: '0.68rem', fontWeight: 700, padding: '1px 7px',
-                            borderRadius: '10px', minWidth: '20px', textAlign: 'center'
-                        }}>
+                        <span className="shop-sidebar-cat-count">
                             {cat.id === 'all' ? products.length : products.filter(p => p.category === cat.id).length}
                         </span>
                     </button>
@@ -123,18 +107,13 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
             {/* Price Range */}
             <SidebarSection title="Price Range">
                 {PRICE_RANGES.map(r => (
-                    <label key={r.id} style={{
-                        display: 'flex', alignItems: 'center', gap: '10px',
-                        padding: '7px 12px', cursor: 'pointer',
-                        fontSize: '0.85rem', color: priceRange === r.id ? '#0b251d' : '#4a4439',
-                        fontWeight: priceRange === r.id ? 700 : 400
-                    }}>
+                    <label key={r.id} className={`shop-sidebar-price-label ${priceRange === r.id ? 'shop-sidebar-price-label-active' : ''}`}>
                         <input
                             type="radio" name="price" checked={priceRange === r.id}
                             onChange={() => setPriceRange(r.id)}
-                            style={{ accentColor: '#0b251d', width: '14px', height: '14px' }}
+                            style={{ accentColor: '#0b251d', width: '15px', height: '15px', cursor: 'pointer' }}
                         />
-                        {r.label}
+                        <span>{r.label}</span>
                     </label>
                 ))}
             </SidebarSection>
@@ -145,18 +124,11 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
                     <button
                         key={stars}
                         onClick={() => setSortBy('rating')}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            padding: '6px 12px', background: 'none', border: 'none',
-                            cursor: 'pointer', borderRadius: '6px', width: '100%',
-                            transition: 'background 0.15s ease'
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(11,37,29,0.05)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                        className="shop-sidebar-rating-btn"
                     >
                         {[...Array(stars)].map((_, i) => <Star key={i} size={13} fill="#dfbe84" color="#dfbe84" />)}
                         {[...Array(5 - stars)].map((_, i) => <Star key={i} size={13} fill="none" color="#d3cdc4" />)}
-                        <span style={{ fontSize: '0.77rem', color: '#5a6e3d', marginLeft: '3px' }}>& Up</span>
+                        <span style={{ fontSize: '0.77rem', color: '#5a6e3d', marginLeft: '3px', fontWeight: 600 }}>& Up</span>
                     </button>
                 ))}
             </SidebarSection>
@@ -645,29 +617,141 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 7px 16px;
+          padding: 8px 18px;
           border-radius: 20px;
-          border: 1px solid rgba(11, 37, 29, 0.12);
+          border: 1px solid rgba(11, 37, 29, 0.14);
           background: #faf8f5;
           color: #4a4439;
-          font-size: 0.82rem;
-          font-weight: 500;
+          font-size: 0.84rem;
+          font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
           white-space: nowrap;
           font-family: inherit;
         }
         .shop-cat-pill:hover {
-          background: #f1ede4;
+          background: #eae2d1;
           color: #0b251d;
-          border-color: rgba(11, 37, 29, 0.25);
+          border-color: rgba(11, 37, 29, 0.35);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(11, 37, 29, 0.08);
         }
         .shop-cat-pill-active {
           background: #0b251d !important;
           color: #f5e7c8 !important;
           border-color: #0b251d !important;
           font-weight: 700 !important;
-          box-shadow: 0 2px 8px rgba(11, 37, 29, 0.16);
+          box-shadow: 0 3px 10px rgba(11, 37, 29, 0.2);
+        }
+        .shop-cat-pill-active:hover {
+          background: #061611 !important;
+          color: #ffffff !important;
+          border-color: #061611 !important;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(11, 37, 29, 0.28);
+        }
+
+        /* ── Sidebar Categories & Filters Hover ── */
+        .shop-sidebar-cat-btn {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: 10px 14px;
+          background: transparent;
+          border: none;
+          border-left: 3px solid transparent;
+          border-radius: 8px;
+          cursor: pointer;
+          text-align: left;
+          transition: all 0.2s ease;
+          font-family: inherit;
+          margin-bottom: 2px;
+        }
+        .shop-sidebar-cat-btn:hover {
+          background: rgba(11, 37, 29, 0.05);
+          border-left-color: rgba(201, 164, 86, 0.6);
+          transform: translateX(3px);
+        }
+        .shop-sidebar-cat-btn:hover .shop-sidebar-cat-label {
+          color: #0b251d;
+        }
+        .shop-sidebar-cat-btn-active {
+          background: rgba(11, 37, 29, 0.08) !important;
+          border-left-color: #0b251d !important;
+        }
+        .shop-sidebar-cat-btn-active:hover {
+          background: rgba(11, 37, 29, 0.12) !important;
+          border-left-color: #0b251d !important;
+        }
+        .shop-sidebar-cat-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.85rem;
+          color: #4a4439;
+          font-weight: 500;
+          transition: color 0.18s ease;
+        }
+        .shop-sidebar-cat-btn-active .shop-sidebar-cat-label {
+          color: #0b251d;
+          font-weight: 700;
+        }
+        .shop-sidebar-cat-count {
+          background: #e5e0d8;
+          color: #7a7266;
+          font-size: 0.68rem;
+          font-weight: 700;
+          padding: 1px 7px;
+          border-radius: 10px;
+          min-width: 20px;
+          text-align: center;
+          transition: all 0.18s ease;
+        }
+        .shop-sidebar-cat-btn-active .shop-sidebar-cat-count {
+          background: #0b251d;
+          color: #f5e7c8;
+        }
+
+        .shop-sidebar-price-label {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          color: #4a4439;
+          transition: all 0.18s ease;
+          margin-bottom: 2px;
+        }
+        .shop-sidebar-price-label:hover {
+          background: rgba(11, 37, 29, 0.05);
+          color: #0b251d;
+          transform: translateX(3px);
+        }
+        .shop-sidebar-price-label-active {
+          color: #0b251d;
+          font-weight: 700;
+          background: rgba(11, 37, 29, 0.04);
+        }
+
+        .shop-sidebar-rating-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          border-radius: 8px;
+          width: 100%;
+          transition: all 0.18s ease;
+          font-family: inherit;
+        }
+        .shop-sidebar-rating-btn:hover {
+          background: rgba(11, 37, 29, 0.06);
+          transform: translateX(3px);
         }
 
         /* ── Toolbar & Results ── */
@@ -982,7 +1066,10 @@ export default function ShopPage({ onViewProduct, onAddToCart, onBuyNow }) {
           flex-shrink: 0;
         }
         .shop-product-add-btn:hover {
-          background: #173f2f;
+          background: #174233;
+          color: #ffffff;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(11, 37, 29, 0.2);
         }
         .shop-product-added {
           background: #1a4d34 !important;

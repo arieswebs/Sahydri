@@ -59,7 +59,7 @@ function OtpBoxes({ value, onChange }) {
 
 /* ── Premium White Theme Auth Modal ────────────────────────────────────────── */
 export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSuccess, initialMode = 'login' }) {
-    const { login, showToast, API } = useShop();
+    const { login, showToast, API, secureFetch } = useShop();
 
     // ── ALL HOOKS FIRST — UNCONDITIONAL ───────────────────────────────────────
     const [step,            setStep]            = useState('form');
@@ -106,7 +106,7 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
         setLoading(true);
         setError('');
         try {
-            const res = await fetch(`${API}/auth/verify-otp`, {
+            const res = await secureFetch(`${API}/auth/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ otp: cleanOtp }),
@@ -127,7 +127,7 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
             setError('Could not connect to server. Check if backend is running.');
         }
         setLoading(false);
-    }, [otp, API, login, showToast, onClose]);
+    }, [otp, API, login, showToast, onClose, onAdminSuccess, onUserSuccess, secureFetch]);
 
     // Auto-verify when 6 digits are filled
     useEffect(() => {
@@ -159,7 +159,7 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
         setError('');
         try {
             if (mode === 'signup') {
-                const res = await fetch(`${API}/auth/signup`, {
+                const res = await secureFetch(`${API}/auth/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
@@ -171,7 +171,7 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
                 if (onUserSuccess) onUserSuccess();
                 else { window.location.hash = 'account'; onClose(); }
             } else {
-                const res = await fetch(`${API}/auth/login`, {
+                const res = await secureFetch(`${API}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: form.email, password: form.password }),
@@ -206,7 +206,7 @@ export default function AuthModal({ isOpen, onClose, onAdminSuccess, onUserSucce
         if (resendCountdown > 0) return;
         setOtp('      '); setError(''); setLoading(true);
         try {
-            const res = await fetch(`${API}/auth/login`, {
+            const res = await secureFetch(`${API}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: form.email, password: form.password }),

@@ -260,7 +260,16 @@ export const verifyRazorpayPayment = async (req, res) => {
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest('hex');
 
-        const isValid = expectedSignature === razorpay_signature;
+        let isValid = false;
+        try {
+            const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+            const actualBuf = Buffer.from(razorpay_signature || '', 'utf8');
+            if (expectedBuf.length === actualBuf.length) {
+                isValid = crypto.timingSafeEqual(expectedBuf, actualBuf);
+            }
+        } catch {
+            isValid = false;
+        }
 
         if (!isValid) {
             return res.status(400).json({ success: false, message: 'Payment signature mismatch. Possible tampering detected.' });

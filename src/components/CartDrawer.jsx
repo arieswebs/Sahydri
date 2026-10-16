@@ -40,9 +40,9 @@ export default function CartDrawer({
   const [addedRecommendationId, setAddedRecommendationId] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('razorpay'); // 'razorpay' | 'cod'
-  const [deliveryAddress, setDeliveryAddress] = useState(() => currentUser?.address || 'Wayanad High-Road, Kerala 673121');
+  const [deliveryAddress, setDeliveryAddress] = useState(() => currentUser?.address || '');
   const [deliveryPhone, setDeliveryPhone] = useState(() => currentUser?.phone || '');
-  const [showAddressEdit, setShowAddressEdit] = useState(false);
+  const [showAddressEdit, setShowAddressEdit] = useState(() => !currentUser?.address);
 
   useEffect(() => {
     if (currentUser?.address) setDeliveryAddress(currentUser.address);
@@ -90,7 +90,7 @@ export default function CartDrawer({
           quantity: i.quantity
         })),
         total: grandTotal,
-        address: deliveryAddress || currentUser?.address || 'Standard Delivery',
+        address: deliveryAddress || currentUser?.address || '',
         paymentMethod: 'Cash on Delivery',
       };
 
@@ -145,7 +145,7 @@ export default function CartDrawer({
             quantity: i.quantity
           })),
           total: grandTotal,
-          address: deliveryAddress || currentUser?.address || 'Standard Delivery',
+          address: deliveryAddress || currentUser?.address || '',
           paymentMethod: 'Razorpay (Online)',
           razorpayOrderId: data.orderId,
           razorpayPaymentId: 'pay_sandbox_' + Date.now(),
@@ -235,7 +235,8 @@ export default function CartDrawer({
 
   // Find 1 or 2 recommended companions not currently in the cart
   const cartItemIds = cartItems.map((item) => item.id);
-  const recommendedCompanions = PRODUCTS.filter((p) => !cartItemIds.includes(p.id)).slice(0, 2);
+  const { products } = useShop();
+  const recommendedCompanions = (products || []).filter((p) => !cartItemIds.includes(p.id)).slice(0, 2);
 
   const handleAddRecommendation = (rec) => {
     if (onAddToCart) {
@@ -338,7 +339,9 @@ export default function CartDrawer({
                     letterSpacing: '0.05em'
                   }}
                 >
-                  {totalItemCount} {totalItemCount === 1 ? 'ITEM' : 'ITEMS'}
+                  {cartItems.length === totalItemCount
+                    ? `${totalItemCount} ${totalItemCount === 1 ? 'ITEM' : 'ITEMS'}`
+                    : `${cartItems.length} ${cartItems.length === 1 ? 'PRODUCT' : 'PRODUCTS'} • ${totalItemCount} ITEMS`}
                 </span>
               </div>
               <div style={{ fontSize: '0.72rem', color: '#706859', marginTop: '2px' }}>
@@ -663,11 +666,17 @@ export default function CartDrawer({
                               fontFamily: 'var(--font-sans)',
                               fontWeight: '700',
                               fontSize: '1.05rem',
-                              color: '#0a221a'
+                              color: '#0a221a',
+                              display: 'block'
                             }}
                           >
                             ₹{item.price * item.quantity}
                           </span>
+                          {item.quantity > 1 && (
+                            <span style={{ fontSize: '0.7rem', color: '#8c733b', fontWeight: '500' }}>
+                              ₹{item.price} each
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -886,26 +895,26 @@ export default function CartDrawer({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showAddressEdit ? '8px' : '0' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#0b251d', fontWeight: 600 }}>
                     <MapPin size={14} color="#8c733b" />
-                    <span>Ship to: {deliveryAddress ? (deliveryAddress.length > 28 ? deliveryAddress.slice(0, 28) + '…' : deliveryAddress) : 'Set Address'}</span>
+                    <span>{deliveryAddress ? `Ship to: ${deliveryAddress.length > 28 ? deliveryAddress.slice(0, 28) + '…' : deliveryAddress}` : 'Enter Delivery Address'}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowAddressEdit(s => !s)}
                     style={{ background: 'none', border: 'none', color: '#8c733b', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
                   >
-                    {showAddressEdit ? 'Save' : 'Change'}
+                    {showAddressEdit ? 'Done' : (deliveryAddress ? 'Change' : 'Add')}
                   </button>
                 </div>
                 {showAddressEdit && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
                     <input
-                      placeholder="Delivery Street Address & PIN"
+                      placeholder="Street address, city, state & pincode"
                       value={deliveryAddress}
                       onChange={e => setDeliveryAddress(e.target.value)}
                       style={{ width: '100%', padding: '7px 9px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}
                     />
                     <input
-                      placeholder="Phone number for dispatch SMS"
+                      placeholder="Phone number for dispatch SMS (optional)"
                       value={deliveryPhone}
                       onChange={e => setDeliveryPhone(e.target.value)}
                       style={{ width: '100%', padding: '7px 9px', fontSize: '0.8rem', border: '1px solid #cbd5e1', borderRadius: '4px', boxSizing: 'border-box' }}

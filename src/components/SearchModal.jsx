@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { Search, X, ArrowRight } from 'lucide-react';
+import { useShop } from '../context/ShopContext';
 import { PRODUCTS } from '../data/products';
 
 export default function SearchModal({ isOpen, onClose, onSelectProduct }) {
+  const { products } = useShop();
   const [query, setQuery] = useState('');
 
   if (!isOpen) return null;
 
+  const catalog = (products && products.length > 0) ? products : PRODUCTS;
   const results = query.trim() === ''
     ? []
-    : PRODUCTS.filter((p) =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.description.toLowerCase().includes(query.toLowerCase()) ||
-        p.originBadge.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase())
+    : catalog.filter((p) =>
+        p.name?.toLowerCase().includes(query.toLowerCase()) ||
+        p.description?.toLowerCase().includes(query.toLowerCase()) ||
+        p.originBadge?.toLowerCase().includes(query.toLowerCase()) ||
+        p.category?.toLowerCase().includes(query.toLowerCase())
       );
 
   return (

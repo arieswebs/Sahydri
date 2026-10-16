@@ -12,6 +12,7 @@ import authRoutes     from './routes/authRoutes.js';
 import shippingRoutes from './routes/shippingRoutes.js';
 import uploadRoutes   from './routes/uploadRoutes.js';
 import { initDatabase, isDatabaseConnected } from './config/db.js';
+import { csrfProtection, csrfTokenHandler } from './middleware/csrf.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,7 +40,8 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'x-csrf-token', 'csrf-token'],
+    exposedHeaders: ['X-CSRF-Token'],
 }));
 
 // ── Body Parsing ──────────────────────────────────────────────────────────────
@@ -54,6 +56,12 @@ const globalLimiter = rateLimit({
     message: { success: false, message: 'Rate limit exceeded. Try again later.' },
 });
 app.use('/api', globalLimiter);
+
+// ── CSRF Token Endpoint (Public GET) ───────────────────────────────────────────
+app.get('/api/csrf-token', csrfTokenHandler);
+
+// ── Enforce CSRF Protection on Mutating Requests (POST, PUT, PATCH, DELETE) ────
+app.use('/api', csrfProtection);
 
 // ── Public Routes ─────────────────────────────────────────────────────────────
 app.use('/api/auth',     authRoutes);
@@ -76,12 +84,19 @@ app.get('/api/health', (_req, res) =>
 );
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
-app.use((_req, res) => res.status(404).json({ success: false, message: 'Route not found.' }));
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found.` });
+});
 
 // ── Global Error Handler ──────────────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-    console.error('[Server Error]', err.message);
-    res.status(500).json({ success: false, message: isDev ? err.message : 'Internal server error.' });
+app.use((err, req, res, _next) => {
+    console.error(`[Server Error] ${req.method} ${req.path}:`, err.stack || err.message);
+    const statusCode = err.status || err.statusCode || 500;
+    res.status(statusCode).json({
+        success: false,
+        message: isDev ? err.message : 'Internal server error.',
+        ...(isDev && { stack: err.stack })
+    });
 });
 
 // ── Start Server & Initialize Database ────────────────────────────────────────

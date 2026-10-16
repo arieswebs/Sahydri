@@ -2,7 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import {
     loginHandler, verifyOtpHandler, refreshHandler, logoutHandler, signupHandler,
-    getMeHandler, updateProfileHandler
+    getMeHandler, updateProfileHandler, forgotPasswordHandler, resetPasswordHandler
 } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -25,11 +25,13 @@ const otpLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-router.post('/login',       authLimiter, loginHandler);
-router.post('/verify-otp',  otpLimiter,  verifyOtpHandler);
-router.post('/refresh',     authLimiter, refreshHandler);
-router.post('/logout',                   logoutHandler);
-router.post('/signup',      authLimiter, signupHandler);
+router.post('/login',           authLimiter, loginHandler);
+router.post('/verify-otp',      otpLimiter,  verifyOtpHandler);
+router.post('/refresh',         authLimiter, refreshHandler);
+router.post('/logout',                       logoutHandler);
+router.post('/signup',          authLimiter, signupHandler);
+router.post('/forgot-password', authLimiter, forgotPasswordHandler);
+router.post('/reset-password',  otpLimiter,  resetPasswordHandler);
 
 // Profile endpoints (require authenticated session)
 router.get('/me',           requireAuth, getMeHandler);

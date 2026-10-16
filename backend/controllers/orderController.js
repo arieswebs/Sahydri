@@ -13,6 +13,8 @@ function formatOrder(r) {
         id: r.id,
         customerName: r.customer_name,
         customerEmail: r.customer_email,
+        customerPhone: r.customer_phone || '',
+        phone: r.customer_phone || '',
         items: Array.isArray(items) ? items : [],
         total: Number(r.total),
         status: r.status,
@@ -20,6 +22,8 @@ function formatOrder(r) {
         paymentMethod: r.payment_method || 'Razorpay',
         razorpayOrderId: r.razorpay_order_id || '',
         razorpayPaymentId: r.razorpay_payment_id || '',
+        shipwayOrderId: r.shipway_order_id || '',
+        shipwayTrackingUrl: r.shipway_tracking_url || '',
         createdAt: r.created_at
     };
 }
@@ -93,10 +97,11 @@ export const getOrderById = async (req, res) => {
 
 // POST /api/orders (Creates order in MySQL)
 export const createOrder = async (req, res) => {
-    const { customerName, customerEmail, items, total, address, paymentMethod, razorpayOrderId, razorpayPaymentId } = req.body;
+    const { customerName, customerEmail, phone, customerPhone, items, total, address, paymentMethod, razorpayOrderId, razorpayPaymentId } = req.body;
 
     const cleanName = sanitizeString(customerName, 100);
     const cleanEmail = sanitizeEmail(customerEmail) || (req.user?.email ? sanitizeEmail(req.user.email) : '');
+    const cleanPhone = sanitizePhone(phone || customerPhone || (req.user?.phone ? req.user.phone : ''));
     const cleanAddress = sanitizeAddress(address, 300);
     const cleanMethod = sanitizeString(paymentMethod, 50) || 'Razorpay';
 
@@ -123,6 +128,8 @@ export const createOrder = async (req, res) => {
         id: newOrderId,
         customerName: cleanName,
         customerEmail: cleanEmail,
+        customerPhone: cleanPhone,
+        phone: cleanPhone,
         items: sanitizedItems,
         total: cleanTotal,
         status: 'pending',
@@ -137,11 +144,11 @@ export const createOrder = async (req, res) => {
         if (isDatabaseConnected()) {
             await query(`
                 INSERT INTO orders (
-                    id, customer_name, customer_email, items, total,
+                    id, customer_name, customer_email, customer_phone, items, total,
                     status, address, payment_method, razorpay_order_id, razorpay_payment_id, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             `, [
-                newOrder.id, newOrder.customerName, newOrder.customerEmail,
+                newOrder.id, newOrder.customerName, newOrder.customerEmail, newOrder.customerPhone,
                 JSON.stringify(newOrder.items), newOrder.total, newOrder.status,
                 newOrder.address, newOrder.paymentMethod,
                 newOrder.razorpayOrderId, newOrder.razorpayPaymentId
@@ -220,6 +227,11 @@ export const updateOrderStatus = async (req, res) => {
     const index = orders.findIndex(o => o.id === orderId);
     if (index === -1) return res.status(404).json({ success: false, message: 'Order not found' });
     orders[index].status = status;
+
+    if (status === 'shipped') {
+        pushOrderToShipway(orders[index]).catch(e => console.warn('[Shipway Status Push]', e.message));
+    }
+
     res.json({ success: true, data: orders[index] });
 };
 
@@ -247,3 +259,74 @@ export const deleteOrder = async (req, res) => {
     const removed = orders.splice(index, 1);
     res.json({ success: true, data: removed[0], message: 'Order deleted' });
 };
+
+// GET /api/orders/customers/all (Admin only - Aggregated customer profiles)
+export const getAllCustomers = async (_req, res) => {
+    try {
+        if (isDatabaseConnected()) {
+            const rows = await query(`
+                SELECT 
+                    LOWER(customer_email) as email,
+                    MAX(customer_name) as name,
+                    MAX(customer_phone) as phone,
+                    MAX(address) as address,
+                    COUNT(*) as orders_count,
+                    SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END) as total_spent,
+                    MAX(created_at) as last_order_date,
+                    MIN(created_at) as first_order_date
+                FROM orders 
+                WHERE customer_email IS NOT NULL AND customer_email != ''
+                GROUP BY LOWER(customer_email)
+                ORDER BY last_order_date DESC
+            `);
+            const customerList = rows.map((r, idx) => ({
+                id: `CUST-${String(idx + 1).padStart(3, '0')}`,
+                name: r.name || 'Anonymous Customer',
+                email: r.email,
+                phone: r.phone || '',
+                address: r.address || '—',
+                orders: Number(r.orders_count) || 0,
+                spent: Number(r.total_spent) || 0,
+                lastOrder: r.last_order_date,
+                joined: r.first_order_date ? new Date(r.first_order_date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : 'Recent'
+            }));
+            return res.json({ success: true, data: customerList });
+        }
+    } catch (err) {
+        console.error('MySQL getAllCustomers error:', err.message);
+    }
+
+    // In-memory customer aggregation from store.js orders
+    const map = new Map();
+    for (const o of orders) {
+        const email = (o.customerEmail || '').toLowerCase().trim();
+        if (!email) continue;
+        if (!map.has(email)) {
+            map.set(email, {
+                id: `CUST-${String(map.size + 1).padStart(3, '0')}`,
+                name: o.customerName || 'Anonymous Customer',
+                email: email,
+                phone: o.customerPhone || o.phone || '',
+                address: o.address || '—',
+                orders: 0,
+                spent: 0,
+                lastOrder: o.createdAt,
+                joined: o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }) : 'Recent'
+            });
+        }
+        const c = map.get(email);
+        c.orders += 1;
+        if (o.status !== 'cancelled') {
+            c.spent += (Number(o.total) || 0);
+        }
+        if (new Date(o.createdAt) > new Date(c.lastOrder)) {
+            c.lastOrder = o.createdAt;
+            if (o.customerName) c.name = o.customerName;
+            if (o.customerPhone || o.phone) c.phone = o.customerPhone || o.phone;
+            if (o.address) c.address = o.address;
+        }
+    }
+    const customerList = Array.from(map.values());
+    res.json({ success: true, data: customerList });
+};
+

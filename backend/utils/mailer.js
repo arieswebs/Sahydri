@@ -73,6 +73,60 @@ export const sendAdminOTP = async (email) => {
     return { success: true, devMode: false };
 };
 
+// Send Password Reset OTP
+export const sendPasswordResetOTP = async (email) => {
+    const otp = generateOTP();
+    otpStore.set(`reset:${email.toLowerCase()}`, {
+        otp,
+        expiresAt: Date.now() + OTP_EXPIRES_MS,
+        attempts:  0,
+    });
+
+    if (!process.env.GMAIL_USER || process.env.GMAIL_USER === 'your_gmail@gmail.com') {
+        console.log(`\n⚡ [DEV MODE] Password Reset OTP for ${email}: ${otp} (expires in ${process.env.OTP_EXPIRES_MINUTES || 10} mins)\n`);
+        return { success: true, devMode: true, otp };
+    }
+
+    try {
+        const transporter = createTransporter();
+        const html = `
+            <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;border:1px solid #d4af37;border-radius:12px;overflow:hidden">
+              <div style="background:#0b251d;padding:28px 32px;text-align:center">
+                <h1 style="color:#d4af37;margin:0;font-size:1.3rem;letter-spacing:0.12em">SAHYDRI ORGANICS</h1>
+                <p style="color:rgba(212,175,55,0.6);font-size:0.75rem;margin:4px 0 0;letter-spacing:0.2em">PASSWORD RECOVERY</p>
+              </div>
+              <div style="padding:36px 32px;background:#faf8f4">
+                <h2 style="color:#0b251d;font-size:1.1rem;margin-bottom:8px">Password Reset Code</h2>
+                <p style="color:#5a4e3c;font-size:0.9rem;line-height:1.6">
+                  A password reset request was received for your Sahydri Organics account. Use the code below to reset your password.
+                </p>
+                <div style="text-align:center;margin:28px 0">
+                  <div style="display:inline-block;background:#0b251d;color:#d4af37;font-size:2.4rem;font-weight:800;letter-spacing:0.3em;padding:18px 36px;border-radius:10px;font-family:monospace">
+                    ${otp}
+                  </div>
+                </div>
+                <p style="color:#9e8550;font-size:0.8rem;text-align:center">
+                  This verification code expires in <strong>${process.env.OTP_EXPIRES_MINUTES || 10} minutes</strong>.<br/>
+                  If you did not request this, please ignore this email.
+                </p>
+              </div>
+            </div>
+        `;
+
+        await transporter.sendMail({
+            from:    `"Sahydri Support" <${process.env.GMAIL_USER}>`,
+            to:      email,
+            subject: '🔒 Reset Your Sahydri Organics Password',
+            html,
+        });
+
+        return { success: true, devMode: false };
+    } catch (err) {
+        console.error('Failed to send reset email:', err);
+        return { success: false, error: err.message };
+    }
+};
+
 // Verify OTP — returns true/false, tracks attempts
 export const verifyOTP = (email, inputOtp) => {
     const record = otpStore.get(email);
@@ -92,3 +146,7 @@ export const verifyOTP = (email, inputOtp) => {
     otpStore.delete(email);  // one-time use
     return { valid: true };
 };
+
+// Verify Password Reset OTP
+export const verifyResetOTP = (email, inputOtp) => verifyOTP(`reset:${email.toLowerCase()}`, inputOtp);
+

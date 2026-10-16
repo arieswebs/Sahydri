@@ -1,45 +1,62 @@
-import React from 'react';
-import { CheckCircle, Package, MapPin, ArrowRight, X, Truck, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, CheckCircle2, Copy, X, Truck } from 'lucide-react';
 import { getShipwayTrackingUrl } from '../services/shipwayService';
 
 export default function OrderSuccessModal({ orderData, onClose, onOpenTracking }) {
+  const [copied, setCopied] = useState(false);
   if (!orderData) return null;
 
-  const orderId = orderData.id || orderData.orderId || ('SY-' + Date.now().toString().slice(-6));
-  const shipwayUrl = getShipwayTrackingUrl(orderId);
+  const rawId = orderData.id || orderData.orderId || ('SY-' + Date.now().toString().slice(-6));
+  const cleanId = String(rawId).replace(/^#/, '');
+  const orderId = `#${cleanId}`;
+  const shipwayUrl = getShipwayTrackingUrl(cleanId);
+  const items = orderData.items || [];
+  const itemCount = items.reduce((acc, item) => acc + (item.quantity || 1), 0) || items.length || 1;
+  const totalAmount = orderData.total ?? orderData.grandTotal ?? 0;
+  const paymentMethod = orderData.paymentMethod || 'Online Payment';
+
+  const handleCopy = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(cleanId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(6, 22, 17, 0.75)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        zIndex: 120,
+        backgroundColor: 'rgba(15, 23, 42, 0.6)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        zIndex: 10000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '20px',
-        animation: 'fadeIn 0.25s var(--ease-spring)'
+        padding: '16px',
+        animation: 'fadeIn 0.2s ease-out'
       }}
       onClick={onClose}
     >
       <div
         style={{
-          backgroundColor: 'var(--color-forest-900)',
-          color: '#ffffff',
-          border: '1px solid rgba(223, 190, 132, 0.35)',
-          borderRadius: 'var(--radius-lg)',
-          maxWidth: '520px',
+          backgroundColor: '#ffffff',
+          color: '#0f172a',
+          borderRadius: '20px',
+          maxWidth: '430px',
           width: '100%',
-          padding: '36px 30px',
+          padding: '32px 28px',
           textAlign: 'center',
-          boxShadow: 'var(--shadow-dropdown)',
-          position: 'relative'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+          position: 'relative',
+          fontFamily: 'var(--font-sans, system-ui, -apple-system, sans-serif)',
+          animation: 'scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button */}
         <button
           onClick={onClose}
           style={{
@@ -48,160 +65,186 @@ export default function OrderSuccessModal({ orderData, onClose, onOpenTracking }
             right: '16px',
             background: 'none',
             border: 'none',
-            color: '#a2b4ab',
-            cursor: 'pointer'
-          }}
-          aria-label="Close modal"
-        >
-          <X size={20} />
-        </button>
-
-        {/* Checkmark circle */}
-        <div
-          style={{
-            width: '64px',
-            height: '64px',
+            color: '#94a3b8',
+            cursor: 'pointer',
+            padding: '6px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(116, 219, 147, 0.15)',
-            border: '2px solid #74db93',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 18px auto'
+            transition: 'color 0.15s, background-color 0.15s'
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          aria-label="Close"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Clean Success Badge */}
+        <div
+          style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: '#ecfdf5',
+            border: '2px solid #a7f3d0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 16px auto'
           }}
         >
-          <CheckCircle size={36} color="#74db93" />
+          <CheckCircle2 size={32} color="#059669" strokeWidth={2.2} />
         </div>
 
-        <span
-          style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: '0.74rem',
-            color: '#e5c98d',
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase'
-          }}
-        >
-          HARVEST DISPATCH CONFIRMED
-        </span>
-
+        {/* Header */}
         <h3
           style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2rem',
-            color: '#ffffff',
-            marginTop: '6px',
-            marginBottom: '10px'
+            fontSize: '1.45rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            margin: '0 0 6px 0',
+            letterSpacing: '-0.02em'
           }}
         >
           Thank You for Your Order!
         </h3>
 
-        <p style={{ fontSize: '0.88rem', color: '#c2cfc9', marginBottom: '20px' }}>
-          Your artisanal spices &amp; wild honey are being hand-packed at source in Wayanad, Kerala.
+        <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.45 }}>
+          Your order has been received and is being prepared for dispatch.
         </p>
 
-        {/* Shipway Express Badge */}
+        {/* Clean Summary Card */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            background: 'rgba(223, 190, 132, 0.12)',
-            border: '1px solid rgba(223, 190, 132, 0.3)',
-            borderRadius: '20px',
-            padding: '6px 14px',
-            fontSize: '0.75rem',
-            color: '#dfbe84',
-            fontWeight: '600',
-            marginBottom: '20px'
-          }}
-        >
-          <Truck size={14} />
-          <span>Fulfillment via Shipway Express Courier Network</span>
-        </div>
-
-        {/* Order Info Card */}
-        <div
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(212, 175, 55, 0.25)',
-            borderRadius: '6px',
-            padding: '16px',
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: '14px',
+            padding: '16px 18px',
             textAlign: 'left',
             fontSize: '0.84rem',
             marginBottom: '20px'
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
-            <span>Order ID:</span>
-            <span style={{ color: '#ffffff', fontWeight: '700' }}>#{orderId}</span>
+          {/* Order ID Row */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '10px' }}>
+            <span style={{ color: '#64748b', fontWeight: 500 }}>Order ID</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.84rem', fontFamily: 'monospace' }}>
+                {orderId}
+              </span>
+              <button
+                onClick={handleCopy}
+                title="Copy Order ID"
+                style={{
+                  background: copied ? '#ecfdf5' : '#ffffff',
+                  border: `1px solid ${copied ? '#a7f3d0' : '#cbd5e1'}`,
+                  borderRadius: '6px',
+                  padding: '3px 6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.72rem',
+                  color: copied ? '#059669' : '#64748b',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {copied ? <Check size={11} /> : <Copy size={11} />}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
-            <span>Items Ordered:</span>
-            <span style={{ color: '#ffffff' }}>{(orderData.items || []).length} product(s)</span>
+
+          <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '0 0 10px 0' }} />
+
+          {/* Items & Payment */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ color: '#64748b' }}>Items</span>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>{itemCount} product{itemCount > 1 ? 's' : ''}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
-            <span>Payment Method:</span>
-            <span style={{ color: '#74db93', fontWeight: '600' }}>{orderData.paymentMethod || 'Razorpay'}</span>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ color: '#64748b' }}>Payment</span>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              color: '#047857',
+              backgroundColor: '#ecfdf5',
+              padding: '2px 8px',
+              borderRadius: '999px',
+              fontWeight: 600,
+              fontSize: '0.76rem'
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+              {paymentMethod}
+            </span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#a2b4ab' }}>
-            <span>Total Amount:</span>
-            <span style={{ color: '#e5c98d', fontWeight: '700', fontSize: '1.05rem' }}>₹{orderData.total ?? orderData.grandTotal}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#74db93', fontSize: '0.76rem', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-            <MapPin size={13} />
-            <span>Traceable Lot: Wayanad High-Altitude Organic Block #04 · Status: Confirmed</span>
+
+          <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '10px 0' }} />
+
+          {/* Total Amount */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ color: '#0f172a', fontWeight: 600, fontSize: '0.88rem' }}>Total Amount</span>
+            <span style={{ color: '#0a221a', fontWeight: 800, fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
+              ₹{Number(totalAmount).toLocaleString('en-IN')}
+            </span>
           </div>
         </div>
 
-        {/* Dual Actions: Track with Shipway & Continue */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Clean Actions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             onClick={() => {
               if (onOpenTracking) {
-                onOpenTracking(orderId);
+                onOpenTracking(cleanId);
               } else {
                 window.open(shipwayUrl, '_blank');
               }
             }}
             style={{
               width: '100%',
-              padding: '12px',
-              backgroundColor: '#dfbe84',
-              color: '#071912',
+              padding: '12px 16px',
+              backgroundColor: '#0a221a',
+              color: '#ffffff',
               border: 'none',
-              borderRadius: '4px',
-              fontWeight: '700',
-              fontSize: '0.85rem',
+              borderRadius: '10px',
+              fontWeight: 600,
+              fontSize: '0.88rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
               cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em'
+              transition: 'background-color 0.15s ease'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#13392d'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0a221a'; }}
           >
             <Truck size={16} />
-            <span>Track Live with Shipway</span>
+            <span>Track Order Status</span>
           </button>
 
           <button
             onClick={onClose}
             style={{
               width: '100%',
-              padding: '10px',
-              background: 'transparent',
-              border: '1px solid rgba(223, 190, 132, 0.3)',
-              color: '#f5e4c3',
-              borderRadius: '4px',
-              fontSize: '0.8rem',
-              cursor: 'pointer'
+              padding: '11px 16px',
+              backgroundColor: 'transparent',
+              border: '1px solid #e2e8f0',
+              color: '#475569',
+              borderRadius: '10px',
+              fontSize: '0.84rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'background-color 0.15s ease, color 0.15s ease'
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.color = '#0f172a'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#475569'; }}
           >
-            Continue Exploring Sahydri
+            Continue Shopping
           </button>
         </div>
       </div>

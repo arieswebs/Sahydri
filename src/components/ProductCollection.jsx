@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Star, Heart, Eye, ShoppingBag, Check } from 'lucide-react';
+import { useShop } from '../context/ShopContext';
 import { PRODUCTS } from '../data/products';
 
-export default function ProductCollection({ onAddToCart, onQuickView, wishlist, onToggleWishlist, onViewProduct }) {
+export default function ProductCollection({ onAddToCart, onQuickView, wishlist = [], onToggleWishlist = () => {}, onViewProduct }) {
+  const { products } = useShop();
   const [activeCategory, setActiveCategory] = useState('all');
   const [addedAnimationId, setAddedAnimationId] = useState(null);
 
@@ -14,9 +16,10 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
     { id: 'oils', label: 'Traditional Oils' }
   ];
 
+  const catalog = (products && products.length > 0) ? products : PRODUCTS;
   const filteredProducts = activeCategory === 'all'
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.category === activeCategory);
+    ? catalog
+    : catalog.filter((p) => p.category === activeCategory);
 
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
@@ -117,7 +120,24 @@ export default function ProductCollection({ onAddToCart, onQuickView, wishlist, 
 
         {/* Luxury Minimalist Grid - 2 Products in a row on mobile */}
         <div className="product-collection-grid">
-          {filteredProducts.map((product) => {
+          {filteredProducts.length === 0 ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              textAlign: 'center',
+              padding: '60px 20px',
+              background: '#ffffff',
+              borderRadius: '8px',
+              border: '1px dashed #d8d0c2'
+            }}>
+              <p style={{ fontFamily: 'var(--font-sans), "Plus Jakarta Sans", sans-serif', fontSize: '1.05rem', fontWeight: 600, color: '#0a221a', margin: '0 0 6px' }}>
+                No Products in Catalog
+              </p>
+              <p style={{ fontFamily: 'var(--font-sans), "Plus Jakarta Sans", sans-serif', fontSize: '0.84rem', color: '#7a8e80', margin: 0 }}>
+                The catalog is currently empty. Add products from the Admin Portal to display them here.
+              </p>
+            </div>
+          ) : (
+            filteredProducts.map((product) => {
             const isWishlisted = wishlist.includes(product.id);
             const isAdded = addedAnimationId === product.id;
 

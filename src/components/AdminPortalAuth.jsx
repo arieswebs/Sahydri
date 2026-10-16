@@ -3,9 +3,9 @@ import { Shield, Lock, Mail, ArrowRight, Sparkles, CheckCircle2, AlertCircle, Ar
 import { useShop } from '../context/ShopContext';
 
 export default function AdminPortalAuth({ onLoginSuccess }) {
-  const { login, showToast, API } = useShop();
-  const [email, setEmail] = useState('care@sahydriorganics.com');
-  const [password, setPassword] = useState('Sahydri@2004');
+  const { login, showToast, API, secureFetch } = useShop();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpRequired, setOtpRequired] = useState(false);
@@ -18,7 +18,7 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
     setError('');
 
     try {
-      const res = await fetch(`${API}/auth/login`, {
+      const res = await secureFetch(`${API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -35,18 +35,22 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
         onLoginSuccess?.();
         return;
       }
+      setError(data.message || 'Quick access rejected. Please enter credentials manually.');
     } catch {
-      // Offline fallback: log in locally as admin
-      const fallbackAdmin = {
-        id: 'USR-001',
-        name: 'Admin Sahydri',
-        email: 'care@sahydriorganics.com',
-        role: 'admin'
-      };
-      login(fallbackAdmin, 'mock-admin-token-' + Date.now(), 'mock-refresh-token');
-      showToast('Offline Admin Access Granted');
-      onLoginSuccess?.();
-      return;
+      // Offline fallback: log in locally as admin in local development mode only
+      if (import.meta.env.DEV) {
+        const fallbackAdmin = {
+          id: 'USR-001',
+          name: 'Admin Sahydri',
+          email: 'care@sahydriorganics.com',
+          role: 'admin'
+        };
+        login(fallbackAdmin, 'mock-admin-token-' + Date.now(), 'mock-refresh-token');
+        showToast('Dev Mode: Offline Admin Access Granted');
+        onLoginSuccess?.();
+        return;
+      }
+      setError('Could not reach backend authentication service.');
     } finally {
       setLoading(false);
     }
@@ -64,7 +68,7 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
     setError('');
 
     try {
-      const res = await fetch(`${API}/auth/login`, {
+      const res = await secureFetch(`${API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, directLogin: true })
@@ -92,8 +96,8 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
       showToast('Welcome back to Admin Portal');
       onLoginSuccess?.();
     } catch {
-      // Local client fallback
-      if ((email.toLowerCase() === 'care@sahydriorganics.com' || email.toLowerCase() === 'admin@sahyadri.com') && (password === 'Sahydri@2004' || password === 'admin123')) {
+      // Local client fallback only in development mode
+      if (import.meta.env.DEV && (email.toLowerCase() === 'care@sahydriorganics.com' || email.toLowerCase() === 'admin@sahyadri.com') && password === 'Sahydri@2004') {
         const fallbackAdmin = {
           id: 'USR-001',
           name: 'Admin Sahydri',
@@ -101,10 +105,10 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
           role: 'admin'
         };
         login(fallbackAdmin, 'mock-admin-token-' + Date.now(), 'mock-refresh-token');
-        showToast('Welcome back, Admin!');
+        showToast('Dev Mode: Welcome back, Admin!');
         onLoginSuccess?.();
       } else {
-        setError('Connection error. Use One-Click Direct Access to enter.');
+        setError('Could not reach backend authentication service.');
       }
     } finally {
       setLoading(false);
@@ -123,7 +127,7 @@ export default function AdminPortalAuth({ onLoginSuccess }) {
     setError('');
 
     try {
-      const res = await fetch(`${API}/auth/verify-otp`, {
+      const res = await secureFetch(`${API}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ otp: otpValue.trim() })

@@ -831,12 +831,21 @@ export default function Navbar({
 
         .nav-member-badge:hover {
           background: rgba(14, 43, 33, 0.1);
-          border-color: rgba(14, 43, 33, 0.2);
+          border-color: rgba(14, 43, 33, 0.25);
+          transform: translateY(-1px);
         }
 
         .nav-admin-badge {
-          background: linear-gradient(135deg, var(--color-forest-950), var(--color-forest-800));
-          border-color: rgba(223, 190, 132, 0.4);
+          background: linear-gradient(135deg, var(--color-forest-950), var(--color-forest-850)) !important;
+          border-color: rgba(223, 190, 132, 0.45) !important;
+          box-shadow: 0 2px 8px rgba(10, 34, 26, 0.2);
+        }
+
+        .nav-admin-badge:hover {
+          background: linear-gradient(135deg, #0e2b21, #174233) !important;
+          border-color: #dfbe84 !important;
+          box-shadow: 0 4px 14px rgba(10, 34, 26, 0.35) !important;
+          transform: translateY(-1px);
         }
 
         .nav-member-avatar {
@@ -872,7 +881,11 @@ export default function Navbar({
         }
 
         .nav-admin-badge .nav-member-name {
-          color: var(--color-gold-300);
+          color: var(--color-gold-300) !important;
+        }
+
+        .nav-admin-badge:hover .nav-member-name {
+          color: #ffffff !important;
         }
 
         .nav-chevron-icon {
@@ -880,7 +893,10 @@ export default function Navbar({
           transition: transform var(--transition-fast);
         }
         .nav-admin-badge .nav-chevron-icon {
-          color: var(--color-gold-300);
+          color: var(--color-gold-300) !important;
+        }
+        .nav-admin-badge:hover .nav-chevron-icon {
+          color: #ffffff !important;
         }
         .nav-chevron-flipped {
           transform: rotate(180deg);

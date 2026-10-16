@@ -5,149 +5,7 @@ import {
 } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 
-export const ARTISAN_COLLECTIONS = [
-  {
-    id: "royal-malabar-spice-chest",
-    name: "The Royal Malabar Spice Chest",
-    subname: "Handcrafted Teak Box with 4 Single-Estate Spices",
-    category: "hampers",
-    price: 2499,
-    originalPrice: 2899,
-    rating: 4.9,
-    reviewsCount: 142,
-    tag: "HANDCRAFTED TEAK",
-    originBadge: "WAYANAD RAINFOREST",
-    image: "/images/collections/teak_spice_chest.jpg",
-    itemsIncluded: [
-      "8mm+ Alleppey Green Cardamom (100g)",
-      "Tellicherry Garbled Black Pepper (200g)",
-      "High-Curcumin Wayanad Turmeric (150g)",
-      "Organic Malabar Whole Cloves (80g)",
-      "Handmade Seasoned Teak Box with Brass Latches"
-    ],
-    description: "Crafted from seasoned Kerala teakwood by traditional Wayanad woodcarvers. Fitted with antique brass latches, housing four airtight glass jars of Kerala's highest-grade single-estate spices.",
-    giftReady: true,
-    elevation: "3,800 ft",
-    harvestYear: "2026 Reserve Harvest"
-  },
-  {
-    id: "artisanal-honey-collection-trio",
-    name: "The Wild Honey Trio & Forest Comb",
-    subname: "Raw Cliff Nectar, Jamun Blossom & Comb Honey",
-    category: "honey",
-    price: 1699,
-    originalPrice: 1999,
-    rating: 5.0,
-    reviewsCount: 98,
-    tag: "RARE FOREST HARVEST",
-    originBadge: "CLIFFSIDE COLONIES",
-    image: "/images/collections/honey_trio_gift_set.jpg",
-    itemsIncluded: [
-      "Raw Wild Forest Honey (300g)",
-      "Monofloral Jamun Blossom Honey (300g)",
-      "Fresh Raw Honeycomb Nectar (300g)",
-      "Handmade Wooden Honey Dipper",
-      "Emerald Velvet Gifting Case"
-    ],
-    description: "Harvested from wild Apis Dorsata rock bee hives in the high canopies of the Western Ghats. Raw, unfiltered, unheated, paired with seasonal Jamun blossom nectar in an emerald velvet gift box.",
-    giftReady: true,
-    elevation: "4,200 ft",
-    harvestYear: "Summer Wild Harvest"
-  },
-  {
-    id: "ayurvedic-wellness-hamper",
-    name: "Ayurvedic Golden Wellness Hamper",
-    subname: "Daily Rejuvenation Ritual with Urukku Velichenna",
-    category: "wellness",
-    price: 2199,
-    originalPrice: 2499,
-    rating: 4.9,
-    reviewsCount: 116,
-    tag: "AYURVEDIC RITUAL",
-    originBadge: "HERITAGE COLD PRESSED",
-    image: "/images/collections/ayurvedic_wellness_hamper.jpg",
-    itemsIncluded: [
-      "Traditional Urukku Velichenna (250ml)",
-      "High-Curcumin Wayanad Turmeric (250g)",
-      "Raw Forest Honey (300g)",
-      "Whole Green Cardamom Pods (50g)",
-      "Woven Bamboo Hamper with Golden Silk Ribbon"
-    ],
-    description: "An authentic tribute to centuries of Kerala Ayurvedic wisdom. Contains hand-cooked Urukku Velichenna from fresh coconut milk, anti-inflammatory turmeric, pure forest honey, and green cardamom for your morning elixirs.",
-    giftReady: true,
-    elevation: "Western Ghats Foothills",
-    harvestYear: "Fresh Batch Cold-Cooked"
-  },
-  {
-    id: "master-chef-spice-kit",
-    name: "The Master Chef Spice Collection",
-    subname: "6 Culinary Hill Spices in UV Amber Glass Jars",
-    category: "culinary",
-    price: 1899,
-    originalPrice: 2199,
-    rating: 4.9,
-    reviewsCount: 87,
-    tag: "CHEF'S RESERVE",
-    originBadge: "6 SINGLE ESTATES",
-    image: "/images/collections/master_chef_spice_kit.jpg",
-    itemsIncluded: [
-      "Tellicherry Black Peppercorns",
-      "Stone-Ground Garam Masala",
-      "Malabar Whole Cloves",
-      "Ceylon Cinnamon Quills",
-      "Whole Star Anise",
-      "8mm+ Green Cardamom"
-    ],
-    description: "Designed for discerning chefs and culinary connoisseurs. Six airtight UV-protected amber glass jars with brushed brass lids, preserving volatile essential oils and aroma for restaurant-grade gourmet cooking.",
-    giftReady: true,
-    elevation: "High Range Estates",
-    harvestYear: "2026 Estate Selection"
-  },
-  {
-    id: "cardamom-pepper-combo",
-    name: "The King & Queen Dual Reserve",
-    subname: "Extra Bold Cardamom 8mm+ & Tellicherry Peppercorns",
-    category: "hampers",
-    price: 912,
-    originalPrice: 1020,
-    rating: 4.9,
-    reviewsCount: 115,
-    tag: "SPECIAL COMBO",
-    originBadge: "MALABAR COAST",
-    image: "/images/products/combo_cardamom_pepper.png",
-    itemsIncluded: [
-      "Alleppey Green Cardamom 8mm+ (100g)",
-      "Tellicherry Bold Peppercorns (200g)",
-      "Matte Gift Box with Golden Crest"
-    ],
-    description: "The historical rulers of the Malabar Spice Route brought together in an embossed dual presentation box. Unrivaled fragrance and pungency harvested at peak maturity.",
-    giftReady: true,
-    elevation: "High Ranges",
-    harvestYear: "Winter Harvest"
-  },
-  {
-    id: "pure-oil-turmeric-duo",
-    name: "The Golden Kitchen Duo",
-    subname: "Cold-Pressed Coconut Oil & Stone-Ground Turmeric",
-    category: "wellness",
-    price: 1079,
-    originalPrice: 1199,
-    rating: 4.8,
-    reviewsCount: 76,
-    tag: "PANTRY ESSENTIAL",
-    originBadge: "ESTATE MILLED",
-    image: "/images/products/natural_coconut_oil_sahydri.png",
-    itemsIncluded: [
-      "Natural Cold-Pressed Coconut Oil (1L)",
-      "Cold Stone-Ground Turmeric Powder (1kg)",
-      "Eco Jute Carry Bag"
-    ],
-    description: "The two foundational pillars of Kerala healthy living: pure wood-pressed virgin coconut oil paired with antioxidant-rich turmeric stone-ground without friction heat.",
-    giftReady: false,
-    elevation: "Malabar Basin & Wayanad",
-    harvestYear: "All-Year Fresh Extraction"
-  }
-];
+export const ARTISAN_COLLECTIONS = [];
 
 const TABS = [
   { id: 'all', label: 'All Collections' },
@@ -158,6 +16,8 @@ const TABS = [
 ];
 
 export default function ArtisanCollections({ onAddToCart, onGoShop }) {
+  if (!ARTISAN_COLLECTIONS || ARTISAN_COLLECTIONS.length === 0) return null;
+
   const { wishlist, toggleWishlist, addToCart, showToast } = useShop();
   const [activeTab, setActiveTab] = useState('all');
   const [selectedSet, setSelectedSet] = useState(null);
@@ -257,19 +117,14 @@ export default function ArtisanCollections({ onAddToCart, onGoShop }) {
                 <div className="artisan-card-body">
                   <h3 className="artisan-card-title">{item.name}</h3>
 
-                  {/* Pricing and Action */}
+                  {/* Action */}
                   <div className="artisan-card-footer">
-                    <div className="artisan-price-col">
-                      <span className="artisan-price">₹{item.price.toLocaleString('en-IN')}</span>
-                      {item.originalPrice > item.price && (
-                        <span className="artisan-orig-price">₹{item.originalPrice.toLocaleString('en-IN')}</span>
-                      )}
-                    </div>
                     <button
                       disabled
                       className="artisan-coming-soon-btn"
+                      style={{ width: '100%', justifyContent: 'center' }}
                     >
-                      <Sparkles size={12} color="#dfbe84" />
+                      <Sparkles size={13} color="#dfbe84" />
                       <span>Coming Soon</span>
                     </button>
                   </div>
@@ -371,17 +226,12 @@ export default function ArtisanCollections({ onAddToCart, onGoShop }) {
                   </ul>
                 </div>
 
-                {/* Pricing & Add to Cart */}
-                <div className="artisan-modal-footer">
-                  <div className="artisan-price-col">
-                    <span className="artisan-modal-price">₹{selectedSet.price.toLocaleString('en-IN')}</span>
-                    {selectedSet.originalPrice > selectedSet.price && (
-                      <span className="artisan-orig-price">₹{selectedSet.originalPrice.toLocaleString('en-IN')}</span>
-                    )}
-                  </div>
+                {/* Coming Soon in Modal */}
+                <div className="artisan-modal-footer" style={{ justifyContent: 'center' }}>
                   <button
                     disabled
                     className="artisan-modal-coming-soon-btn"
+                    style={{ width: '100%', justifyContent: 'center' }}
                   >
                     <Sparkles size={15} color="#dfbe84" />
                     <span>Coming Soon · Reserve Batch</span>
@@ -432,9 +282,9 @@ export default function ArtisanCollections({ onAddToCart, onGoShop }) {
           margin-bottom: 12px;
         }
         .artisan-title {
-          font-family: var(--font-serif), Georgia, serif;
+          font-family: var(--font-sans), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-size: clamp(1.8rem, 4vw, 3.2rem);
-          font-weight: 400;
+          font-weight: 700;
           color: #f7f3ea;
           line-height: 1.15;
           margin-bottom: 14px;
@@ -610,12 +460,13 @@ export default function ArtisanCollections({ onAddToCart, onGoShop }) {
         }
 
         .artisan-card-title {
-          font-family: var(--font-serif), Georgia, serif;
-          font-size: 1.05rem;
+          font-family: var(--font-sans), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-size: 1.02rem;
           color: #ffffff;
-          line-height: 1.3;
+          line-height: 1.35;
           margin: 0 0 10px;
-          font-weight: 500;
+          font-weight: 600;
+          letter-spacing: -0.01em;
         }
 
         /* Footer */
@@ -829,9 +680,10 @@ export default function ArtisanCollections({ onAddToCart, onGoShop }) {
           margin-bottom: 8px;
         }
         .artisan-modal-title {
-          font-family: var(--font-serif), Georgia, serif;
+          font-family: var(--font-sans), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-size: 1.45rem;
           color: #ffffff;
+          font-weight: 700;
           margin: 0 0 6px;
         }
         .artisan-modal-sub {
